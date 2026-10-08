@@ -1,0 +1,88 @@
+NARASI DEMO KLIPERS — STORY STUDIO (Ide → Naskah → Storyboard → Editor → Unggah)
+Folder       : marketing/iklan/demo-story-studio-portrait/
+Durasi video : ±63 detik (1080×1920, klipers-mobile-app, tema terang)
+Bahasa       : Indonesia
+Voice        : ElevenLabs. vo-01 = "Kak Ceria - Cute Kids Storyteller" (speed .93, stab 40, sim 78),
+               vo-02..11 = "Zephlyn - Calm, Neutral and Measured" (speed 1.0, stab 50, sim 75),
+               satu rekaman naskah A (54,6 dtk) dipotong per kalimat di jeda heningnya.
+               Cadangan Edge-TTS: audio/edge-sementara/ (Gadis -4% + Ardi +6%).
+               Narasi portrait & landscape SAMA: generate sekali, salin audio/.
+
+=====================================================================
+A. NASKAH UTUH — untuk ditempel langsung ke ElevenLabs / TTS lain
+=====================================================================
+
+(Suara cerita) Dahulu kala, seorang nelayan menangkap ikan emas yang bisa berbicara.
+
+Video tadi, dari gambar sampai suaranya, dibuat cuma dari satu kalimat ide.
+
+Namanya Story Studio di Klipers. Empat langkah, dari ide jadi video.
+
+Tulis idemu, pilih gaya visual, durasi, dan format. Lalu klik Tulis naskah, gratis.
+
+AI menyusun adegan demi adegan, lengkap dengan narasinya. Tinggal kamu rapikan.
+
+Di Storyboard, buat semua gambar sekali klik. Wajah tokohnya tetap sama di tiap adegan.
+
+Rekam narasi dengan suara AI, pasang efek suara otomatis, dan atur gerak kamera.
+
+Di Editor, pilih gaya subtitle dan musik latar, lalu ekspor MP4.
+
+Judul, caption, dan cover juga disiapkan.
+
+Lalu jadwalkan auto upload ke lima platform sekaligus, langsung dari Klipers.
+
+Story Studio di Klipers. Satu ide, jadi video cerita. Download di Google Play sekarang.
+
+
+=====================================================================
+B. PER KALIMAT — satu file audio per kalimat (sinkron ke animasi)
+   Jendela Mulai–Selesai = CUES di build-demo-story-studio.mjs.
+=====================================================================
+
+[vo-01.mp3]  Mulai 0,4 – Selesai 4,5 dtk · Scene: Hook, video cerita jadi diputar (suara cerita, bukan narator)
+Dahulu kala, seorang nelayan menangkap ikan emas yang bisa berbicara.
+
+[vo-02.mp3]  Mulai 6,0 – Selesai 10,9 dtk · Scene: Hook, video dibekukan → "Video ini dibuat dari 1 kalimat."
+Video tadi, dari gambar sampai suaranya, dibuat cuma dari satu kalimat ide.
+
+[vo-03.mp3]  Mulai 11,0 – Selesai 16,5 dtk · Scene: Daftar proyek Story Studio, 4 langkah → Proyek baru
+Namanya Story Studio di Klipers. Empat langkah, dari ide jadi video.
+
+[vo-04.mp3]  Mulai 16,6 – Selesai 22,95 dtk · Scene: Langkah Ide (sinopsis, gaya visual, durasi, format, Tulis naskah)
+Tulis idemu, pilih gaya visual, durasi, dan format. Lalu klik Tulis naskah, gratis.
+
+[vo-05.mp3]  Mulai 24,1 – Selesai 29,2 dtk · Scene: Langkah Naskah (5 adegan, edit narasi, Susun visual)
+AI menyusun adegan demi adegan, lengkap dengan narasinya. Tinggal kamu rapikan.
+
+[vo-06.mp3]  Mulai 29,8 – Selesai 35,3 dtk · Scene: Storyboard (Buat semua gambar, lembar karakter, acuan wajah)
+Di Storyboard, buat semua gambar sekali klik. Wajah tokohnya tetap sama di tiap adegan.
+
+[vo-07.mp3]  Mulai 35,9 – Selesai 40,85 dtk · Scene: Storyboard (Rekam narasi, Pasang otomatis efek suara, gerak Ken Burns)
+Rekam narasi dengan suara AI, pasang efek suara otomatis, dan atur gerak kamera.
+
+[vo-08.mp3]  Mulai 41,1 – Selesai 45,75 dtk · Scene: Editor (preset subtitle, Musik otomatis, Ekspor MP4)
+Di Editor, pilih gaya subtitle dan musik latar, lalu ekspor em pe empat.
+
+[vo-09.mp3]  Mulai 46,0 – Selesai 49,0 dtk · Scene: Unggah (Paket unggah: cover + caption tiap platform)
+Judul, caption, dan cover juga disiapkan.
+
+[vo-10.mp3]  Mulai 49,8 – Selesai 54,35 dtk · Scene: Pengaturan Jadwal → YouTube, TikTok, Facebook, Instagram, Threads → Jadwalkan
+Lalu jadwalkan auto upload ke lima platform sekaligus, langsung dari Klipers.
+
+[vo-11.mp3]  Mulai 55,4 – Selesai 61,1 dtk · Scene: CTA Story Studio + Google Play
+Story Studio di Klipers. Satu ide, jadi video cerita. Download di Google Play sekarang.
+
+
+=====================================================================
+CATATAN
+=====================================================================
+- Hook sengaja beda dari iklan lain: video hasil jadi diputar dulu (tanpa caption iklan, subtitle
+  karaoke terbakar di video), lalu dibekukan dan dibongkar "dibuat dari 1 kalimat".
+- Cerita contoh: Legenda Danau Toba, gaya "Buku cerita cat air", 30 detik, 5 adegan.
+  Ilustrasi = SVG tiruan (marketing/_shared/story-studio/art.js), bukan hasil generate sungguhan.
+- Video AI per adegan masih "Segera hadir" di aplikasi → di iklan hanya badge, tidak diklaim.
+- Generate ulang Edge-TTS (bash):
+    edge-tts --voice id-ID-GadisNeural --rate=-4% --text "..." --write-media audio/vo-01.mp3
+    VOICE=id-ID-ArdiNeural RATE=+6% bash marketing/tools/generate-voiceover.sh marketing/iklan/demo-story-studio-portrait
+  (generate-voiceover.sh ikut menimpa vo-01 dengan suara Ardi; generate ulang vo-01 sesudahnya.)

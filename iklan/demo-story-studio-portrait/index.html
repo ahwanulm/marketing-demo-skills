@@ -1,0 +1,1558 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Demo Story Studio HP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<!--
+  DIHASILKAN oleh marketing/tools/build-demo-story-studio.mjs dari template.html + marketing/_shared/story-studio/*.
+  Edit template.html / _shared, lalu build ulang. Jangan edit index.html langsung.
+
+  Klipers — DEMO Story Studio versi HP (1080×1920, 60 dtk, tema terang)
+  Pola demo portrait yang disetujui owner: HP tampil UTUH (y 300–1782, layar 390×844 ×1,7231),
+  judul bab di atas, caption di bawah HP. Konten panjang digulir di dalam layar.
+  UI = klipers-mobile-app/components/story-studio (layout HP tanpa breakpoint sm:/lg:).
+  URL params: ?t=12  ?nocaps=1  ?guides=1  ?record=1 (window.__seek)
+-->
+<style>
+:root{--k:.3}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#e7e5e4;overflow:hidden;font-family:Inter,system-ui,sans-serif;color:#171717}
+svg{display:block}
+#viewport{position:fixed;left:0;right:0;top:0;bottom:56px;display:flex;align-items:center;justify-content:center}
+body.rec #viewport{bottom:0}
+#stageWrap{position:relative;width:calc(1080px * var(--k));height:calc(1920px * var(--k))}
+#stage{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(var(--k));transform-origin:0 0;overflow:hidden;background:#f4f4f3}
+.bg{position:absolute;inset:0;background-image:radial-gradient(rgba(23,23,23,.07) 1.4px,transparent 1.5px);background-size:40px 40px;-webkit-mask-image:radial-gradient(ellipse at center,#000 35%,transparent 80%);mask-image:radial-gradient(ellipse at center,#000 35%,transparent 80%)}
+.logoTile{display:flex;align-items:center;justify-content:center;background:#fff;border-radius:50%;overflow:hidden;flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.logoTile img{width:92%;height:92%;object-fit:contain;display:block}
+.inv{display:inline-block;background:#171717;color:#fff;padding:0 .16em;border-radius:.1em}
+
+/* ---------- HOOK ---------- */
+#hook{position:absolute;inset:0}
+#hv{position:absolute;left:0;top:0;width:1080px;height:1920px;overflow:hidden;transform-origin:0 0;background:#000}
+#hv .ly{position:absolute;inset:-4%;opacity:0}
+#hv .ly svg{width:100%;height:100%}
+#hsub{position:absolute;left:60px;right:140px;top:1020px;text-align:center;font:900 82px/1.12 Montserrat;color:#fff;text-transform:uppercase;-webkit-text-stroke:11px #000;paint-order:stroke fill}
+#hsub .on{color:#ffe600}
+#hbar{position:absolute;left:0;bottom:0;height:10px;width:0;background:rgba(255,255,255,.9)}
+#hflash{position:absolute;inset:0;background:#fff;opacity:0}
+#hpause{position:absolute;left:50%;top:50%;width:240px;height:240px;margin:-120px 0 0 -120px;border-radius:50%;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;gap:28px;opacity:0}
+#hpause i{width:34px;height:104px;border-radius:8px;background:#fff}
+#hR{position:absolute;left:478px;top:480px;width:482px}
+#hR h1{margin:0;font:900 70px/1.06 Montserrat;letter-spacing:-2.5px;color:#171717}
+#hR h1 .w{display:inline-block}
+#hR .ln{display:block}
+#idea{position:absolute;left:60px;right:120px;top:1120px;display:flex;align-items:center;gap:16px;padding:22px 28px;border-radius:26px;background:#fff;border:1px solid #e5e5e5;box-shadow:0 24px 60px rgba(0,0,0,.08);font:500 38px/1.25 Inter;color:#171717;opacity:0;min-height:104px}
+#idea svg{width:38px;height:38px;color:#737373}
+#ideaTx.typing::after{content:'';display:inline-block;width:3px;height:40px;margin-left:3px;vertical-align:-7px;background:#171717}
+.htag{position:absolute;display:flex;align-items:center;gap:12px;padding:12px 22px 12px 12px;border-radius:999px;background:#171717;color:#fff;font:700 30px Inter;box-shadow:0 20px 50px rgba(0,0,0,.25);opacity:0}
+.htag span{width:46px;height:46px;border-radius:50%;background:#fff;color:#171717;display:flex;align-items:center;justify-content:center}
+.htag span svg{width:24px;height:24px}
+.htag b{font-weight:600;color:#a3a3a3;margin-left:2px}
+
+/* ---------- judul bab (atas) ---------- */
+#head{position:absolute;left:40px;right:40px;top:58px;height:224px}
+.hd{position:absolute;left:0;right:0;top:0;margin:0;text-align:center;font:900 70px/1.08 Montserrat;letter-spacing:-2px;color:#171717;visibility:hidden}
+.hd small{display:block;margin-top:10px;font:700 32px Inter;letter-spacing:0;color:#737373}
+.hd .n{display:inline-flex;align-items:center;justify-content:center;width:68px;height:68px;margin-right:16px;border-radius:50%;background:#171717;color:#fff;font:900 36px Inter;vertical-align:8px;letter-spacing:0}
+
+/* ---------- HP ---------- */
+#phone{position:absolute;left:190px;top:300px;width:700px;height:1482px;border-radius:78px;background:#0a0a0a;border:2px solid #2a2a2a;box-shadow:0 60px 160px rgba(0,0,0,.25),inset 0 0 0 6px #151515;visibility:hidden}
+.screen{position:absolute;left:14px;top:14px;width:390px;height:844px;transform:scale(1.7231);transform-origin:0 0;border-radius:37px;overflow:hidden;background:#fff;font-size:14px}
+.sbar{position:absolute;left:0;right:0;top:0;height:26px;display:flex;align-items:center;justify-content:space-between;padding:0 22px 0 26px;font:600 12px Inter;color:#171717;z-index:60;background:#fff}
+.sbar i{display:flex;gap:5px;align-items:center}
+.sbar svg{width:14px;height:14px}
+.punch{position:absolute;left:50%;top:7px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:#000;z-index:61}
+.homebar{position:absolute;left:50%;bottom:5px;width:120px;height:4px;margin-left:-60px;border-radius:3px;background:#171717;opacity:.5;z-index:90}
+.mtop{position:absolute;left:0;right:0;top:26px;height:42px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;background:#fff;border-bottom:1px solid #e5e5e5;z-index:20}
+.mtop .l,.mtop .r{display:flex;align-items:center;gap:6px}
+.cpill{display:flex;align-items:center;gap:6px;height:28px;padding:0 4px 0 9px;border-radius:999px;background:#f3f4f6;border:1px solid #e5e7eb}
+.cpill svg{width:14px;height:14px}
+.cpill b{font:700 12px Inter;color:#111827}.cpill small{font:400 10px Inter;color:#6b7280}
+.cpill .plus{width:20px;height:20px;border-radius:50%;background:#111827;color:#fff;display:flex;align-items:center;justify-content:center}
+.cpill .plus svg{width:12px;height:12px}
+.hpill{display:flex;align-items:center;gap:4px;height:28px;padding:0 9px;border-radius:999px;background:#f3f4f6;border:1px solid #e5e7eb;font:600 10px Inter;color:#1f2937}
+.hpill svg{width:14px;height:14px}
+.rbtn{width:30px;height:30px;border-radius:50%;background:#f3f4f6;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;color:#111827}
+.rbtn svg{width:16px;height:16px}
+.rbtn.money{background:#111827;color:#fff;border:0;font:800 14px Inter}
+#appBox{position:absolute;left:0;top:68px;width:390px;height:776px;overflow:hidden}
+#app{width:390px;height:776px}
+
+/* ---------- CTA ---------- */
+#cta{position:absolute;inset:0;visibility:hidden}
+#logoBig{position:absolute;left:460px;top:300px;width:160px;height:160px;box-shadow:0 30px 70px rgba(0,0,0,.15),0 0 0 6px rgba(0,0,0,.05)}
+#wordmark{position:absolute;left:0;right:0;top:500px;margin:0;text-align:center;font:900 116px/1 Montserrat;letter-spacing:-5px;color:#171717}
+#tagline{position:absolute;left:0;right:0;top:640px;margin:0;text-align:center;font:600 46px Inter;color:#525252;letter-spacing:-.8px}
+#tagline b{color:#171717}
+#flow{position:absolute;left:90px;right:150px;top:738px;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:14px 10px;font:600 24px Inter;color:#a3a3a3}
+#flow span{display:flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;border:1px solid #e5e5e5;background:#fff;color:#262626}
+#flow span svg{width:22px;height:22px}
+#play{position:absolute;left:90px;right:150px;top:880px;display:flex;align-items:center;gap:20px;padding:20px;border-radius:30px;background:#fff;border:1px solid #e5e5e5;box-shadow:0 20px 60px rgba(0,0,0,.08)}
+#play .appIcon{width:96px;height:96px;border-radius:22px}
+.appTxt{flex:1;min-width:0}
+.appTxt small{display:block;font:600 18px Inter;color:#737373;letter-spacing:.4px}
+.appTxt b{display:block;font:800 31px/1.15 Inter;color:#171717;letter-spacing:-.6px;margin-top:4px}
+.gp{position:absolute;left:50%;top:1046px;transform:translateX(-50%);overflow:hidden;display:flex;align-items:center;gap:16px;height:104px;padding:0 34px 0 26px;border-radius:20px;background:#000;border:2px solid #a6a6a6;color:#fff}
+.gp svg{width:54px;height:54px}
+.gp small{display:block;font:600 17px Inter;letter-spacing:1px}
+.gp b{display:block;font:600 40px Inter;letter-spacing:-.6px;line-height:1}
+.shine{position:absolute;top:0;bottom:0;left:0;width:120px;background:linear-gradient(100deg,transparent,rgba(255,255,255,.5),transparent);transform:translateX(-160px)}
+#ctaUrl{position:absolute;left:0;right:0;top:1176px;margin:0;text-align:center;font:600 32px Inter;color:#737373}
+#ctaUrl b{color:#171717}
+#ctaVid{position:absolute;left:90px;right:150px;top:1290px;display:flex;justify-content:center;gap:12px}
+#ctaVid div{width:150px;height:266px;border-radius:16px;overflow:hidden;box-shadow:0 14px 34px rgba(0,0,0,.14)}
+#ctaVid svg{width:100%;height:100%}
+
+/* ---------- caption, garis safe zone & kontrol ---------- */
+#caps{position:absolute;left:30px;right:30px;bottom:30px;text-align:center;z-index:95;opacity:0;pointer-events:none}
+#caps .ln{display:inline-block;padding:8px 20px;border-radius:18px;background:rgba(0,0,0,.66);backdrop-filter:blur(6px)}
+#caps .cw{display:inline-block;margin:0 5px;font:800 42px/1.25 Montserrat;color:#fff;-webkit-text-stroke:6px #000;paint-order:stroke fill}
+#caps .cw.on{color:#000;-webkit-text-stroke:0;background:#fff;border-radius:8px;padding:0 8px;margin:0 2px}
+body.nocaps #caps{display:none}
+#guides{position:absolute;inset:0;z-index:99;pointer-events:none;display:none}
+body.guides #guides{display:block}
+#guides i{position:absolute;background:rgba(255,0,0,.18);border:2px dashed rgba(255,60,60,.8)}
+#controls{position:fixed;left:0;right:0;bottom:0;height:56px;display:flex;align-items:center;gap:10px;padding:0 16px;background:#0b0b0c;border-top:1px solid #1f1f22;font:600 13px Inter;color:#a1a1aa}
+#controls button{height:34px;min-width:34px;padding:0 11px;border-radius:8px;border:1px solid #2a2a2e;background:#151517;color:#fff;font:600 13px Inter;cursor:pointer;white-space:nowrap}
+#controls button.off{color:#71717a;text-decoration:line-through}
+#scrub{flex:1;min-width:60px;accent-color:#fff}
+#tlabel{font-variant-numeric:tabular-nums;min-width:88px;text-align:right}
+#audioNote{color:#fbbf24;display:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+body.rec #controls,body.rec #startOverlay{display:none}
+#startOverlay{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(0,0,0,.55);z-index:100;cursor:pointer;backdrop-filter:blur(3px);text-align:center;padding:20px}
+#startOverlay div{width:110px;height:110px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center}
+#startOverlay div::after{content:'';border-left:34px solid #000;border-top:21px solid transparent;border-bottom:21px solid transparent;margin-left:10px}
+#startOverlay p{margin:0;font:700 18px Inter;color:#fff}
+#startOverlay small{font:500 14px Inter;color:#d4d4d4}
+.spinA{animation:sp .9s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+body.rec .spinA{animation:none}
+@media (prefers-reduced-motion: reduce){.spinA{animation:none}}
+#flow .plats5 svg{width:26px;height:26px;border-radius:7px}
+#flow .plats5 svg:first-child{width:22px;height:22px;border-radius:0}
+/* ================= UI STORY STUDIO (salinan visual frontend/components/story-studio) =================
+   Token = T di ui.tsx (tema terang): neutral-900 teks, neutral-600 muted, neutral-500 faint,
+   neutral-200 garis, panel rounded-2xl putih, inset neutral-50. Status: emerald/amber.
+   .app.m = layout HP (390 px, tanpa breakpoint sm:/lg:), .app.d = desktop (lg:). */
+.app{--tx:#171717;--mu:#525252;--fa:#737373;--ln:#e5e5e5;--ln2:#d4d4d4;--in:#fafafa;--in2:#f5f5f5;--pn:#fff;--ink:#171717;
+  position:absolute;left:0;top:0;font:400 14px/1.45 Inter,system-ui,sans-serif;color:var(--tx);background:#fff;overflow:hidden;-webkit-font-smoothing:antialiased}
+.app *{box-sizing:border-box}
+.app svg{display:block;flex:none}
+.ic{width:14px;height:14px}
+.mono{font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+.mu{color:var(--mu)} .fa{color:var(--fa)}
+.row{display:flex;align-items:center}
+.pnl{border-radius:16px;border:1px solid var(--ln);background:var(--pn)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:36px;padding:0 16px;border-radius:999px;font:500 14px Inter;white-space:nowrap;flex:none;position:relative}
+.btn .ic{width:16px;height:16px}
+.btn.sm{height:32px;padding:0 12px;font-size:12px;gap:6px}.btn.sm .ic{width:14px;height:14px}
+.btn.lg{height:44px;padding:0 20px}
+.btn.pri{background:#171717;color:#fff;font-weight:600}
+.btn.sec{border:1px solid var(--ln);background:#fff;color:#404040}
+.btn.gho{color:var(--mu)}
+.btn .cost{display:inline-flex;align-items:center;gap:2px;font:400 11px 'JetBrains Mono',monospace;opacity:.7}
+.btn .cost svg{width:12px;height:12px}
+.btn .spin{display:none;width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.35);border-top-color:#fff}
+.btn.sec .spin,.btn.gho .spin{border-color:#d4d4d4;border-top-color:#171717}
+.btn.busy .spin{display:block}.btn.busy>.ico{display:none}
+.btn.busy .lbl{display:none}.btn .blbl{display:none}.btn.busy .blbl{display:inline}
+.btn.busy .cost{display:none}
+.btn.dis{opacity:.4}
+.chip{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--ln);background:var(--in);color:var(--mu);font:600 12px Inter;white-space:nowrap;flex:none}
+.chip.on{border-color:#171717;background:#171717;color:#fff}
+.chip.s7{height:28px;padding:0 10px;font-size:11px}
+.sec-h{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.sec-h h3{margin:0;display:flex;align-items:center;gap:6px;white-space:nowrap;font:700 11px Inter;letter-spacing:.08em;text-transform:uppercase;color:var(--fa)}
+.sec-h h3 svg{width:14px;height:14px}
+.sec-h h3 b{margin-left:6px;font-weight:600;text-transform:none;letter-spacing:0;color:var(--tx)}
+.sec-h .aside{font-size:11px;color:var(--fa);display:flex;gap:4px;align-items:center}
+.sect{display:flex;flex-direction:column;gap:10px}
+.selb{display:flex;align-items:center;gap:8px;width:100%;height:42px;padding:0 14px;border-radius:12px;border:1px solid var(--ln);background:var(--in);font:400 14px Inter;color:var(--tx);position:relative}
+.selb .v{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.selb>svg{width:16px;height:16px;color:var(--fa)}
+.selb.sm{width:132px;height:30px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;gap:6px}
+.selb.sm svg{width:14px;height:14px}
+.selb.open{border-color:#171717;background:#fff}
+.dd{position:absolute;left:0;top:calc(100% + 6px);min-width:100%;padding:4px;border-radius:12px;border:1px solid var(--ln);background:#fff;box-shadow:0 18px 40px rgba(0,0,0,.12);z-index:30;display:none}
+.selb.open .dd{display:block}
+.dd div{display:flex;align-items:center;justify-content:space-between;gap:10px;height:32px;padding:0 10px;border-radius:8px;font:400 13px Inter;color:#404040;white-space:nowrap}
+.dd div.hi{background:var(--in2);color:var(--tx);font-weight:600}
+.segw{display:inline-flex;padding:2px;border-radius:999px;border:1px solid var(--ln);background:var(--in)}
+.segw span{display:inline-flex;align-items:center;gap:4px;height:28px;padding:0 10px;border-radius:999px;font:600 12px Inter;color:var(--fa)}
+.segw span svg{width:14px;height:14px}
+.segw span.on{background:#fff;color:var(--tx);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.badge{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 10px;border-radius:999px;border:1px solid var(--ln);background:var(--in);font:600 11px Inter;color:var(--mu);white-space:nowrap}
+.badge.amber{border-color:#fde68a;background:#fffbeb;color:#b45309}
+.badge.green{border-color:#a7f3d0;background:#ecfdf5;color:#047857}
+.cursor{position:absolute;left:0;top:0;width:24px;height:24px;z-index:80;pointer-events:none;filter:drop-shadow(0 3px 5px rgba(0,0,0,.35))}
+.cring{position:absolute;left:-17px;top:-17px;width:34px;height:34px;border-radius:50%;border:2px solid #171717;opacity:0;z-index:79;pointer-events:none}
+.caret::after{content:'';display:inline-block;width:1.5px;height:1.05em;margin-left:1px;vertical-align:-2px;background:#171717;opacity:0}
+.typing.caret::after,.caret.typing::after{opacity:1}
+.prog{height:4px;border-radius:999px;background:var(--ln);overflow:hidden}
+.prog i{display:block;height:100%;width:0;border-radius:999px;background:#171717}
+
+/* ---------- sidebar (desktop) ---------- */
+.side{position:absolute;left:0;top:0;bottom:0;width:240px;border-right:1px solid var(--ln);background:#fafafa;padding:8px 12px;display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:10px;height:50px;padding:0 6px;font:700 17px Inter}
+.planb{display:flex;align-items:center;justify-content:space-between;margin-top:4px;padding:7px 12px;border-radius:12px;border:1px solid var(--ln);background:#f5f5f5}
+.planb span{font:700 11px Inter;text-transform:uppercase}
+.planb b{font:900 14px Inter}.planb b small{font:500 10px Inter;color:var(--fa);margin-left:2px}
+.mk{margin:10px 0 6px;height:38px;border-radius:12px;background:#171717;color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;font:600 14px Inter}
+.mi{position:relative;display:flex;align-items:center;gap:11px;height:34px;padding:0 11px;border-radius:11px;font:500 13.5px Inter;color:#737373}
+.mi svg{width:17px;height:17px}
+.mi.on{background:#ececec;color:#171717;font-weight:600}
+.mi .bd{margin-left:auto;padding:1px 7px;border-radius:999px;background:#ececec;font:700 9.5px Inter;text-transform:uppercase;color:#737373}
+.mi.on .bd{background:#171717;color:#fff}
+.msub{display:flex;flex-direction:column;gap:1px;margin:2px 0 4px 20px;padding-left:10px;border-left:1px solid var(--ln)}
+.msub .mi{height:31px;font-size:13px}
+.main{position:absolute;left:240px;right:0;top:0;bottom:0;overflow:hidden;background:#fff}
+.app.m .main{left:0}
+
+/* ---------- layar ---------- */
+.scr{position:absolute;left:0;right:0;top:0;visibility:hidden}
+.scroll{position:relative;padding:24px 32px 40px}
+.app.m .scroll{padding:16px 16px 120px}
+h1.h1,h2.h2{margin:0;font:700 24px/1.25 Inter;letter-spacing:-.5px}
+h2.h2x{margin:0;font:700 20px/1.25 Inter;letter-spacing:-.4px}
+.desc{margin:4px 0 0;font-size:14px;color:var(--mu);max-width:640px}
+.stephd{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px}
+.stephd .acts{display:flex;flex-wrap:wrap;gap:8px}
+.app.m .stephd .acts{width:100%}.app.m .stephd .acts>*{flex:1}
+
+/* daftar proyek */
+.lsthd{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:32px}
+.empty{padding:40px 40px;display:flex;flex-direction:column;gap:32px}
+.app.m .empty{padding:28px 22px}
+.empty ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+.app.m .empty ol{grid-template-columns:1fr;gap:18px}
+.empty li{display:flex;gap:12px}
+.empty li .cir{width:36px;height:36px;border-radius:50%;border:1px solid var(--ln);display:flex;align-items:center;justify-content:center;flex:none}
+.empty li .cir svg{width:16px;height:16px}
+.empty li b{display:block;font:600 14px Inter}.empty li b i{font-style:normal;margin-right:4px;color:var(--fa)}
+.empty li span{display:block;font-size:12px;color:var(--mu)}
+
+/* header proyek */
+.wshd{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding-bottom:16px;border-bottom:1px solid var(--ln);margin-bottom:32px}
+.backb{width:36px;height:36px;border-radius:50%;border:1px solid var(--ln);display:flex;align-items:center;justify-content:center;color:var(--mu)}
+.backb svg{width:16px;height:16px}
+.ttl{flex:1;min-width:0;max-width:420px;height:36px;padding:0 8px;display:flex;align-items:center;font:700 16px Inter;white-space:nowrap;overflow:hidden}
+.svst{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:999px;font:600 11px Inter;color:var(--mu);white-space:nowrap}
+.svst svg{width:14px;height:14px}
+.stepr{margin-left:auto;display:flex;align-items:center;gap:2px;padding:4px;border-radius:999px;border:1px solid var(--ln);background:var(--in)}
+.stepr span{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:999px;font:600 12px Inter;color:#525252}
+.stepr span svg{width:14px;height:14px}
+.stepr span .ok{display:none}
+.stepr span.done .ok{display:block}.stepr span.done .si{display:none}
+.stepr span.on{background:#171717;color:#fff}
+.stepr span.on .ok{display:none}.stepr span.on .si{display:block}
+.app.m .wshd{gap:10px;margin-bottom:22px}
+.app.m .ttl{font-size:15px;padding:0 4px}
+.app.m .stepr{margin-left:0;width:100%;display:grid;grid-template-columns:repeat(4,1fr);border-radius:16px}
+.app.m .stepr span{height:48px;flex-direction:column;justify-content:center;gap:4px;border-radius:12px;font-size:11px;padding:0 4px}
+.aibar{display:none;align-items:center;gap:8px;margin:-20px 0 24px;padding:12px 16px;border-radius:12px;border:1px solid var(--ln);background:var(--in);font:600 14px Inter}
+.aibar .sp{width:16px;height:16px;border-radius:50%;border:2px solid #d4d4d4;border-top-color:#171717;flex:none}
+.aibar small{font:400 12px Inter;color:var(--mu);margin-left:4px}
+.app.m .aibar small{display:none}
+.app.m .aibar{margin:-12px 0 18px;font-size:13px}
+
+/* langkah 1: ide */
+.idea{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:24px;align-items:start}
+.app.m .idea{grid-template-columns:1fr}
+.idea .col{display:flex;flex-direction:column;gap:24px;min-width:0}
+.styles{display:flex;gap:8px;overflow:hidden;padding:2px 2px 8px}
+.stc{position:relative;width:150px;flex:none;display:flex;align-items:center;gap:10px;padding:8px;border-radius:12px;border:1px solid var(--ln);background:#fff}
+.stc .sw{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font:700 12px Inter;flex:none}
+.stc b{display:block;font:600 12px Inter;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stc small{display:block;font-size:10px;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stc .ck{position:absolute;right:6px;top:6px;width:12px;height:12px;display:none}
+.stc.on{border-color:#171717;background:#fafafa}.stc.on .ck{display:block}
+.syn{display:flex;flex-direction:column}
+.syn .ta{min-height:196px;padding:20px 20px 12px;font:400 16px/1.6 Inter;color:var(--tx);white-space:pre-wrap}
+.syn .ta .ph{color:#737373}
+.app.m .syn .ta{min-height:150px;font-size:15px;padding:16px 16px 10px}
+.tbar2{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 12px;border-top:1px solid var(--ln)}
+.tbar2 .cnt{margin-left:auto;font:400 11px 'JetBrains Mono',monospace;color:var(--fa)}
+.ideas{display:flex;gap:6px;overflow:hidden;padding-bottom:4px}
+.asd{display:flex;flex-direction:column;gap:20px;padding:20px}
+.hr{border-top:1px solid var(--ln)}
+.note{font-size:11px;color:var(--mu);margin:0}
+.btnw{width:100%}
+.ctr{text-align:center}
+
+/* langkah 2: naskah */
+.srow{display:grid;grid-template-columns:56px minmax(0,1fr);gap:8px 16px;padding:20px;border-top:1px solid var(--ln)}
+.srow:first-child{border-top:0}
+.app.m .srow{grid-template-columns:1fr;padding:16px}
+.srow .no{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.app.m .srow .no{flex-direction:row;align-items:center}
+.srow .no b{font:600 18px 'JetBrains Mono',monospace}
+.srow .no i{display:flex;flex-direction:column;color:#a3a3a3}
+.app.m .srow .no i{flex-direction:row;margin-left:auto;gap:4px}
+.srow .no i svg{width:16px;height:16px;margin:4px 8px}
+.srow .st{font:700 16px Inter;padding:6px 0}
+.srow .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.app.m .srow .two{grid-template-columns:1fr}
+.lbl2{display:flex;align-items:center;justify-content:space-between;gap:8px;font:700 11px Inter;letter-spacing:.08em;text-transform:uppercase;color:var(--fa)}
+.lbl2>span{display:flex;align-items:center;gap:6px}
+.lbl2 svg{width:14px;height:14px}
+.lbl2 .spk{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;border:1px solid var(--ln);font:600 11px Inter;text-transform:none;letter-spacing:0;color:var(--mu)}
+.lbl2 .spk svg{width:12px;height:12px}
+.lbl2 .mono{font-weight:500;text-transform:none;letter-spacing:0}
+.tx2{margin-top:4px;padding:6px 8px;margin-left:-8px;border-radius:8px;border:1px solid transparent;font:400 14px/1.6 Inter;min-height:64px}
+.tx2.foc{border-color:#171717;background:#fff}
+.addrow{display:flex;align-items:center;justify-content:center;gap:8px;height:48px;border-top:1px solid var(--ln);font:600 14px Inter;color:var(--mu)}
+.addrow svg{width:16px;height:16px}
+
+/* langkah 3: storyboard */
+.meters{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto auto;gap:16px 32px;padding:16px 20px;align-items:center}
+.app.m .meters{grid-template-columns:1fr 1fr;gap:14px 20px;padding:14px 16px}
+.mtr .r{display:flex;align-items:center;justify-content:space-between;font:600 12px Inter;color:var(--mu);margin-bottom:8px}
+.mtr .r span{display:flex;align-items:center;gap:6px}.mtr .r svg{width:14px;height:14px}
+.mtr .r b{font:500 12px 'JetBrains Mono',monospace;color:var(--tx)}
+.mx{display:flex;align-items:center;justify-content:space-between;gap:12px;border-left:1px solid var(--ln);padding-left:24px;font:600 12px Inter;color:var(--mu);white-space:nowrap}
+.mx>span{display:flex;align-items:center;gap:6px}.mx svg{width:14px;height:14px}
+.app.m .mx{grid-column:span 2;border-left:0;border-top:1px solid var(--ln);padding:12px 0 0}
+.cast{display:flex;gap:12px;overflow:hidden;padding-bottom:8px}
+.ccard{width:300px;flex:none;overflow:hidden;display:flex;flex-direction:column}
+.app.m .ccard{width:270px}
+.ccard .sh{position:relative;aspect-ratio:16/9;border-bottom:1px solid var(--ln);background:var(--in)}
+.ccard .sh svg{position:absolute;inset:0;width:100%;height:100%}
+.ccard .sh .emp{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:var(--fa)}
+.ccard .sh .emp svg{position:static;width:28px;height:28px}
+.ccard .bd{padding:12px;display:flex;flex-direction:column;gap:8px}
+.ccard .bd b{font:600 14px Inter}
+.ccard .bd p{margin:0;font-size:12px;color:var(--mu);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.veil{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:rgba(250,250,250,.86);font:600 11px Inter;color:#404040;opacity:0}
+.veil .sp{width:18px;height:18px;border-radius:50%;border:2px solid #d4d4d4;border-top-color:#171717}
+.veil .prog{width:60%}
+.strip{display:flex;gap:8px;overflow:hidden;padding:4px 4px 8px}
+.th{position:relative;flex:none;border-radius:12px;overflow:hidden;background:#f5f5f5;opacity:.8}
+.th.on{opacity:1;box-shadow:0 0 0 2px #fff,0 0 0 4px #171717}
+.th .im{position:absolute;inset:0;opacity:0}
+.th .im svg{width:100%;height:100%}
+.th .no{position:absolute;left:6px;top:6px;padding:2px 6px;border-radius:6px;background:rgba(0,0,0,.65);font:600 11px 'JetBrains Mono',monospace;color:#fff;z-index:2}
+.th .au{position:absolute;right:6px;bottom:6px;padding:2px;border-radius:6px;background:rgba(0,0,0,.65);color:#fff;opacity:0;z-index:2}
+.th .au svg{width:12px;height:12px}
+.th .em{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#a3a3a3}
+.th .em svg{width:22px;height:22px}
+.cpanel{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;padding:24px}
+.app.m .cpanel{grid-template-columns:1fr;padding:16px;gap:18px}
+.bigim{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--ln);background:#f5f5f5}
+.bigim .mv{position:absolute;inset:0;transform-origin:50% 50%}
+.bigim .mv svg{width:100%;height:100%}
+.bigim .pg{position:absolute;right:12px;top:12px;display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:999px;background:rgba(0,0,0,.6);font:600 11px Inter;color:#fff}
+.bigim .pg svg{width:14px;height:14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+
+/* langkah 4: editor */
+.edg{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px;align-items:start}
+.app.m .edg{grid-template-columns:1fr}
+.plc{padding:24px;background:#fafafa}
+.app.m .plc{padding:12px}
+.player{position:relative;margin:0 auto;border-radius:12px;overflow:hidden;background:#000}
+.player .fr{position:absolute;inset:0;opacity:0}
+.player .fr svg{width:100%;height:100%}
+.psub{position:absolute;left:6%;right:6%;text-align:center;font:900 22px/1.2 Montserrat,Inter,sans-serif;color:#fff;text-transform:uppercase;-webkit-text-stroke:4px #000;paint-order:stroke fill;letter-spacing:.2px}
+.psub .on{color:#ffe600}
+.pbar{display:flex;align-items:center;gap:10px;margin-top:12px;font:500 11px 'JetBrains Mono',monospace;color:var(--mu)}
+.pbar .pp{width:32px;height:32px;border-radius:50%;background:#171717;color:#fff;display:flex;align-items:center;justify-content:center}
+.pbar .pp svg{width:14px;height:14px}
+.pbar .prog{flex:1}
+.tabs5{display:grid;grid-template-columns:repeat(5,1fr);border-bottom:1px solid var(--ln)}
+.tabs5 span{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 0;margin-bottom:-1px;border-bottom:2px solid transparent;font:600 11px Inter;color:var(--fa)}
+.tabs5 span svg{width:14px;height:14px}
+.tabs5 span.on{border-color:#171717;color:var(--tx)}
+.tabp{position:relative;padding:16px;min-height:430px}
+.app.m .tabp{min-height:400px}
+.tp{position:absolute;left:16px;right:16px;top:16px;display:flex;flex-direction:column;gap:16px;visibility:hidden}
+.box{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;border:1px solid var(--ln)}
+.box>b{display:flex;align-items:center;gap:6px;font:600 14px Inter}
+.box>b svg{width:14px;height:14px}
+.box p{margin:0;font-size:12px;color:var(--mu)}
+.cprev{display:flex;flex-direction:column;border-radius:12px;border:1px solid var(--ln);overflow:hidden}
+.cprev .pv{height:80px;background:#171717;display:flex;align-items:center;justify-content:center;font:900 20px Montserrat,Inter,sans-serif;color:#fff;-webkit-text-stroke:3px #000;paint-order:stroke fill;text-transform:uppercase}
+.cprev .pv .on{color:#ffe600}
+.cprev .in{display:flex;align-items:center;gap:12px;padding:12px}
+.cprev .in>span{flex:1;min-width:0}
+.cprev .in b{display:block;font:600 14px Inter}
+.cprev .in small{display:block;font-size:12px;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lab{display:flex;justify-content:space-between;margin-bottom:6px;font:600 11px Inter;letter-spacing:.04em;text-transform:uppercase;color:var(--mu)}
+.res2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.cks{display:flex;flex-direction:column;gap:8px;font-size:12px;color:#404040}
+.cks span{display:flex;align-items:center;gap:8px}
+.cks i{width:14px;height:14px;border-radius:3px;background:#171717;display:flex;align-items:center;justify-content:center;color:#fff}
+.cks i svg{width:10px;height:10px}
+.excard{display:flex;flex-direction:column;gap:8px;padding:12px;opacity:0}
+.excard .vid{position:relative;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:#000}
+.excard .vid svg{width:100%;height:100%}
+.covers{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.covers div{position:relative;border-radius:8px;overflow:hidden;background:#f5f5f5}
+.covers svg{width:100%;height:100%}
+.cf{display:flex;flex-direction:column;gap:4px}
+.cf .h{display:flex;align-items:center;justify-content:space-between;font:600 11px Inter;letter-spacing:.04em;text-transform:uppercase;color:var(--mu)}
+.cf .h svg{width:14px;height:14px;color:var(--fa)}
+.cf .v{padding:8px 12px;border-radius:12px;border:1px solid var(--ln);background:var(--in);font-size:12px;line-height:1.5;color:var(--tx);white-space:pre-line}
+.plats{display:flex;gap:6px}
+.plats svg{width:22px;height:22px;border-radius:6px}
+.toast{position:absolute;right:20px;bottom:20px;display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;background:#171717;color:#fff;font:500 13px Inter;box-shadow:0 12px 30px rgba(0,0,0,.2);opacity:0;z-index:60;max-width:360px}
+.toast svg{width:16px;height:16px;color:#34d399}
+.app.m .toast{left:16px;right:16px;bottom:90px;max-width:none}
+
+/* modal subtitle */
+.modal{position:absolute;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:50;visibility:hidden}
+.mdl{width:560px;border-radius:16px;background:#fff;box-shadow:0 30px 80px rgba(0,0,0,.3);overflow:hidden}
+.app.m .modal{align-items:flex-end}
+.app.m .mdl{width:100%;border-radius:20px 20px 0 0}
+.mdl .mhd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--ln);font:700 15px Inter}
+.mdl .tb{display:flex;gap:4px;margin:12px 16px 0;padding:4px;border-radius:10px;background:#f5f5f5}
+.mdl .tb span{flex:1;text-align:center;padding:6px;border-radius:8px;font:600 12px Inter;color:var(--fa)}
+.mdl .tb span.on{background:#fff;color:var(--tx);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 16px 16px}
+.pt{border-radius:10px;border:1.5px solid var(--ln);overflow:hidden}
+.pt .pv{height:58px;background:#171717;display:flex;align-items:center;justify-content:center;font:900 13px Montserrat,Inter,sans-serif;color:#fff;-webkit-text-stroke:2px #000;paint-order:stroke fill;text-transform:uppercase}
+.pt b{display:block;padding:6px 8px;font:600 11px Inter}
+.pt.on{border-color:#171717;box-shadow:0 0 0 2px #171717}
+.mdl .ft{display:flex;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid var(--ln)}
+
+.stp{display:none}.stp.show{display:block}
+#st2.show,#st3.show,#st4.show{display:flex;flex-direction:column;gap:24px}
+#renderRow{display:none;flex-direction:column;gap:6px}#renderRow.show{display:flex}
+.empty li .cir{transition:none}.empty li.hl .cir{background:#171717;border-color:#171717;color:#fff}
+.btn.sec.pri{background:#171717;color:#fff;border-color:#171717;font-weight:600}
+.btn.sec.pri .spin{border-color:rgba(255,255,255,.35);border-top-color:#fff}
+.btn.gone{display:none}
+.same{box-shadow:0 0 0 3px #fff,0 0 0 6px #171717!important;opacity:1!important}
+.samebd{position:absolute;left:8px;top:8px;padding:3px 9px;border-radius:999px;background:#171717;color:#fff;font:700 10px Inter;letter-spacing:.04em;opacity:0;z-index:3}
+.ccard.same .samebd{opacity:1}
+.cpanel,.th,.ccard{position:relative}
+.psub.motion{color:#fff;font-size:24px}.psub.motion .on{color:#000;background:#fff;-webkit-text-stroke:0;border-radius:6px;padding:0 6px}
+.tp.show{visibility:visible}
+.tabs5 span.on{border-color:#171717;color:#171717}
+.srow{opacity:1}
+.aibar.vis{display:flex}
+.gone{display:none!important}
+
+/* modal Pengaturan Jadwal (ScheduleUploadModal.tsx) */
+.smd{width:600px}
+.mdl .mhd.sh{background:#f9fafb;border-bottom:1px solid #e5e7eb}
+.mhd.sh b{display:block;font:700 17px Inter;color:#000}.mhd.sh small{display:block;font:400 12px Inter;color:#6b7280}
+.sbody{padding:18px 22px;display:flex;flex-direction:column;gap:6px}
+.flab{display:block;font:700 12px Inter;color:#374151;margin-top:8px}
+.pgrid2{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:2px}
+.app.m .pgrid2{grid-template-columns:1fr 1fr;gap:8px}
+.app.m .smd{width:100%}
+.app.m .sbody{padding:14px 16px}
+.pl{position:relative;display:flex;align-items:center;gap:8px;padding:10px;border:1px solid #e5e7eb;border-radius:12px;background:#fff}
+.pl .rd{width:14px;height:14px;border-radius:50%;border:1px solid #d1d5db;flex:none;position:relative}
+.pl .pi svg{width:22px;height:22px;border-radius:6px}
+.pl .pt2{min-width:0;flex:1;line-height:1.2}
+.pl .pt2 b{display:block;font:600 12px Inter;color:#111827}
+.pl .pt2 small{display:block;font:500 10px Inter;color:#6b7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.pl .ok2{position:absolute;right:-6px;top:-6px;width:20px;height:20px;border-radius:50%;background:#059669;color:#fff;display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(.4)}
+.pl .ok2 svg{width:12px;height:12px}
+.pl.on{border-color:#1e293b;background:#f1f5f9;box-shadow:0 0 0 1px rgba(30,41,59,.1)}
+.pl.on .rd{border-color:#1e293b}.pl.on .rd::after{content:'';position:absolute;left:3px;top:3px;width:6px;height:6px;border-radius:50%;background:#1e293b}
+.pl.done .ok2{opacity:1;transform:scale(1);transition:none}
+.fin{padding:10px 14px;border-radius:12px;border:1px solid #e5e7eb;background:#fff;font:400 13px Inter;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fin svg{color:#6b7280}
+.msg{display:none;align-items:center;gap:10px;padding:10px 12px;margin-bottom:6px;border-radius:10px;border:1px solid #a7f3d0;background:#ecfdf5;color:#047857;font:600 13px Inter}
+.msg.show{display:flex}
+
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stageWrap"><div id="stage">
+  <div class="bg"></div>
+
+  <section id="hook">
+    <div id="hv"><div class="ly" id="hv0"></div><div class="ly" id="hv1"></div><div id="hsub"></div><div id="hbar"></div><div id="hpause"><i></i><i></i></div><div id="hflash"></div></div>
+    <div class="htag" id="tag0" style="left:40px;top:396px"><span id="tagI0"></span>Gambar <b>AI</b></div>
+    <div class="htag" id="tag1" style="left:250px;top:700px"><span id="tagI1"></span>Narasi <b>AI</b></div>
+    <div class="htag" id="tag2" style="left:40px;top:1010px"><span id="tagI2"></span>Subtitle <b>AI</b></div>
+    <div id="hR"><h1><span class="ln"><span class="w">Video</span> <span class="w">ini</span></span><span class="ln"><span class="w">dibuat</span> <span class="w">dari</span></span><span class="ln"><span class="w"><span class="inv">1 kalimat.</span></span></span></h1></div>
+    <div id="idea"><span id="ideaIc"></span><span id="ideaTx"></span></div>
+  </section>
+
+  <div id="head">
+    <h2 class="hd" id="hd0">Story Studio<small>4 langkah, ide jadi video</small></h2>
+    <h2 class="hd" id="hd1"><span class="n">1</span>Tulis ide<small>Gaya, durasi, dan format</small></h2>
+    <h2 class="hd" id="hd2"><span class="n">2</span>Naskah AI<small>Tinggal kamu rapikan</small></h2>
+    <h2 class="hd" id="hd3"><span class="n">3</span>Storyboard<small>Wajah tokoh tetap sama</small></h2>
+    <h2 class="hd" id="hd4"><span class="n">3</span>Suara &amp; gerak<small>Narasi AI, efek, kamera</small></h2>
+    <h2 class="hd" id="hd5"><span class="n">4</span>Editor<small>Subtitle, musik, MP4</small></h2>
+    <h2 class="hd" id="hd6">Siap unggah<small>Judul, caption, dan cover</small></h2>
+    <h2 class="hd" id="hd7">Auto upload<small>5 platform sekaligus</small></h2>
+  </div>
+
+  <div id="phone"><div class="screen">
+    <div class="sbar"><span>9:41</span><i>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 20h3V16H2zm5 0h3v-7H7zm5 0h3V9h-3zm5 0h3V5h-3z"/></svg>
+      <svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="7" width="18" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="4" y="9" width="12" height="6" rx="1"/><rect x="21" y="10" width="1.6" height="4" rx=".8"/></svg>
+    </i></div>
+    <div class="punch"></div>
+    <div class="mtop">
+      <div class="l">
+        <div class="cpill"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 3L4 14h7l-2 7 9-11h-7l2-7z"/></svg><b>240</b><small>cr</small><span class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 4.5v15m7.5-7.5h-15"/></svg></span></div>
+        <div class="hpill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>Riwayat</div>
+      </div>
+      <div class="r"><span class="rbtn money">$</span><span class="rbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 0 0-4-5.7V5a2 2 0 1 0-4 0v.3C7.7 6.2 6 8.4 6 11v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0v1a3 3 0 1 1-6 0v-1m6 0H9"/></svg></span></div>
+    </div>
+    <div id="appBox"><div id="app"></div></div>
+    <div class="homebar"></div>
+  </div></div>
+
+  <section id="cta">
+    <div id="logoBig" class="logoTile"><img alt="Klipers" src="data:image/png;base64,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"></div>
+    <h1 id="wordmark">Story Studio</h1>
+    <p id="tagline"><b>Satu ide,</b> jadi video cerita.</p>
+    <div id="flow"></div>
+    <div id="play"><div class="appIcon logoTile"><img alt="Klipers" src="data:image/png;base64,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"></div><div class="appTxt"><small>DOWNLOAD APLIKASINYA</small><b>Klipers - Ai Video Clipping</b></div></div>
+    <div class="gp"><svg viewBox="0 0 24 24"><path d="M4 2.5 13.5 12 4 21.5c-.4-.2-.6-.6-.6-1.1V3.6c0-.5.2-.9.6-1.1z" fill="#2196F3"/><path d="M4 2.5c.4-.2.9-.2 1.3.1L16.6 9l-3.1 3z" fill="#4CAF50"/><path d="M4 21.5 13.5 12l3.1 3-11.3 6.4c-.4.3-.9.3-1.3.1z" fill="#F44336"/><path d="M16.6 9l3.6 2c.8.5.8 1.5 0 2l-3.6 2-3.1-3z" fill="#FFC107"/></svg><div><small>TERSEDIA DI</small><b>Google Play</b></div><i class="shine"></i></div>
+    <p id="ctaUrl">atau buka <b>klipers.pro</b></p>
+    <div id="ctaVid"></div>
+  </section>
+
+  <div id="caps"></div>
+  <div id="guides"><i style="left:0;right:0;top:0;height:270px"></i><i style="left:0;right:0;bottom:0;height:670px"></i><i style="right:0;top:270px;bottom:670px;width:120px"></i></div>
+</div></div></div>
+
+<div id="controls">
+  <button id="bPlay">▶</button><button id="bRestart">↺</button>
+  <input id="scrub" type="range" min="0" max="63" step="0.01" value="0">
+  <span id="tlabel">0.0 / 63s</span>
+  <span id="audioNote"></span>
+  <button id="bCaps">CC Caption: On</button><button id="bMute">🔊 Suara</button>
+</div>
+<div id="startOverlay"><div></div><p>Putar demo Story Studio</p><small>Narasi: audio/vo-*.mp3 · efek: audio/sfx-*.mp3</small></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+/* ================= ILUSTRASI ADEGAN (tiruan hasil gaya "Buku cerita cat air") =================
+   Legenda Danau Toba, 5 adegan. Digambar di dunia 160×160 dan dipotong lewat
+   preserveAspectRatio="slice", jadi satu gambar bisa dipakai 16:9 maupun 9:16
+   (subjek utama selalu di kotak tengah ±90×90).
+   art(i, opt): opt.uid wajib unik per instance (id filter/gradient SVG).
+   sheet(uid): lembar karakter Toba (3 pose, wajah sama) untuk kartu Pemeran. */
+const ART_SCENES = [
+  { title: 'Nelayan di tepi danau', story: 'Toba, nelayan miskin, menjala ikan sendirian saat fajar.', nar: 'Dahulu kala, seorang nelayan menangkap ikan emas yang bisa berbicara.', cam: 'kenburns', sfx: 'Ombak tenang' },
+  { title: 'Ikan emas di jala', story: 'Jalanya berat. Seekor ikan emas berkilau memohon dilepaskan.', nar: '"Lepaskan aku," pinta ikan itu, "dan hidupmu akan berubah."', cam: 'zoomin', sfx: 'Kilau ajaib' },
+  { title: 'Menjadi seorang putri', story: 'Ikan itu berubah menjadi putri cantik. Toba menikahinya dengan satu janji.', nar: 'Ikan itu menjelma putri, dengan satu syarat: jangan pernah ungkit asal-usulnya.', cam: 'zoomout', sfx: 'Denting' },
+  { title: 'Janji yang dilanggar', story: 'Bertahun kemudian Toba marah pada anaknya dan mengucap kata terlarang.', nar: 'Suatu hari Toba murka, dan janji itu pun terucap: "Dasar anak ikan!"', cam: 'shake', sfx: 'Guntur' },
+  { title: 'Lahirnya Danau Toba', story: 'Hujan turun tanpa henti. Desa tenggelam menjadi danau, menyisakan Pulau Samosir.', nar: 'Hujan turun tanpa henti, dan desa itu menjadi Danau Toba.', cam: 'panright', sfx: 'Hujan lebat' },
+];
+
+function _wc(u) {
+  // tepi kuas + tekstur kertas
+  return `<filter id="wc${u}" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".045" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="1.3"/></filter>
+  <filter id="pp${u}"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="3"/><feColorMatrix values="0 0 0 0 .45  0 0 0 0 .36  0 0 0 0 .25  0 0 0 .55 0"/></filter>
+  <radialGradient id="vg${u}" cx=".5" cy=".5" r=".75"><stop offset=".55" stop-color="#3a2a1a" stop-opacity="0"/><stop offset="1" stop-color="#3a2a1a" stop-opacity=".28"/></radialGradient>`;
+}
+const _lg = (id, a, b, c) => `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a}"/>${c ? `<stop offset=".55" stop-color="${b}"/><stop offset="1" stop-color="${c}"/>` : `<stop offset="1" stop-color="${b}"/>`}</linearGradient>`;
+
+/* ---------- tokoh (warna & ciri tetap = "wajah sama di tiap adegan") ---------- */
+function _toba(x, y, s = 1, pose = 'stand') {
+  // ikat kepala ulos merah bergaris hitam, kumis-janggut tipis, rompi cokelat, sarung biru tua
+  const arms = {
+    stand: '<path d="M-4.2 -9 L-7 -2.5 M4.2 -9 L7 -2.5" stroke="#b07a52" stroke-width="1.9" stroke-linecap="round"/>',
+    net: '<path d="M-4.2 -9 L-9 -12 M4.2 -9 L9 -12" stroke="#b07a52" stroke-width="1.9" stroke-linecap="round"/>',
+    wow: '<path d="M-4.2 -9 L-8 -16 M4.2 -9 L8 -16" stroke="#b07a52" stroke-width="1.9" stroke-linecap="round"/>',
+    point: '<path d="M-4.2 -9 L-6.5 -2.5 M4.2 -9 L12.5 -11" stroke="#b07a52" stroke-width="1.9" stroke-linecap="round"/>',
+    back: '<path d="M-4.2 -9 L-6 -2.8 M4.2 -9 L6 -2.8" stroke="#8a5b3a" stroke-width="1.9" stroke-linecap="round"/>',
+  }[pose];
+  const face = pose === 'back'
+    ? '<circle cx="0" cy="-15.5" r="4.4" fill="#2b211b"/>'
+    : `<circle cx="0" cy="-15.5" r="4.4" fill="#b07a52"/><path d="M-3.3 -13.4 Q0 -10.2 3.3 -13.4 Q2.6 -11 0 -10.8 Q-2.6 -11 -3.3 -13.4Z" fill="#2b211b"/>
+       <circle cx="-1.5" cy="-16" r=".5" fill="#2b211b"/><circle cx="1.5" cy="-16" r=".5" fill="#2b211b"/>${pose === 'point' ? '<path d="M-2.6 -17.6 L-.6 -17 M2.6 -17.6 L.6 -17" stroke="#2b211b" stroke-width=".6"/>' : ''}`;
+  return `<g transform="translate(${x} ${y}) scale(${s})">
+    ${arms}
+    <path d="M-4.6 -10.5 Q0 -12 4.6 -10.5 L4 1 L-4 1Z" fill="#7a4e2e"/><path d="M-1.4 -10.8 L1.4 -10.8 L1 0 L-1 0Z" fill="#e8dcc4"/>
+    <path d="M-4.2 0.5 L4.2 0.5 L4.8 10 L-4.8 10Z" fill="#2f4a6b"/><path d="M-4.4 4 L4.5 4" stroke="#c9a24a" stroke-width=".6"/>
+    ${face}
+    <path d="M-4.7 -17.6 Q0 -21.8 4.7 -17.6 L4.8 -16.4 Q0 -18.6 -4.8 -16.4Z" fill="#b3262c"/><path d="M-4.6 -17.1 Q0 -20 4.6 -17.1" stroke="#1b1b1b" stroke-width=".55" fill="none"/>
+    <path d="M4.4 -17 L7.4 -15.4 L6 -14.4" fill="#b3262c"/>
+  </g>`;
+}
+function _putri(x, y, s = 1) {
+  return `<g transform="translate(${x} ${y}) scale(${s})">
+    <path d="M-3.8 -18 Q-6.6 -6 -5.6 4 L-2 2 Z M3.8 -18 Q6.6 -6 5.6 4 L2 2Z" fill="#1d1715"/>
+    <path d="M-3.6 -10 Q0 -11.4 3.6 -10 L6.4 11 L-6.4 11Z" fill="#e9b949"/><path d="M-6 9 L6 9" stroke="#b0791e" stroke-width=".7"/><path d="M-2 -10 L0 -6 L2 -10" stroke="#fff3c4" stroke-width=".6" fill="none"/>
+    <path d="M-3.6 -8.5 L-6.6 -2 M3.6 -8.5 L6.6 -2" stroke="#d9a27a" stroke-width="1.6" stroke-linecap="round"/>
+    <circle cx="0" cy="-15" r="4" fill="#d9a27a"/>
+    <path d="M-4.2 -15.5 Q-4 -20.4 0 -20.2 Q4 -20.4 4.2 -15.5 Q2.6 -18.4 0 -18.2 Q-2.6 -18.4 -4.2 -15.5Z" fill="#1d1715"/>
+    <circle cx="-1.4" cy="-15.2" r=".45" fill="#2b211b"/><circle cx="1.4" cy="-15.2" r=".45" fill="#2b211b"/><path d="M-1 -13 Q0 -12.4 1 -13" stroke="#a5523f" stroke-width=".5" fill="none"/>
+    <circle cx="3.6" cy="-18.6" r="1.1" fill="#f6d36b"/>
+  </g>`;
+}
+function _anak(x, y, s = 1, cry = false) {
+  return `<g transform="translate(${x} ${y}) scale(${s})">
+    <path d="M-3 -7 L-5 -2 M3 -7 L${cry ? '1 -11' : '5 -2'}" stroke="#b07a52" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M-3.2 -7.8 L3.2 -7.8 L3.4 1 L-3.4 1Z" fill="#efe6d4"/><path d="M-3.2 1 L3.2 1 L3.6 7 L-3.6 7Z" fill="#2f4a6b"/>
+    <circle cx="0" cy="-11.6" r="3.4" fill="#b07a52"/>
+    <path d="M-3.5 -13 Q0 -16.2 3.5 -13 L3.5 -12.2 Q0 -14.2 -3.5 -12.2Z" fill="#b3262c"/>
+    ${cry ? '<path d="M-1.4 -11.6 l0 2.4 M1.4 -11.6 l0 2.4" stroke="#7cc6e8" stroke-width=".6"/><path d="M-1 -9.4 Q0 -10.2 1 -9.4" stroke="#2b211b" stroke-width=".45" fill="none"/>' : '<circle cx="-1.2" cy="-11.8" r=".4" fill="#2b211b"/><circle cx="1.2" cy="-11.8" r=".4" fill="#2b211b"/>'}
+  </g>`;
+}
+function _fish(x, y, s = 1, glow = true, u = '') {
+  return `<g transform="translate(${x} ${y}) scale(${s})">
+    ${glow ? `<circle r="18" fill="url(#fg${u})"/>` : ''}
+    <path d="M9 0 L17 -7 Q15 0 17 7Z" fill="#e39a1f"/>
+    <path d="M-12 0 Q-6 -9 6 -6 Q10 -3 10 0 Q10 3 6 6 Q-6 9 -12 0Z" fill="#f4b733"/>
+    <path d="M-12 0 Q-6 -9 6 -6 Q2 -2 -12 0Z" fill="#ffd767" opacity=".8"/>
+    ${[-3, 1, 5].map(d => `<path d="M${d} -4 Q${d + 2.4} 0 ${d} 4" stroke="#c9801a" stroke-width=".5" fill="none"/>`).join('')}
+    <path d="M-2 -6.4 Q2 -12 6 -6" fill="#e39a1f"/>
+    <circle cx="-7.6" cy="-1.4" r="1.5" fill="#fff"/><circle cx="-7.9" cy="-1.4" r=".8" fill="#2b211b"/>
+  </g>`;
+}
+const _spark = (pts, c = '#fff6d0') => pts.map(([x, y, r]) => `<path d="M${x} ${y - r} L${x + r * .28} ${y - r * .28} L${x + r} ${y} L${x + r * .28} ${y + r * .28} L${x} ${y + r} L${x - r * .28} ${y + r * .28} L${x - r} ${y} L${x - r * .28} ${y - r * .28}Z" fill="${c}"/>`).join('');
+function _bolon(x, y, s = 1) {
+  // rumah bolon Batak: atap pelana melengkung, dinding berukir segitiga merah-putih-hitam
+  return `<g transform="translate(${x} ${y}) scale(${s})">
+    <path d="M-20 -14 Q-10 -6 0 -8 Q10 -6 20 -14 L14 -30 Q0 -22 -14 -30Z" fill="#6e4b3a"/>
+    <path d="M-14 -30 Q0 -22 14 -30 L12 -32 Q0 -25 -12 -32Z" fill="#4a3226"/>
+    <path d="M-12 -8 L12 -8 L12 4 L-12 4Z" fill="#8a5a3c"/>
+    ${[-10, -5, 0, 5].map(d => `<path d="M${d} -6 L${d + 2.5} -1 L${d + 5} -6Z" fill="#b3262c"/><path d="M${d} -1 L${d + 2.5} -6 L${d + 5} -1Z" fill="#efe6d4" opacity=".85"/>`).join('')}
+    <path d="M-12 4 L-12 14 M-6 4 L-6 14 M6 4 L6 14 M12 4 L12 14" stroke="#4a3226" stroke-width="1.6"/>
+    <path d="M-3 -2 L3 -2 L3 4 L-3 4Z" fill="#2b1d16"/>
+  </g>`;
+}
+
+function art(i, opt = {}) {
+  const u = opt.uid || ('a' + i + Math.random().toString(36).slice(2, 7));
+  let defs = _wc(u), g = '';
+  if (i === 0) {
+    defs += _lg('sk' + u, '#f6c7a0', '#fbe3c6', '#fdf0dc') + _lg('lk' + u, '#a9cdd6', '#7fb0c0');
+    g = `<rect width="160" height="160" fill="url(#sk${u})"/>
+      <circle cx="108" cy="58" r="13" fill="#fff4d8" opacity=".95"/><circle cx="108" cy="58" r="22" fill="#fff4d8" opacity=".25"/>
+      <path d="M0 84 L18 66 L34 76 L52 58 L72 74 L90 62 L112 78 L132 64 L160 80 L160 96 L0 96Z" fill="#a6b9c8" opacity=".85"/>
+      <path d="M0 90 L22 78 L44 86 L64 76 L88 88 L110 80 L136 90 L160 84 L160 98 L0 98Z" fill="#7f9f8c"/>
+      <rect y="94" width="160" height="66" fill="url(#lk${u})"/>
+      <path d="M100 98 L116 98 L112 160 L104 160Z" fill="#fff4d8" opacity=".35"/>
+      ${[104, 112, 121, 133, 146].map((y, k) => `<path d="M${10 + k * 9} ${y} h${30 - k * 3}" stroke="#eef6f6" stroke-width=".7" opacity=".7"/>`).join('')}
+      <path d="M0 99 Q40 96 80 100 T160 98" stroke="#fff" stroke-width="1.6" opacity=".35" fill="none"/>
+      <g><path d="M58 108 Q80 116 104 108 L100 113 Q80 119 62 113Z" fill="#5a3a26"/><path d="M60 109 Q80 115 102 109" stroke="#8a5a3c" stroke-width=".8" fill="none"/></g>
+      ${_toba(80, 98, 1, 'net')}
+      <path d="M71 86 Q80 80 89 86 L95 108 L65 108Z" fill="none" stroke="#e8dcc4" stroke-width=".35" opacity=".7"/>
+      <path d="M40 46 q3 -2 6 0 q3 -2 6 0 M58 40 q2 -1.5 4 0 q2 -1.5 4 0" stroke="#5b4636" stroke-width=".7" fill="none"/>
+      <rect y="88" width="160" height="10" fill="#fff" opacity=".18"/>`;
+  }
+  if (i === 1) {
+    defs += _lg('w' + u, '#6aa9bb', '#3f7f95', '#2a5f74') + `<radialGradient id="fg${u}"><stop offset="0" stop-color="#ffe9a6" stop-opacity=".95"/><stop offset="1" stop-color="#ffe9a6" stop-opacity="0"/></radialGradient>`;
+    const mesh = [];
+    for (let k = -6; k <= 6; k++) { mesh.push(`<path d="M${80 + k * 9} 40 Q${80 + k * 7} 90 ${80 + k * 5} 132" stroke="#eadcc0" stroke-width=".45" fill="none" opacity=".75"/>`); }
+    for (let k = 0; k < 9; k++) { const y = 46 + k * 10; mesh.push(`<path d="M${22 + k * 3} ${y} Q80 ${y + 10} ${138 - k * 3} ${y}" stroke="#eadcc0" stroke-width=".45" fill="none" opacity=".75"/>`); }
+    g = `<rect width="160" height="160" fill="url(#w${u})"/>
+      ${[30, 52, 116, 138].map((y, k) => `<path d="M0 ${y} Q40 ${y - 4} 80 ${y} T160 ${y}" stroke="#bfe3ea" stroke-width=".8" opacity=".45" fill="none"/>`).join('')}
+      <ellipse cx="80" cy="88" rx="58" ry="50" fill="#1f4f63" opacity=".35"/>
+      ${_fish(80, 86, 1.9, true, u)}
+      ${mesh.join('')}
+      <path d="M22 46 Q80 30 138 46" stroke="#c7a46a" stroke-width="2.4" fill="none"/>
+      <path d="M14 40 q-2 8 6 10 q6 -2 6 -8" fill="#b07a52"/><path d="M146 40 q2 8 -6 10 q-6 -2 -6 -8" fill="#b07a52"/>
+      ${_spark([[52, 62, 3], [112, 70, 2.4], [62, 108, 2], [104, 104, 3.2], [80, 54, 1.8]])}
+      <circle cx="48" cy="120" r="1.6" fill="#d7f0f4" opacity=".7"/><circle cx="118" cy="126" r="2.2" fill="#d7f0f4" opacity=".6"/>`;
+  }
+  if (i === 2) {
+    defs += _lg('s' + u, '#cdb9e0', '#efcfd6', '#f8e2c8') + `<radialGradient id="fg${u}"><stop offset="0" stop-color="#fff2c2" stop-opacity=".95"/><stop offset="1" stop-color="#fff2c2" stop-opacity="0"/></radialGradient>`;
+    g = `<rect width="160" height="160" fill="url(#s${u})"/>
+      <path d="M0 96 Q40 88 80 94 T160 92 L160 160 L0 160Z" fill="#9fc2b0"/>
+      <path d="M0 112 Q50 104 96 112 T160 110 L160 160 L0 160Z" fill="#86ad97"/>
+      <path d="M0 132 Q40 126 80 132 T160 130 L160 160 L0 160Z" fill="#8cb7c6"/>
+      <circle cx="88" cy="88" r="30" fill="url(#fg${u})"/>
+      ${_putri(88, 104, 1.45)}
+      ${_toba(52, 112, 1.15, 'wow')}
+      <g opacity=".45">${_fish(118, 70, .7, false)}</g>
+      ${_spark([[70, 62, 3], [108, 60, 2.4], [100, 90, 2], [74, 96, 1.8], [118, 84, 2.8], [92, 50, 2]], '#fff8dc')}
+      ${[20, 36, 140].map((x, k) => `<path d="M${x} 112 q-2 -10 1 -16 M${x + 3} 112 q1 -8 4 -12" stroke="#5f8a6d" stroke-width=".8" fill="none"/>`).join('')}`;
+  }
+  if (i === 3) {
+    defs += _lg('s' + u, '#6d7383', '#9aa0aa', '#c9c2b6');
+    g = `<rect width="160" height="160" fill="url(#s${u})"/>
+      <path d="M0 40 Q20 28 44 36 Q60 22 84 32 Q104 20 124 32 Q146 24 160 34 L160 0 L0 0Z" fill="#4c5262"/>
+      <path d="M96 36 L90 50 L96 50 L88 66" stroke="#fff3c4" stroke-width="1.4" fill="none"/>
+      <path d="M0 104 Q60 98 160 104 L160 160 L0 160Z" fill="#7e8a6c"/>
+      ${_bolon(118, 92, 1.25)}
+      ${_toba(62, 112, 1.3, 'point')}
+      ${_anak(94, 116, 1.15, true)}
+      ${_putri(138, 118, .9)}
+      ${Array.from({ length: 22 }, (_, k) => `<path d="M${(k * 23) % 160} ${(k * 37) % 110 + 20} l-2 7" stroke="#dfe6ee" stroke-width=".5" opacity=".6"/>`).join('')}
+      <rect width="160" height="160" fill="#2a3040" opacity=".08"/>`;
+  }
+  if (i === 4) {
+    defs += _lg('s' + u, '#f2b48c', '#f7d2a8', '#fbe7cc') + _lg('lk' + u, '#8cbccb', '#5e98ac');
+    g = `<rect width="160" height="160" fill="url(#s${u})"/>
+      <path d="M18 62 A62 62 0 0 1 142 62" stroke="#f6e3b0" stroke-width="3" fill="none" opacity=".55"/>
+      <path d="M22 64 A58 58 0 0 1 138 64" stroke="#cfe3c8" stroke-width="2" fill="none" opacity=".45"/>
+      <circle cx="80" cy="74" r="10" fill="#fff1cf"/>
+      <path d="M0 80 L24 64 L46 76 L66 66 L80 74 L96 64 L118 76 L138 66 L160 78 L160 92 L0 92Z" fill="#9db4a0"/>
+      <rect y="88" width="160" height="72" fill="url(#lk${u})"/>
+      <path d="M50 104 Q62 94 80 96 Q100 94 112 104 Q96 110 80 110 Q62 110 50 104Z" fill="#7d9e6a"/>
+      <path d="M58 103 Q70 97 82 99" stroke="#a8c48e" stroke-width="1.2" fill="none"/>
+      <path d="M74 90 L86 90 L90 160 L70 160Z" fill="#fff1cf" opacity=".32"/>
+      ${[118, 128, 140].map((y, k) => `<path d="M${16 + k * 10} ${y} h${36 - k * 4} M${108 - k * 4} ${y + 4} h${30 - k * 3}" stroke="#eaf6f6" stroke-width=".6" opacity=".65"/>`).join('')}
+      <path d="M0 118 Q22 112 44 116 Q56 119 62 126 L62 160 L0 160Z" fill="#6f8f5e"/>
+      ${_toba(50, 120, .85, 'back')}
+      <g opacity=".35">${_fish(110, 122, .5, false)}</g>`;
+  }
+  return `<svg viewBox="0 0 160 160" preserveAspectRatio="xMidYMid slice" ${opt.cls ? `class="${opt.cls}"` : ''}><defs>${defs}</defs>
+    <g filter="url(#wc${u})">${g}</g>
+    <rect width="160" height="160" filter="url(#pp${u})" opacity=".22" style="mix-blend-mode:multiply"/>
+    <rect width="160" height="160" fill="url(#vg${u})"/></svg>`;
+}
+
+function sheet(u) {
+  // lembar karakter: depan, samping, ekspresi; dasar kertas putih
+  return `<svg viewBox="0 0 160 90" preserveAspectRatio="xMidYMid meet"><defs>${_wc(u)}</defs>
+    <rect width="160" height="90" fill="#fbf8f2"/>
+    <g filter="url(#wc${u})">
+      ${_toba(34, 60, 2, 'stand')}${_toba(80, 60, 2, 'net')}${_toba(124, 60, 2, 'point')}
+    </g>
+    <path d="M57 10 V82 M103 10 V82" stroke="#e5e5e5" stroke-width=".5"/>
+    <text x="34" y="87" text-anchor="middle" font-family="Inter" font-size="4" fill="#737373">depan</text>
+    <text x="80" y="87" text-anchor="middle" font-family="Inter" font-size="4" fill="#737373">aksi</text>
+    <text x="126" y="87" text-anchor="middle" font-family="Inter" font-size="4" fill="#737373">ekspresi</text>
+  </svg>`;
+}
+
+/* ================= DOM UI STORY STUDIO =================
+   buildStudio(root, { mode: 'd'|'m', aspect: '16:9'|'9:16', logo }) mengisi root (.app) dengan
+   layar: daftar proyek (#sList) dan ruang kerja (#sWork: header + #st1..#st4).
+   Label & urutan disalin dari ProjectList/ProjectWorkspace/IdeaStep/ScriptStep/StoryboardStep/
+   EditorStep/PublishPanel.tsx. */
+const _P = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const IC = {
+  bulb: _P('<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5M9 18h6M10 22h4"/>'),
+  scroll: _P('<path d="M15 12h-5M15 8h-5M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/>'),
+  gallery: _P('<path d="M2 7v10M6 5v14"/><rect width="12" height="18" x="10" y="3" rx="2"/>'),
+  clapper: _P('<path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3Z"/><path d="m6.2 5.3 3.1 3.9M12.4 3.4l3.1 4M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/>'),
+  check: _P('<path d="M20 6 9 17l-5-5"/>'),
+  back: _P('<path d="m12 19-7-7 7-7M19 12H5"/>'),
+  filepen: _P('<path d="M12.5 22H18a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v9.5"/><path d="M14 2v4a2 2 0 0 0 2 2h4M13.4 12.6a2 2 0 1 1 3 3L11 21l-4 1 1-4Z"/>'),
+  palette: _P('<circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2a10 10 0 0 0 0 20c.9 0 1.7-.8 1.7-1.7 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1a1.6 1.6 0 0 1 1.6-1.7h2A5.6 5.6 0 0 0 22 11.1C22 6.1 17.5 2 12 2Z"/>'),
+  clock: _P('<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>'),
+  vert: _P('<rect width="12" height="20" x="6" y="2" rx="2"/>'),
+  hori: _P('<rect width="20" height="12" x="2" y="6" rx="2"/>'),
+  lang: _P('<path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/>'),
+  theater: _P('<path d="M2 10s3-3 3-8M22 10s-3-3-3-8M10 2c0 4.4-3.6 8-8 8M14 2c0 4.4 3.6 8 8 8M2 10s2 2 2 5M22 10s-2 2-2 5M8 15h8M2 22v-1a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1M14 22v-1a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1"/>'),
+  book: _P('<path d="M12 7v14M16 12h2M16 8h2M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3zM6 12h2M6 8h2"/>'),
+  user: _P('<circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/>'),
+  users: _P('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>'),
+  image: _P('<rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/>'),
+  mic: _P('<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3"/>'),
+  pen: _P('<path d="M12 20h9M16.4 3.6a2.1 2.1 0 1 1 3 3L7 19l-4 1 1-4Z"/>'),
+  zap: _P('<path d="M4 14a1 1 0 0 1-.8-1.6l9.9-10.2a.5.5 0 0 1 .9.5l-1.9 6A1 1 0 0 0 13 10h7a1 1 0 0 1 .8 1.6l-9.9 10.2a.5.5 0 0 1-.9-.5l1.9-6A1 1 0 0 0 11 14z"/>'),
+  wand: _P('<path d="m21.6 2.4-1.2-1.2a1.2 1.2 0 0 0-1.7 0L1.2 18.7a1.2 1.2 0 0 0 0 1.7l1.2 1.2a1.2 1.2 0 0 0 1.7 0L21.6 4.1a1.2 1.2 0 0 0 0-1.7ZM14 7l3 3M5 6v4M19 14v4M10 2v2M7 8H3M21 16h-4M11 3H9"/>'),
+  plus: _P('<path d="M5 12h14M12 5v14"/>'),
+  up: _P('<path d="m5 12 7-7 7 7M12 19V5"/>'),
+  down: _P('<path d="M12 5v14M19 12l-7 7-7-7"/>'),
+  booktext: _P('<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20M8 11h8M8 7h6"/>'),
+  sparkles: _P('<path d="M9.9 15.5A2 2 0 0 0 8.5 14l-6.1-1.6a.5.5 0 0 1 0-1L8.5 9.9A2 2 0 0 0 9.9 8.5l1.6-6.1a.5.5 0 0 1 1 0l1.6 6.1a2 2 0 0 0 1.4 1.4l6.1 1.6a.5.5 0 0 1 0 1l-6.1 1.6a2 2 0 0 0-1.4 1.4l-1.6 6.1a.5.5 0 0 1-1 0zM20 3v4M22 5h-4"/>'),
+  lines: _P('<path d="M2 10v3M6 6v11M10 3v18M14 8v7M18 5v13M22 10v3"/>'),
+  wave: _P('<path d="M2 13a2 2 0 0 0 2-2V7a2 2 0 0 1 4 0v13a2 2 0 0 0 4 0V4a2 2 0 0 1 4 0v13a2 2 0 0 0 4 0v-4a2 2 0 0 1 2-2"/>'),
+  video: _P('<path d="m16 13 5.2 3.5a.5.5 0 0 0 .8-.4V7.9a.5.5 0 0 0-.8-.4L16 10.5"/><rect x="2" y="6" width="14" height="12" rx="2"/>'),
+  move: _P('<path d="M12 2v20M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M5 9l-3 3 3 3M9 5l3-3 3 3"/>'),
+  shuffle: _P('<path d="m18 14 4 4-4 4M18 2l4 4-4 4M2 18h1.9a4 4 0 0 0 3.3-1.7l5.6-8.6A4 4 0 0 1 16.1 6H22M2 6h1.9a4 4 0 0 1 3.4 1.9M22 18h-5.9a4 4 0 0 1-3.3-1.8l-.4-.6"/>'),
+  caps: _P('<rect width="18" height="14" x="3" y="5" rx="2"/><path d="M7 15h4M15 15h2M7 11h2M13 11h4"/>'),
+  music: _P('<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>'),
+  layers: _P('<path d="m12.8 2.2a2 2 0 0 0-1.7 0L2.6 6.1a1 1 0 0 0 0 1.8l8.6 3.9a2 2 0 0 0 1.7 0l8.6-3.9a1 1 0 0 0 0-1.8ZM2 12a1 1 0 0 0 .6.9l8.6 3.9a2 2 0 0 0 1.7 0l8.5-3.9A1 1 0 0 0 22 12M2 17a1 1 0 0 0 .6.9l8.6 3.9a2 2 0 0 0 1.7 0l8.5-3.9A1 1 0 0 0 22 17"/>'),
+  monitor: _P('<path d="m9 10 3-3 3 3M12 13V7"/><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M12 17v4M8 21h8"/>'),
+  mega: _P('<path d="m3 11 18-5v12L3 14v-3zM11.6 16.8a3 3 0 1 1-5.8-1.6"/>'),
+  film: _P('<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18M3 7.5h4M3 12h18M3 16.5h4M17 3v18M17 7.5h4M17 16.5h4"/>'),
+  dl: _P('<path d="M12 15V3M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5"/>'),
+  play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12-7.5z"/></svg>',
+  pause: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>',
+  copy: _P('<rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>'),
+  cal: _P('<path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5M16 2v4M8 2v4M3 10h5M17.5 17.5 16 16.3V14"/><circle cx="16" cy="16" r="6"/>'),
+  sliders: _P('<path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4"/>'),
+  info: _P('<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>'),
+  chev: _P('<path d="m6 9 6 6 6-6"/>'),
+  x: _P('<path d="M18 6 6 18M6 6l12 12"/>'),
+  refresh: _P('<path d="M3 12a9 9 0 0 1 9-9 9.8 9.8 0 0 1 6.7 2.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-9 9 9.8 9.8 0 0 1-6.7-2.7L3 16M8 16H3v5"/>'),
+  home: _P('<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .7-1.5l7-6a2 2 0 0 1 2.6 0l7 6a2 2 0 0 1 .7 1.5v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>'),
+  folder: _P('<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>'),
+  chart: _P('<path d="M3 3v16a2 2 0 0 0 2 2h16M18 17V9M13 17V5M8 17v-3"/>'),
+  upload: _P('<path d="M12 3v12M17 8l-5-5-5 5M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>'),
+};
+const ico = (k, cls = '') => IC[k].replace('<svg', `<svg class="${cls}"`);
+const PLAT_IC = {
+  youtube: '<svg viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#FF0000"/><path d="M26 22l16 10-16 10z" fill="#fff"/></svg>',
+  tiktok: '<svg viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#000"/><path d="M38 14c1 5 4 8 9 8v7c-3.3 0-6.3-1-9-2.8V40a11 11 0 1 1-11-11v7a4 4 0 1 0 4 4V14z" fill="#fff"/></svg>',
+  instagram: '<svg viewBox="0 0 64 64"><defs><radialGradient id="igS" cx=".3" cy="1" r="1.2"><stop offset="0" stop-color="#FFD600"/><stop offset=".5" stop-color="#FF0069"/><stop offset="1" stop-color="#7638FA"/></radialGradient></defs><rect width="64" height="64" rx="14" fill="url(#igS)"/><rect x="16" y="16" width="32" height="32" rx="10" fill="none" stroke="#fff" stroke-width="4"/><circle cx="32" cy="32" r="7.5" fill="none" stroke="#fff" stroke-width="4"/><circle cx="42" cy="22" r="2.5" fill="#fff"/></svg>',
+  threads: '<svg viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#000"/><path d="M40.6 30.4c-.2-.1-.4-.2-.6-.3-.4-6.6-4-10.4-10-10.4-3.6 0-6.6 1.5-8.4 4.3l3.3 2.3c1.4-2.1 3.5-2.5 5.1-2.5 2 0 3.5.6 4.4 1.8.7.8 1.1 2 1.3 3.4-1.7-.3-3.5-.4-5.4-.3-5.4.3-8.9 3.5-8.7 7.9.1 2.2 1.2 4.2 3.1 5.4 1.6 1.1 3.7 1.6 5.8 1.5 2.8-.2 5-1.2 6.6-3.2 1.2-1.5 1.9-3.4 2.3-5.8 1.3.8 2.3 1.9 2.8 3.2.9 2.2 1 5.8-2 8.7-2.6 2.6-5.7 3.7-10.4 3.7-5.2 0-9.2-1.7-11.8-5-2.4-3.1-3.7-7.6-3.7-13.3s1.3-10.2 3.7-13.3c2.6-3.3 6.5-5 11.8-5 5.3 0 9.3 1.7 12 5.1 1.3 1.6 2.3 3.7 2.9 6.1l3.9-1c-.8-3-2-5.6-3.7-7.7-3.5-4.3-8.5-6.5-15.1-6.5-6.5 0-11.5 2.2-14.9 6.5C11.6 21.3 10 26.5 10 32.8v.1c0 6.3 1.6 11.5 4.8 15.4 3.4 4.3 8.4 6.5 14.9 6.5 5.8 0 9.8-1.5 13.2-4.9 4.4-4.4 4.2-9.9 2.8-13.2-1-2.4-3-4.4-5.1-5.3zm-9.5 9c-2.4.1-4.8-.9-4.9-3.1-.1-1.6 1.1-3.4 4.9-3.6h1.3c1.4 0 2.7.1 3.9.4-.5 5.6-3.2 6.2-5.2 6.3z" fill="#fff"/></svg>',
+  facebook: '<svg viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#0866FF"/><path d="M35.5 52V35h5.8l.9-6.8h-6.7v-4.3c0-2 .6-3.3 3.4-3.3h3.6v-6A48 48 0 0 0 37.3 14c-5.2 0-8.7 3.2-8.7 9v5.2h-5.8V35h5.8v17z" fill="#fff"/></svg>',
+};
+
+const STYLE_CARDS = [
+  ['stickman', 'Stickman berwarna', 'Sejarah, kisah nyata', '#F2B266', '#1F1D1A'],
+  ['flat', 'Kartun flat', 'Sains, fakta, edukasi', '#8CCBE3', '#1F1D1A'],
+  ['whiteboard', 'Whiteboard doodle', 'Tutorial, bisnis', '#FFFFFF', '#1F1D1A'],
+  ['collage', 'Kolase kertas', 'Dokumenter, jurnalisme', '#E9D8BA', '#1F1D1A'],
+  ['watercolor', 'Buku cerita cat air', 'Dongeng anak, religi', '#CFE3B5', '#1F1D1A'],
+  ['anime', 'Anime', 'Drama, motivasi, fiksi', '#F5C3CD', '#1F1D1A'],
+  ['noir', 'Komik noir', 'Horor, true crime', '#2F3240', '#FAF7F2'],
+];
+const IDEA_CHIPS = ['Campur', 'Tren hari ini', 'Anak-anak', 'Dokumenter', 'Sejarah', 'Misteri & horor', 'Sains & fakta', 'Legenda & dongeng', 'Motivasi', 'Komedi'];
+const SYNOPSIS = 'Legenda Danau Toba. Nelayan bernama Toba menangkap ikan emas yang menjelma putri, lalu menikahinya dengan satu janji. Saat janji itu dilanggar, desanya tenggelam menjadi danau. Suasana haru.';
+const NAR1_SHORT = '"Lepaskan aku," pinta ikan itu,';
+const NAR1_ADD = ' "dan hidupmu akan berubah."';
+const SCH_PLATS = [['youtube', 'YouTube', 'Kisah Nusantara'], ['tiktok', 'TikTok', '@kisahnusantara'], ['facebook', 'Facebook', 'Kisah Nusantara'], ['instagram', 'Instagram', '@kisahnusantara'], ['threads', 'Threads', '@kisahnusantara']];
+const CAPTIONS = {
+  youtubeTitle: 'Asal-usul Danau Toba yang Bikin Merinding 🌊 #shorts',
+  tiktok: 'Satu kalimat marah, satu desa tenggelam 😢 #legenda #danautoba #fyp',
+  instagram: 'Janji yang dilanggar, lahirlah Danau Toba 🌊\nKisah rakyat Sumatera Utara dalam 30 detik.\n#ceritarakyat #danautoba #legendanusantara',
+};
+
+function buildStudio(root, o) {
+  const M = o.mode === 'm', wide = o.aspect === '16:9';
+  root.classList.add('app', M ? 'm' : 'd');
+  const btn = (id, cls, icn, lbl, cost, busy) => `<span class="btn ${cls}" id="${id}">${icn ? `<span class="ico">${ico(icn, 'ic')}</span>` : ''}<span class="spin"></span><span class="lbl">${lbl}</span>${busy ? `<span class="blbl">${busy}</span>` : ''}${cost != null ? `<span class="cost">${ico('zap')}${cost}</span>` : ''}</span>`;
+  const sel = (id, v, cls = '', icn = '', opts = []) => `<span class="selb ${cls}" id="${id}">${icn ? ico(icn) : ''}<span class="v">${v}</span>${ico('chev')}${opts.length ? `<span class="dd">${opts.map((x, k) => `<div data-k="${k}">${x}</div>`).join('')}</span>` : ''}</span>`;
+  const secH = (icn, title, aside = '', extra = '') => `<div class="sec-h"><h3>${icn ? ico(icn) : ''}${title}${extra}</h3>${aside ? `<div class="aside">${aside}</div>` : ''}</div>`;
+
+  const steps = [['bulb', 'Ide'], ['scroll', 'Naskah'], ['gallery', 'Storyboard'], ['clapper', 'Editor']];
+  const thW = wide ? 128 : 72, thH = wide ? 72 : 128;
+  const ar = wide ? '16/9' : '9/16';
+
+  root.innerHTML = `
+  ${M ? '' : `<aside class="side">
+    <div class="brand"><span class="logoTile" style="width:32px;height:32px"><img alt="Klipers" src="${o.logo}"></span>Klipers</div>
+    <div class="planb"><span>Pro</span><b>240<small>cr</small></b></div>
+    <div class="mk">${ico('plus', 'ic')}Buat Video</div>
+    <div class="mi">${ico('home')}Beranda</div>
+    <div class="mi">${ico('folder')}Video Saya</div>
+    <div class="mi">${ico('chart')}Alat SEO${ico('chev', 'ic')}</div>
+    <div class="mi">${ico('sparkles')}Alat AI${ico('chev', 'ic')}</div>
+    <div class="msub">
+      <div class="mi">${ico('film')}AI Content Creator<span class="bd">New</span></div>
+      <div class="mi on" id="miStory">${ico('gallery')}Story Studio<span class="bd">New</span></div>
+      <div class="mi">${ico('zap')}Generate Prompt</div>
+      <div class="mi">${ico('music')}Music Generator</div>
+      <div class="mi">${ico('mic')}Text To Speech</div>
+      <div class="mi">${ico('mic')}Clone Suara<span class="bd">New</span></div>
+    </div>
+    <div class="mi">${ico('upload')}Auto Upload</div>
+  </aside>`}
+  <div class="main" id="ssMain">
+    <!-- daftar proyek -->
+    <section class="scr" id="sList"><div class="scroll">
+      <div class="lsthd"><div><h1 class="h1">Story Studio</h1>
+        <p class="desc">Ubah ide cerita jadi video: AI menulis naskah dan menyusun visual, kamu rapikan tiap adegan, lalu ekspor MP4 dengan gerak kamera, narasi, dan subtitle.</p></div>
+        ${btn('bNew', 'pri lg', 'plus', 'Proyek baru')}</div>
+      <div class="pnl empty"><div class="sect" style="gap:12px;align-items:flex-start">
+        <h2 class="h2x">Mulai dari satu ide</h2>
+        <p class="desc" style="margin:0;max-width:520px">Kisah legenda daerah, sejarah tokoh, atau cerita misteri. Empat langkah sampai jadi video siap unggah.</p>
+        ${btn('bFirst', 'pri', 'plus', 'Buat proyek pertama')}</div>
+        <ol>${[['bulb', 'Ide', 'Tulis sinopsis, pilih gaya visual dan suara.'], ['scroll', 'Naskah', 'AI menulis adegan, kamu rapikan alurnya.'], ['gallery', 'Storyboard', 'Gambar, suara tiap pemeran, dan efek suara per adegan.'], ['clapper', 'Editor', 'Subtitle, musik otomatis, ekspor, lalu siap unggah.']]
+          .map(([ic, t, d], k) => `<li id="intro${k}"><span class="cir">${ico(ic)}</span><span><b><i class="mono">${k + 1}</i>${t}</b><span>${d}</span></span></li>`).join('')}</ol>
+      </div>
+    </div></section>
+
+    <!-- ruang kerja -->
+    <section class="scr" id="sWork"><div class="scroll" id="wScroll">
+      <header class="wshd">
+        <span class="backb">${ico('back')}</span>
+        <span class="ttl" id="wTitle">Proyek tanpa judul</span>
+        <span class="svst" id="wSave">${ico('filepen')}<span id="wSaveTx">${M ? 'Draf' : 'Draf, tersimpan setelah naskah ditulis'}</span></span>
+        <nav class="stepr">${steps.map(([ic, l], k) => `<span id="sp${k + 1}">${ico(ic, 'si')}${ico('check', 'ok')}${l}</span>`).join('')}</nav>
+      </header>
+      <div class="aibar" id="aiBar"><span class="sp spinA"></span><span id="aiTx">AI sedang menulis naskah...</span><small>Boleh tinggalkan halaman ini. Hasilnya muncul otomatis saat selesai.</small></div>
+
+      <!-- 1 · IDE -->
+      <div class="stp" id="st1"><div class="idea">
+        <div class="col">
+          <div><h2 class="h2">Ceritakan idemu</h2><p class="desc">Sebut tokoh, tempat, dan akhir ceritanya. Makin jelas, makin rapi susunan adegan dari AI.</p></div>
+          <section class="sect">${secH('palette', 'Gaya visual', `<span class="chip s7 on">Semua</span><span class="chip s7">2D</span><span class="chip s7">3D</span><span class="chip s7">Realistis</span>`, '<b id="styleName">Stickman berwarna</b>')}
+            <div class="styles" id="styleRow">${STYLE_CARDS.map(([id, n, ni, sw, ink]) => `<span class="stc${id === 'stickman' ? ' on' : ''}" id="sty-${id}"><span class="sw" style="background:${sw};color:${ink};${sw === '#FFFFFF' ? 'box-shadow:inset 0 0 0 1px #e5e5e5' : ''}">${n[0]}</span><span style="min-width:0"><b>${n}</b><small>${ni}</small></span>${ico('check', 'ck')}</span>`).join('')}</div>
+          </section>
+          <div class="pnl syn">
+            <div class="ta"><span class="caret" id="synTx"></span><span class="ph" id="synPh">Tahun 1336 di istana Majapahit. Gajah Mada bersumpah tidak akan menikmati palapa sebelum Nusantara bersatu...</span></div>
+            <div class="tbar2">
+              ${sel('selDur', '1 menit', 'sm', 'clock', ['30 detik', '1 menit', '3 menit'])}
+              <span class="segw"><span id="fmt916" class="on">${ico('vert')}9:16</span><span id="fmt169">${ico('hori')}16:9</span></span>
+              <span class="cnt" id="synCnt">±11 adegan · 5 dtk · 0/4.000</span>
+            </div>
+          </div>
+          <section class="sect">${secH('', 'Butuh ide?', 'Pilih jenis cerita, gratis')}
+            <div class="ideas">${IDEA_CHIPS.map(c => `<span class="chip">${c}</span>`).join('')}</div></section>
+        </div>
+        <aside class="sect" style="gap:16px">
+          <div class="pnl asd">
+            <section class="sect">${secH('lang', 'Bahasa naskah &amp; suara')}${sel('selLang', 'Indonesia')}</section>
+            <section class="sect">${secH('theater', 'Gaya bercerita')}${sel('selNar', 'Storytelling')}</section>
+            <section class="sect">${secH('book', 'Fokus cerita')}<span class="segw" style="align-self:flex-start"><span class="on">${ico('user')}Bertokoh</span><span>${ico('users')}Topik</span></span><p class="note">Cerita mengikuti tokoh utama.</p></section>
+            <div class="hr"></div>
+            <section class="sect">${secH('image', 'Model gambar')}${sel('selImg', 'Seedream 5.0 Pro · 4 kredit', '', 'image')}<p class="note">Lembar karakter dipakai sebagai acuan, jadi wajah tokoh tetap sama di semua adegan.</p></section>
+            <div class="hr"></div>
+            <section class="sect">${secH('mic', 'Suara narator')}${sel('selTts', 'Klipers TTS')}${sel('selVoice', 'Ardi (Indonesia, pria)', '', 'mic')}<p class="note">Suara 1 kredit per adegan.</p></section>
+          </div>
+          ${btn('bWrite', 'pri lg btnw', 'pen', 'Tulis naskah', 'gratis', 'AI sedang menulis naskah...')}
+          <p class="note ctr" style="margin-top:-6px">Kredit baru dipakai saat membuat gambar, suara, dan video.</p>
+        </aside>
+      </div></div>
+
+      <!-- 2 · NASKAH -->
+      <div class="stp" id="st2">
+        <div class="stephd"><div><h2 class="h2">Naskah</h2><p class="desc"><span class="mono">5</span> adegan, sekitar <span class="mono">0:30</span>. Baca alurnya dulu; visual dibuat dari naskah final ini.</p></div>
+          <div class="acts">${btn('bVis', 'pri', 'wand', 'Susun visual', 'gratis', 'AI sedang menyusun visual...')}</div></div>
+        <div class="pnl" id="rows">${ART_SCENES.map((s, k) => `<div class="srow" id="row${k}">
+          <div class="no"><b>${String(k + 1).padStart(2, '0')}</b><i>${ico('up')}${ico('down')}</i></div>
+          <div style="min-width:0;display:flex;flex-direction:column;gap:8px">
+            <div class="st">${s.title}</div>
+            <div class="two">
+              <div><div class="lbl2"><span>${ico('booktext')}Yang terjadi</span></div><div class="tx2 mu">${s.story}</div></div>
+              <div><div class="lbl2"><span>Narasi <span class="spk">${ico('mic')}Narator</span></span><span class="mono" id="wc${k}">${s.nar.split(' ').length} kata · ${(s.nar.split(' ').length * .42 + .6).toFixed(1).replace('.', ',')} dtk</span></div>
+                <div class="tx2" id="nar${k}"><span id="narT${k}" class="caret">${k === 1 ? NAR1_SHORT : s.nar}</span></div></div>
+            </div></div></div>`).join('')}
+          <div class="addrow">${ico('plus')}Tambah adegan</div></div>
+      </div>
+
+      <!-- 3 · STORYBOARD -->
+      <div class="stp" id="st3">
+        <div class="stephd"><div><h2 class="h2">Storyboard</h2><p class="desc">Buat gambar, suara, dan gerak tiap adegan. Semua tombol menampilkan biayanya sebelum kamu menekan.</p></div>
+          <div class="acts">${btn('bImgs', 'pri', 'sparkles', 'Buat semua gambar', '24')}${btn('bVoice', 'sec', 'mic', 'Rekam narasi', '5', `Merekam narasi <span class="mono" id="vPct">0%</span>`)}${btn('bToEd', 'gho', 'clapper', 'Ke editor')}</div></div>
+        <div class="pnl meters">
+          <div class="mtr"><div class="r"><span>${ico('image')}Gambar</span><b><span id="mImg">0</span>/5</b></div><div class="prog"><i id="mImgB"></i></div></div>
+          <div class="mtr"><div class="r"><span>${ico('lines')}Suara</span><b><span id="mVo">0</span>/5</b></div><div class="prog"><i id="mVoB"></i></div></div>
+          <div class="mx"><span>${ico('wave')}Efek suara <b class="mono" style="color:#171717" id="mSfx">0</b></span>${btn('bSfx', 'gho sm', 'sparkles', 'Pasang otomatis', 'gratis')}</div>
+          <div class="mx"><span>${ico('video')}Video AI</span><span class="badge amber">Segera hadir</span></div>
+        </div>
+        <section class="sect">${secH('users', 'Pemeran', `${ico('plus', 'ic')}<b style="font-weight:600">Tambah pemeran</b>`)}
+          <div class="cast">${[['Toba', 'Nelayan Batak, kulit sawo matang, ikat kepala ulos merah bergaris hitam, rompi cokelat, sarung biru.', 1], ['Putri', 'Perempuan anggun, rambut hitam panjang, gaun kuning keemasan, jepit bunga emas.', 0]]
+            .map(([n, d, sh], k) => `<div class="pnl ccard" id="cc${k}"><div class="sh"><div class="emp">${ico('user')}<span>Belum ada lembar karakter</span></div><div class="shim" id="sheet${k}" style="position:absolute;inset:0;opacity:0"></div><div class="veil" id="cv${k}"><span class="sp spinA"></span>Membuat lembar</div>${k === 0 ? '<span class="samebd">Acuan wajah</span>' : ''}</div>
+            <div class="bd"><b>${n}</b><p>${d}</p></div></div>`).join('')}</div></section>
+        <section class="sect">${secH('gallery', 'Adegan', '<span class="mono">5 adegan</span>')}
+          <div class="strip">${ART_SCENES.map((s, k) => `<div class="th${k === 0 ? ' on' : ''}" id="th${k}" style="width:${thW}px;height:${thH}px"><div class="em">${ico('image')}</div><div class="im" id="thi${k}"></div><span class="no">${String(k + 1).padStart(2, '0')}</span><span class="au" id="tha${k}">${ico('lines')}</span><div class="veil" id="thv${k}"><span class="sp spinA"></span>${wide ? 'Membuat gambar' : ''}</div></div>`).join('')}</div></section>
+        <div class="pnl cpanel" id="cpan">
+          <div class="sect" style="gap:12px">
+            <div class="row" style="justify-content:space-between"><b style="font:700 16px Inter"><span class="mono fa" style="margin-right:6px">01</span>${ART_SCENES[0].title}</b><span class="badge" id="cpSfx">${ico('wave', 'ic')}Tanpa efek</span></div>
+            <div class="bigim" style="aspect-ratio:${ar};${wide ? '' : 'max-width:300px;margin:0 auto;width:100%'}"><div class="mv" id="bigMv"></div><span class="pg">${ico('play')}Putar gerak</span></div>
+            <p style="margin:0;font-size:14px;line-height:1.6">${ART_SCENES[0].nar}</p>
+          </div>
+          <div class="sect" style="gap:18px">
+            <section class="sect">${secH('move', 'Gerak')}<div class="chips">${Object.entries({ zoomin: 'Zoom in', zoomout: 'Zoom out', panleft: 'Geser kiri', panright: 'Geser kanan', kenburns: 'Ken Burns', shake: 'Goyang halus', static: 'Diam' }).map(([k, l]) => `<span class="chip${k === 'zoomin' ? ' on' : ''}" id="cam-${k}">${l}</span>`).join('')}</div></section>
+            <section class="sect">${secH('shuffle', 'Transisi ke adegan berikutnya')}${sel('selTr', 'Pudar')}</section>
+            <section class="sect">${secH('wave', 'Efek suara di awal adegan')}${sel('selSfx', 'Tanpa efek')}</section>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4 · EDITOR -->
+      <div class="stp" id="st4">
+        <div class="stephd"><div><h2 class="h2">Editor</h2><p class="desc">Atur subtitle, musik, dan logo, ekspor MP4, lalu siapkan unggahannya.${M ? '' : ' Pratinjau memakai gerak kamera, transisi, efek suara, dan posisi yang sama dengan hasil akhir.'}</p></div></div>
+        <div class="edg">
+          <div class="pnl plc" id="plc"><div class="player" id="player" style="aspect-ratio:${ar};${wide ? '' : 'max-width:260px'}">${ART_SCENES.map((s, k) => `<div class="fr" id="pf${k}"></div>`).join('')}<div class="psub" id="psub" style="bottom:${wide ? 10 : 22}%"></div></div>
+            <div class="pbar"><span class="pp">${ico('play')}</span><span class="mono" id="pT">0:00</span><div class="prog"><i id="pBar"></i></div><span class="mono">0:30</span></div></div>
+          <div class="pnl" style="display:flex;flex-direction:column">
+            <div class="tabs5">${[['caps', 'Subtitle'], ['music', 'Musik'], ['layers', 'Logo &amp; teks'], ['monitor', 'Ekspor'], ['mega', 'Unggah']].map(([ic, l], k) => `<span id="tab${k}">${ico(ic)}${l}</span>`).join('')}</div>
+            <div class="tabp">
+              <div class="tp" id="tp0">
+                <div class="cprev" id="capCard"><div class="pv" id="capPv">Dahulu <span class="on">kala</span></div><div class="in"><span><b id="capName">Karaoke</b><small id="capMeta">Montserrat · 60px · otomatis · posisi 75%</small></span><span class="btn sec sm" id="bCapEdit" style="position:relative">${ico('sliders', 'ic')}Ubah</span></div></div>
+                <p class="note fa row" style="align-items:flex-start;gap:6px">${ico('info', 'ic')}<span>Preset, animasi, dan pengaturannya sama dengan Quick Process dan kartu klip.</span></p>
+              </div>
+              <div class="tp" id="tp1">
+                <div class="box"><b>${ico('sparkles')}Musik otomatis</b><p>AI membaca suasana ceritamu lalu memilihkan 3 lagu instrumental bebas royalti (Creative Commons). Gratis.</p>${btn('bMusic', 'pri sm', 'music', 'Cari musik yang cocok')}</div>
+                <div><div class="lab"><span>Musik latar</span></div>${sel('selMusic', 'Tanpa musik')}</div>
+                <p class="note fa" id="musicNote" style="opacity:0">“Legend of the Lake” oleh Arulo, lisensi Creative Commons lewat Jamendo.</p>
+                <div id="volRow" style="opacity:0"><div class="lab"><span>Volume musik</span><span class="mono">-18 dB</span></div><div class="prog"><i style="width:62%"></i></div></div>
+              </div>
+              <div class="tp" id="tp3">
+                <div><div class="lab"><span>Resolusi</span></div><div class="res2"><span class="btn pri sm">1080p</span><span class="btn sec sm">720p</span></div></div>
+                <div class="cks"><span><i>${ico('check')}</i>Tempelkan subtitle ke video</span><span><i>${ico('check')}</i>Buat juga file subtitle .srt</span><span><i>${ico('check')}</i>Ratakan volume akhir</span></div>
+                ${btn('bExport', 'pri', 'film', 'Ekspor MP4 · 0:30')}
+                <div id="renderRow"><p class="note" style="color:#525252" id="renderTx">Merender video 0%</p><div class="prog"><i id="renderB"></i></div></div>
+                <div class="pnl excard" id="exCard"><div class="row" style="justify-content:space-between"><b style="font:600 12px Inter;color:#404040">Hasil ekspor terakhir</b><span class="badge green">1080p</span></div>
+                  <div class="vid" id="exVid" style="aspect-ratio:${ar};${wide ? '' : 'max-height:150px;margin:0 auto'}"></div>
+                  ${btn('bPrep', 'pri sm', 'mega', 'Siapkan unggahan')}</div>
+              </div>
+              <div class="tp" id="tp4">
+                <div class="box"><b>${ico('mega')}Paket unggah</b><p>AI menulis judul, caption, dan tagar untuk YouTube, TikTok, Instagram, dan Facebook, plus beberapa pilihan cover dari gambar adeganmu.</p>${btn('bKit', 'pri sm', 'sparkles', 'Buat paket unggah', 'gratis')}</div>
+                <div id="kit" style="display:flex;flex-direction:column;gap:12px;opacity:0">
+                  <div><div class="lab"><span>Cover</span></div><div class="covers">${[0, 2, 3, 4].map(k => `<div style="aspect-ratio:${ar}" id="cov${k}"></div>`).join('')}</div></div>
+                  ${[['Judul YouTube Shorts', CAPTIONS.youtubeTitle], ['Caption TikTok', CAPTIONS.tiktok], ['Caption Instagram Reels', CAPTIONS.instagram]].map(([l, v], k) => `<div class="cf" id="cf${k}"><div class="h"><span>${l}</span>${ico('copy')}</div><div class="v">${v}</div></div>`).join('')}
+                </div>
+                <div class="box" id="schBox"><b>${ico('cal')}Jadwalkan unggah</b><p>Unggah hasil ekspor terakhir ke YouTube, TikTok, Facebook, atau Instagram, sekarang atau di jam yang kamu pilih.</p>${btn('bSched', 'pri sm', 'cal', 'Jadwalkan')}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div></section>
+
+    <div class="modal" id="capModal"><div class="mdl"><div class="mhd">Pengaturan Subtitle ${ico('x', 'ic')}</div>
+      <div class="tb"><span class="on">Presets</span><span>Settings</span></div>
+      <div class="pgrid">${[['Karaoke', 'karaoke'], ['Klipers Motion', 'motion'], ['Bold Impact', 'bold'], ['Neon Pulse', 'neon'], ['Pop', 'pop'], ['Box', 'box']].map(([n, k]) => `<div class="pt${k === 'karaoke' ? ' on' : ''}" id="pre-${k}"><div class="pv" style="${{ neon: 'color:#7df9ff;-webkit-text-stroke:0;text-shadow:0 0 8px #22d3ee', box: 'background:#171717', motion: 'color:#fff', bold: 'color:#fde047', pop: 'color:#fff' }[k] || ''}">${k === 'box' ? '<span style="background:#fff;color:#000;padding:2px 6px;border-radius:4px;-webkit-text-stroke:0">TOBA</span>' : k === 'karaoke' ? 'IKAN <span style="color:#ffe600">EMAS</span>' : 'IKAN EMAS'}</div><b>${n}</b></div>`).join('')}</div>
+      <div class="ft"><span class="btn sec sm">Batal</span><span class="btn pri sm" id="bCapSave">Simpan</span></div></div></div>
+
+    <div class="modal sch" id="schModal"><div class="mdl smd">
+      <div class="mhd sh"><span><b>Pengaturan Jadwal</b><small>Jadwalkan upload ke social media</small></span>${ico('x', 'ic')}</div>
+      <div class="sbody">
+        <div class="msg" id="schMsg">${ico('check', 'ic')}<span>Upload berhasil dijadwalkan ke 5 platform</span></div>
+        <label class="flab">Pilih Platform *</label>
+        <div class="pgrid2">${SCH_PLATS.map(([k, n, a], j) => `<div class="pl" id="pl-${k}"><span class="rd"></span><span class="pi">${PLAT_IC[k]}</span><span class="pt2"><b>${n}</b><small>${a}</small></span><span class="ok2">${ico('check')}</span></div>`).join('')}</div>
+        <label class="flab">Judul Video</label><div class="fin">${CAPTIONS.youtubeTitle}</div>
+        <label class="flab">Waktu Rilis</label><div class="fin row" style="justify-content:space-between">Besok, 19.00 WIB ${ico('cal', 'ic')}</div>
+      </div>
+      <div class="ft">${btn('bSchGo', 'pri btnw', 'cal', 'Jadwalkan', null, 'Menjadwalkan...')}</div></div></div>
+    <div class="toast" id="toast">${ico('check')}<span id="toastTx"></span></div>
+  </div>
+  <svg class="cursor" id="cur" viewBox="0 0 24 24"><path d="M4 2l16 9.2-7 1.7L9 20z" fill="#fff" stroke="#111" stroke-width="1.5" stroke-linejoin="round"/></svg><div class="cring" id="cring"></div>`;
+
+  // gambar
+  const put = (sel, k, uid) => { const el = root.querySelector(sel); if (el) el.innerHTML = art(k, { uid }); };
+  ART_SCENES.forEach((s, k) => { put('#thi' + k, k, 'th' + k); put('#pf' + k, k, 'pf' + k); });
+  put('#bigMv', 0, 'big');
+  put('#exVid', 0, 'exv');
+  [0, 2, 3, 4].forEach(k => put('#cov' + k, k, 'cov' + k));
+  root.querySelector('#sheet0').innerHTML = sheet('sh0');
+  root.querySelector('#sheet1').innerHTML = `<svg viewBox="0 0 160 90"><defs>${_wc('sh1')}</defs><rect width="160" height="90" fill="#fbf8f2"/><g filter="url(#wcsh1)">${_putri(40, 62, 2)}${_putri(80, 62, 2)}${_putri(122, 62, 2)}</g><path d="M60 10 V82 M101 10 V82" stroke="#e5e5e5" stroke-width=".5"/></svg>`;
+}
+
+/* ================= ENGINE BERSAMA demo-story-studio-{landscape,portrait} =================
+   Dipakai lewat build: marketing/tools/build-demo-story-studio.mjs menanam berkas ini ke index.html.
+   Kontrak iklan: timeline GSAP paused & seek-safe, ?t= ?nocaps=1 ?guides=1 ?record=1,
+   window.__seek / __duration / __ready / __sfx (dicampur export-video.mjs). */
+function storyEngine(cfg) {
+  const { W, H, D, CUES, build, onSync } = cfg;
+  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const Q = new URLSearchParams(location.search);
+  const REC = Q.has('record');
+  document.body.classList.add('light');
+  if (REC) document.body.classList.add('rec');
+  if (Q.has('nocaps')) document.body.classList.add('nocaps');
+  if (Q.has('guides')) document.body.classList.add('guides');
+
+  function fit() {
+    const k = Math.min(innerWidth / W, (innerHeight - (REC ? 0 : 56)) / H);
+    document.documentElement.style.setProperty('--k', k);
+  }
+  fit(); addEventListener('resize', fit);
+
+  /* ---------- caption ---------- */
+  CUES.forEach(c => {
+    const words = c.text.split(' ');
+    const wt = words.map(w => w.length + 2 + (/[.,?:!]$/.test(w) ? 4 : 0));
+    const total = wt.reduce((a, b) => a + b, 0);
+    const span = (c.e - c.s) - 0.3;
+    let acc = 0;
+    c.words = words.map((w, i) => { const st = c.s + span * acc / total; acc += wt[i]; return { w, st }; });
+    c.chunks = []; let cur = [];
+    c.words.forEach((w, i) => {
+      cur.push(i);
+      if (cur.length >= (cfg.capWords || 6) || (/[.,?:!]$/.test(w.w) && cur.length >= 3)) { c.chunks.push(cur); cur = []; }
+    });
+    if (cur.length) c.chunks.push(cur);
+  });
+  const capsEl = $('#caps');
+  let capKey = null;
+  function renderCaps(t) {
+    const ci = CUES.findIndex(c => !c.nocap && t >= c.s && t <= c.e);
+    if (ci < 0) { capsEl.style.opacity = 0; capKey = null; return; }
+    const c = CUES[ci];
+    let wi = 0; c.words.forEach((w, i) => { if (t >= w.st) wi = i; });
+    const chunk = c.chunks.find(ch => ch.includes(wi));
+    const key = ci + ':' + chunk[0];
+    if (key !== capKey) {
+      capsEl.innerHTML = '<span class="ln">' + chunk.map(i => `<span class="cw" data-i="${i}">${c.words[i].w}</span>`).join('') + '</span>';
+      capKey = key;
+    }
+    capsEl.querySelectorAll('.cw').forEach(el => el.classList.toggle('on', +el.dataset.i === wi));
+    capsEl.style.opacity = 1;
+  }
+
+  /* ---------- audio (narasi + efek) ---------- */
+  const SFX = [];
+  const sfx = (t, name, vol = .5) => SFX.push({ t: +t.toFixed(3), file: `audio/sfx-${name}.mp3`, vol });
+  const AUD = CUES.map(c => {
+    const a = new Audio(); a.preload = 'auto';
+    a.onerror = () => { c.missing = true; updateVoiceNote(); };
+    a.src = c.file; return a;
+  });
+  const SFXA = {};
+  const SS = window.speechSynthesis;
+  let ttsVoice = null;
+  function pickVoice() {
+    if (!SS) return;
+    const vs = SS.getVoices(); if (!vs.length) return;
+    const by = f => vs.find(f);
+    ttsVoice = by(v => /^id/i.test(v.lang) && /ardi/i.test(v.name)) || by(v => /^id/i.test(v.lang)) || null;
+    updateVoiceNote();
+  }
+  function updateVoiceNote() {
+    if (!CUES.some(c => c.missing)) return;
+    const n = $('#audioNote');
+    n.style.display = 'inline';
+    n.textContent = ttsVoice ? 'Suara: ' + ttsVoice.name.replace(/\s*-\s*.*$/, '') + ' (browser)' : 'File narasi tidak ditemukan';
+  }
+  if (SS) { pickVoice(); SS.onvoiceschanged = pickVoice; }
+  let muted = false, playing = false, lastT = 0;
+  function stopAudio() { AUD.forEach(a => a.pause()); Object.values(SFXA).forEach(a => a.pause()); if (SS) SS.cancel(); CUES.forEach(c => { c.started = false; }); }
+  function syncAudio(t) {
+    if (!playing || muted) { lastT = t; return; }
+    CUES.forEach((c, i) => {
+      if (c.started) return;
+      const a = AUD[i];
+      const len = !c.missing && isFinite(a.duration) ? a.duration : (c.e - c.s);
+      if (t >= c.s && t < c.s + len) {
+        c.started = true;
+        if (c.missing) {
+          if (SS && t - c.s < .6) { SS.cancel(); const u = new SpeechSynthesisUtterance(c.say || c.text); u.lang = 'id-ID'; try { if (ttsVoice) u.voice = ttsVoice; } catch (e) {} SS.speak(u); }
+          return;
+        }
+        try { a.currentTime = Math.max(0, t - c.s); } catch (e) {}
+        a.play().catch(() => {});
+      }
+    });
+    if (t > lastT && t - lastT < .5) SFX.forEach(ev => {
+      if (ev.t > lastT && ev.t <= t) {
+        const a = SFXA[ev.file + ev.t] || (SFXA[ev.file + ev.t] = new Audio(ev.file));
+        a.volume = Math.min(1, ev.vol); try { a.currentTime = 0; } catch (e) {} a.play().catch(() => {});
+      }
+    });
+    lastT = t;
+  }
+
+  /* ---------- state diskret (seek-safe) ----------
+     flag(t0,t1,el,cls) · say(t,el,teks) · type(t0,t1,el,teks) · count(t0,t1,el,a,b,fmt) */
+  const FLAGS = [], TEXTS = new Map(), TYPES = [], COUNTS = [];
+  const EL = x => typeof x === 'string' ? $(x) : x;
+  const flag = (t0, t1, el, cls) => { el = EL(el); if (!el) throw new Error('flag: elemen tidak ada ' + el); FLAGS.push({ t0, t1: t1 ?? 1e9, el, cls }); };
+  const say = (t, el, txt) => { el = EL(el); if (!TEXTS.has(el)) TEXTS.set(el, { init: el.innerHTML, list: [] }); TEXTS.get(el).list.push({ t, txt }); };
+  const type = (t0, t1, el, txt, init = '') => TYPES.push({ t0, t1, el: EL(el), txt, init });
+  const count = (t0, t1, el, a, b, fmt = v => v) => COUNTS.push({ t0, t1, el: EL(el), a, b, fmt });
+  function applyState(t) {
+    const want = new Map();
+    FLAGS.forEach(f => {
+      if (!want.has(f.el)) want.set(f.el, {});
+      const m = want.get(f.el); m[f.cls] = m[f.cls] || (t >= f.t0 && t < f.t1);
+    });
+    want.forEach((m, el) => Object.entries(m).forEach(([c, on]) => el.classList.toggle(c, on)));
+    TEXTS.forEach((v, el) => { let cur = v.init; v.list.forEach(x => { if (t >= x.t) cur = x.txt; }); if (el.innerHTML !== cur) el.innerHTML = cur; });
+    const typed = new Map();
+    TYPES.forEach(x => {
+      if (t < x.t0) { if (!typed.has(x.el)) typed.set(x.el, x.init); return; }
+      const p = Math.min(1, (t - x.t0) / Math.max(.01, x.t1 - x.t0));
+      typed.set(x.el, x.init + x.txt.slice(0, Math.round(x.txt.length * p)));
+    });
+    typed.forEach((v, el) => { if (el.textContent !== v) el.textContent = v; el.classList.toggle('typing', TYPES.some(x => x.el === el && t >= x.t0 && t < x.t1 + .4)); });
+    const cnt = new Map();
+    COUNTS.forEach(x => {
+      if (t < x.t0 && cnt.has(x.el)) return;
+      const p = Math.max(0, Math.min(1, (t - x.t0) / Math.max(.01, x.t1 - x.t0)));
+      cnt.set(x.el, x.fmt(Math.round(x.a + (x.b - x.a) * p)));
+    });
+    cnt.forEach((v, el) => { const s = String(v); if (el.textContent !== s) el.textContent = s; });
+  }
+
+  /* posisi elemen relatif kontainer (offset, kebal transform) */
+  function rel(el, root) {
+    el = EL(el); root = EL(root);
+    let x = 0, y = 0, n = el;
+    while (n && n !== root) { x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; }
+    if (n !== root) throw new Error('rel: root bukan offsetParent leluhur');
+    return { x: x + el.offsetWidth / 2, y: y + el.offsetHeight / 2, l: x, t: y, w: el.offsetWidth, h: el.offsetHeight };
+  }
+
+  const tl = gsap.timeline({ paused: true, onUpdate: sync });
+  function sync() {
+    const t = tl.time();
+    applyState(t);
+    onSync && onSync(t);
+    renderCaps(t);
+    syncAudio(t);
+    if (!scrubbing) $('#scrub').value = t;
+    $('#tlabel').textContent = t.toFixed(1) + ' / ' + D + 's';
+  }
+  const api = { tl, $, $$, flag, say, type, count, sfx, rel, EL };
+
+  /* ---------- kontrol ---------- */
+  let scrubbing = false;
+  const scrub = $('#scrub'); scrub.max = D;
+  function play() { if (tl.time() >= D - .05) tl.seek(0, false); stopAudio(); lastT = tl.time(); playing = true; tl.play(); $('#bPlay').textContent = '❚❚'; }
+  function pause() { playing = false; tl.pause(); stopAudio(); $('#bPlay').textContent = '▶'; }
+  $('#bPlay').onclick = () => (playing ? pause() : play());
+  $('#bRestart').onclick = () => { stopAudio(); tl.seek(0, false); sync(); play(); };
+  $('#bMute').onclick = () => { muted = !muted; $('#bMute').textContent = muted ? '🔇 Bisu' : '🔊 Suara'; if (muted) stopAudio(); };
+  function paintCapsBtn() { const off = document.body.classList.contains('nocaps'); $('#bCaps').textContent = 'CC Caption: ' + (off ? 'Off' : 'On'); $('#bCaps').classList.toggle('off', off); }
+  $('#bCaps').onclick = () => { document.body.classList.toggle('nocaps'); paintCapsBtn(); };
+  paintCapsBtn();
+  scrub.addEventListener('input', () => { scrubbing = true; if (playing) pause(); tl.seek(+scrub.value, false); sync(); });
+  scrub.addEventListener('change', () => { scrubbing = false; });
+  addEventListener('keydown', e => {
+    if (e.code === 'Space') { e.preventDefault(); playing ? pause() : play(); }
+    if (e.key === 'c' || e.key === 'C') $('#bCaps').click();
+  });
+  $('#startOverlay').onclick = () => { $('#startOverlay').style.display = 'none'; play(); };
+
+  document.fonts.ready.then(() => requestAnimationFrame(() => {
+    build(api);
+    tl.set({}, {}, D);
+    SFX.sort((a, b) => a.t - b.t);
+    window.__sfx = SFX;
+    window.__tl = tl;
+    window.__duration = D;
+    window.__seek = t => { tl.seek(t, false); sync(); };
+    const t0 = parseFloat(Q.get('t'));
+    tl.seek(isFinite(t0) ? t0 : 0, false);
+    sync();
+    window.__ready = true;
+  }));
+  return api;
+}
+
+/* ================= ALUR DEMO STORY STUDIO (11,0 – 51,0 dtk) =================
+   Dipakai bersama portrait & landscape. Waktu mengikuti narasi vo-03 … vo-09.
+   F (dari template): { root, vh, aspect: '16:9'|'9:16', cam?(t, el, zoom, d) }.
+   Mengembalikan onSync(t) untuk pemutar pratinjau Editor. */
+function storyFlow(A, F) {
+  const { tl, $, flag, say, type, count, sfx, rel } = A;
+  const R = F.root, main = $('#ssMain');
+  const wide = F.aspect === '16:9';
+  let SY = 0;                                   // posisi gulir #wScroll (px app) setelah view terakhir
+  const shown = (ids, fn) => { const els = ids.map(x => $(x)); const add = els.filter(e => !e.classList.contains('show')); add.forEach(e => e.classList.add('show')); const r = fn(); add.forEach(e => e.classList.remove('show')); return r; };
+  const yOf = el => rel(el, main).t;
+  function view(t, y, d = .6) { tl.to('#wScroll', { y: -y, duration: d, ease: 'power2.inOut' }, t); SY = y; }
+  function viewEl(t, el, top, d) {
+    const max = Math.max(0, $('#wScroll').offsetHeight - F.vh);
+    view(t, Math.max(0, Math.min(max, yOf(el) - top)), d);
+  }
+  // fokus: gulir supaya el terlihat (top px dari atas viewport) + kamera (landscape)
+  function focus(t, el, o = {}) {
+    const d = o.d ?? .6;
+    if (!o.noView) viewEl(t, el, o.top ?? (F.mode === 'm' ? 80 : F.vh * .22), d);
+    F.cam && F.cam(t, o.camEl || el, o.zoom || 1, d, o.el2, SY);
+  }
+  // kursor: tiba di elemen tepat pada t lalu klik
+  let cx = F.cursorStart ? F.cursorStart.x : 600, cy0 = F.cursorStart ? F.cursorStart.y : 500;
+  tl.set('#cur', { x: cx, y: cy0, autoAlpha: 0 }, 0);
+  function cur(t, el, o = {}) {
+    const p = rel(el, R);
+    const x = p.x + (o.dx || 0), y = p.y - (o.noScroll ? 0 : SY) + (o.dy || 0);
+    tl.to('#cur', { x, y, duration: o.d || .55, ease: 'power2.inOut' }, t - (o.d || .55));
+    if (o.move) return;
+    tl.fromTo('#cring', { x, y, scale: .4, opacity: .9 }, { scale: 1.6, opacity: 0, duration: .45, ease: 'power2.out', immediateRender: false }, t);
+    tl.to('#cur', { scale: .85, duration: .08, yoyo: true, repeat: 1, transformOrigin: '0 0' }, t);
+    sfx(t, 'click', .55);
+  }
+  const busy = (t0, t1, el) => flag(t0, t1, el, 'busy');
+  const toast = (t0, t1, txt) => { say(t0, '#toastTx', txt); tl.fromTo('#toast', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: .3, immediateRender: false }, t0); tl.to('#toast', { opacity: 0, duration: .25 }, t1); };
+  const aibar = (t0, t1, txt) => { say(t0, '#aiTx', txt); flag(t0, t1, '#aiBar', 'vis'); };
+  // header stepper: aktif / selesai per waktu
+  [[16.1, 24.0], [24.0, 29.8], [29.8, 41.0], [41.0, 99]].forEach(([a, b], k) => {
+    flag(a, b, '#sp' + (k + 1), 'on');
+    flag(b, 99, '#sp' + (k + 1), 'done');
+  });
+  const steps = { 1: [16.1, 24.0], 2: [24.0, 29.8], 3: [29.8, 41.0], 4: [41.0, 99] };
+  Object.entries(steps).forEach(([n, [a, b]]) => flag(a, b, '#st' + n, 'show'));
+
+  /* ---------- 1 · daftar proyek (11,0 – 16,1) ---------- */
+  tl.set('#sList', { autoAlpha: 1 }, 0);
+  tl.set('#sList', { autoAlpha: 0 }, 16.1);
+  tl.set('#sWork', { autoAlpha: 0 }, 0);
+  tl.set('#sWork', { autoAlpha: 1 }, 16.1);
+  tl.set('#cur', { autoAlpha: 1 }, 12.6);
+  [13.9, 14.35, 14.8, 15.25].forEach((t, k) => flag(t, 16.1, '#intro' + k, 'hl'));
+  [13.9, 14.35, 14.8, 15.25].forEach(t => sfx(t, 'click', .18));
+    focus(11.2, '#sList', { zoom: 1, d: .01, noView: true });
+  cur(15.85, '#bNew', { noScroll: true });
+
+  /* ---------- 2 · ide (16,1 – 24,0) ---------- */
+  const ST1 = ['#st1'];
+  shown(ST1, () => {
+    focus(16.2, '#st1 .col', { zoom: 1.22, d: .8, noView: true });
+    cur(16.75, '#synTx', { dx: 40 });
+    flag(16.75, null, '#synPh', 'gone');
+    type(16.8, 19.1, '#synTx', SYNOPSIS);
+    for (let t = 16.9; t < 19.1; t += .22) sfx(t, 'click', .1);
+    say(19.15, '#synCnt', `±11 adegan · 5 dtk · ${SYNOPSIS.length}/4.000`);
+    cur(19.6, '#sty-watercolor');
+    flag(0, 19.6, '#sty-stickman', 'on');
+    flag(19.6, null, '#sty-watercolor', 'on');
+    say(19.6, '#styleName', 'Buku cerita cat air');
+    cur(20.55, '#selDur');
+    flag(20.55, 21.35, '#selDur', 'open');
+    flag(20.9, 21.35, '#selDur .dd div[data-k="0"]', 'hi');
+    cur(21.3, '#selDur', { move: true, dy: 40, d: .35 });
+    say(21.35, '#selDur .v', '30 detik');
+    say(21.35, '#synCnt', `±5 adegan · 6 dtk · ${SYNOPSIS.length}/4.000`);
+    sfx(21.35, 'click', .45);
+    if (wide) {
+      cur(22.0, '#fmt169');
+      flag(0, 22.0, '#fmt916', 'on');
+      flag(22.0, null, '#fmt169', 'on');
+    }
+    focus(22.0, '#bWrite', { zoom: 1.15, d: .6, top: F.mode === 'm' ? F.vh - 140 : 300 });
+    cur(22.8, '#bWrite');
+    busy(22.8, 24.0, '#bWrite');
+    aibar(22.85, 24.0, 'AI sedang menulis naskah...');
+    sfx(22.85, 'processing', .35);
+  });
+  say(24.0, '#wTitle', 'Legenda Danau Toba');
+  say(24.0, '#wSaveTx', 'Tersimpan');
+  view(24.0, 0, .01);
+
+  /* ---------- 3 · naskah (24,0 – 29,8) ---------- */
+  shown(['#st2'], () => {
+    focus(24.0, '#rows', { zoom: 1.12, d: .01, noView: true });
+    ART_SCENES.forEach((s, k) => tl.fromTo('#row' + k, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: .35, ease: 'power2.out', immediateRender: false }, 24.1 + k * .28));
+    tl.set(ART_SCENES.map((s, k) => '#row' + k), { opacity: 0 }, 0);
+    sfx(24.1, 'whoosh', .3);
+    focus(25.5, '#row1', { top: F.mode === 'm' ? 70 : 150, zoom: 1.3, d: .7 });
+    cur(26.3, '#narT1', { dx: 60 });
+    flag(26.3, 27.9, '#nar1', 'foc');
+    say(0, '#wc1', '5 kata · 2,7 dtk');
+    type(26.45, 27.6, '#narT1', NAR1_ADD, NAR1_SHORT);
+    for (let t = 26.5; t < 27.6; t += .2) sfx(t, 'click', .1);
+    say(27.6, '#wc1', '9 kata · 4,4 dtk');
+    view(28.0, 0, .55);
+    focus(28.0, '#bVis', { zoom: 1.25, d: .55, noView: true });
+    cur(28.75, '#bVis');
+    busy(28.75, 29.8, '#bVis');
+    aibar(28.8, 29.8, 'AI sedang menyusun visual...');
+    sfx(28.8, 'processing', .35);
+  });
+
+  /* ---------- 4 · storyboard (29,8 – 41,0) ---------- */
+  shown(['#st3'], () => {
+    view(29.8, 0, .01);
+    focus(29.8, '#st3 .stephd', { zoom: 1.12, d: .01, noView: true });
+    toast(29.9, 31.6, 'Visual tiap adegan siap. Sekarang buat gambar dan suaranya.');
+    cur(30.45, '#bImgs');
+    busy(30.45, 34.0, '#bImgs');
+    sfx(30.5, 'riser', .3);
+    focus(30.6, '.cast', { top: F.mode === 'm' ? 30 : 120, zoom: 1.18, d: .7 });
+    [0, 1].forEach(k => {
+      tl.to('#cv' + k, { opacity: 1, duration: .2 }, 30.55);
+      tl.to('#cv' + k, { opacity: 0, duration: .25 }, 31.6 + k * .2);
+      tl.to('#sheet' + k, { opacity: 1, duration: .3 }, 31.6 + k * .2);
+    });
+    sfx(31.7, 'regenerate', .3);
+    focus(32.0, '.strip', { top: F.mode === 'm' ? 150 : 300, zoom: 1.25, d: .7 });
+    ART_SCENES.forEach((s, k) => {
+      const t = 32.1 + k * .42;
+      tl.to('#thv' + k, { opacity: 1, duration: .2 }, 31.0);
+      tl.to('#thv' + k, { opacity: 0, duration: .2 }, t);
+      tl.fromTo('#thi' + k, { opacity: 0, scale: 1.08 }, { opacity: 1, scale: 1, duration: .35, immediateRender: false }, t);
+      sfx(t, 'click', .22);
+    });
+    count(32.1, 33.8, '#mImg', 0, 5);
+    tl.fromTo('#mImgB', { width: '0%' }, { width: '100%', duration: 1.8, ease: 'none', immediateRender: false }, 32.1);
+    // wajah sama di tiap adegan
+    focus(34.1, '.cast', { top: F.mode === 'm' ? 30 : 110, zoom: 1.02, d: .6, el2: '.strip' });
+    ['#cc0', '#th0', '#th1', '#th3', '#th4'].forEach((s, k) => flag(34.3 + k * .12, 35.7, s, 'same'));
+    sfx(34.3, 'success', .3);
+    flag(34.0, null, '#bImgs', 'gone');
+    flag(34.0, null, '#bVoice', 'pri');
+    // narasi
+    view(35.75, 0, .5);
+    focus(35.75, '#st3 .stephd', { zoom: 1.15, d: .5, noView: true });
+    cur(36.3, '#bVoice');
+    busy(36.3, 37.5, '#bVoice');
+    count(36.35, 37.45, '#vPct', 0, 100, v => v + '%');
+    count(36.35, 37.45, '#mVo', 0, 5);
+    tl.fromTo('#mVoB', { width: '0%' }, { width: '100%', duration: 1.1, ease: 'none', immediateRender: false }, 36.35);
+    ART_SCENES.forEach((s, k) => tl.to('#tha' + k, { opacity: 1, duration: .15 }, 36.45 + k * .22));
+    sfx(36.35, 'processing', .3);
+    cur(37.75, '#bSfx');
+    busy(37.75, 38.25, '#bSfx');
+    count(38.25, 38.3, '#mSfx', 0, 5);
+    say(38.25, '#cpSfx', ico('wave', 'ic') + 'Ombak tenang');
+    say(38.25, '#selSfx .v', 'Ombak tenang');
+    sfx(38.25, 'success', .25);
+    focus(38.55, '#cpan', { top: F.mode === 'm' ? 10 : 30, zoom: 1.12, d: .6 });
+    if (F.mode === 'm') viewEl(39.0, '#cam-kenburns', 300, .3);
+    cur(39.35, '#cam-kenburns');
+    flag(0, 39.35, '#cam-zoomin', 'on');
+    flag(39.35, null, '#cam-kenburns', 'on');
+    tl.fromTo('#bigMv', { scale: 1, x: 0 }, { scale: 1.16, x: wide ? -30 : -14, y: -8, duration: 1.4, ease: 'sine.inOut', immediateRender: false }, 39.45);
+    view(40.3, 0, .4);
+    focus(40.3, '#bToEd', { zoom: 1.15, d: .4, noView: true });
+    cur(40.85, '#bToEd');
+  });
+
+  /* ---------- 5 · editor + unggah (41,0 – 51,0) ---------- */
+  shown(['#st4'], () => {
+    view(41.0, 0, .01);
+    focus(41.0, '#st4 .edg', { zoom: 1.08, d: .01, noView: true });
+    const tab = (k, t0, t1) => { flag(t0, t1, '#tab' + k, 'on'); flag(t0, t1, '#tp' + k, 'show'); };
+    tab(0, 41.0, 43.3); tab(1, 43.3, 44.8); tab(3, 44.8, 47.1); tab(4, 47.1, 99);
+    focus(41.2, '.tabs5', { top: F.mode === 'm' ? 60 : 120, zoom: 1.3, d: .6, el2: '#capCard' });
+    cur(41.75, '#bCapEdit');
+    tl.set('#capModal', { autoAlpha: 0 }, 0);
+    tl.to('#capModal', { autoAlpha: 1, duration: .2 }, 41.8);
+    tl.to('#capModal', { autoAlpha: 0, duration: .2 }, 43.0);
+    F.cam && F.cam(41.85, '#capModal .mdl', 1.25, .4, null, 0);
+    cur(42.4, '#pre-motion', { noScroll: true });
+    flag(0, 42.4, '#pre-karaoke', 'on');
+    flag(42.4, null, '#pre-motion', 'on');
+    cur(42.9, '#bCapSave', { noScroll: true });
+    say(42.95, '#capName', 'Klipers Motion');
+    say(42.95, '#capMeta', 'Montserrat · 60px · 3 kata · posisi 75%');
+    flag(42.95, null, '#psub', 'motion');
+    focus(43.0, '.tabs5', { zoom: 1.3, d: .4, el2: '#tp1', noView: true });
+    cur(43.35, '#tab1');
+    cur(43.85, '#bMusic');
+    busy(43.85, 44.4, '#bMusic');
+    say(44.4, '#selMusic .v', 'Legend of the Lake (1:12)');
+    tl.to(['#musicNote', '#volRow'], { opacity: 1, duration: .3 }, 44.4);
+    toast(44.4, 45.7, 'Musik dipasang. Ada 3 pilihan lagu di daftar musik.');
+    cur(44.85, '#tab3');
+    cur(45.35, '#bExport');
+    flag(45.35, 46.6, '#renderRow', 'show');
+    flag(45.35, 46.6, '#bExport', 'dis');
+    count(45.4, 46.5, '#renderTx', 0, 100, v => `Merender video ${v}%`);
+    tl.fromTo('#renderB', { width: '0%' }, { width: '100%', duration: 1.1, ease: 'none', immediateRender: false }, 45.4);
+    sfx(45.4, 'processing', .3);
+    tl.to('#exCard', { opacity: 1, duration: .3 }, 46.6);
+    sfx(46.6, 'success', .3);
+    cur(47.05, '#bPrep');
+    focus(47.1, '.tabs5', { zoom: 1.25, d: .5, el2: '#tp4', noView: true });
+    cur(47.65, '#bKit');
+    busy(47.65, 48.35, '#bKit');
+    tl.to('#kit', { opacity: 1, duration: .3 }, 48.35);
+    ['#cf0', '#cf1', '#cf2'].forEach((s, k) => tl.fromTo(s, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: .3, immediateRender: false }, 48.45 + k * .2));
+    sfx(48.4, 'success', .3);
+    toast(48.5, 49.4, 'Paket unggah siap: caption tiap platform dan cover.');
+    // auto upload 5 platform (modal Pengaturan Jadwal)
+    if (F.mode === 'm') viewEl(48.7, '#schBox', F.vh - 230, .7);
+    else focus(48.7, '#schBox', { top: F.vh - 200, zoom: 1.2, d: .7, camEl: '#cf1', el2: '#schBox' });
+    cur(49.55, '#bSched');
+    tl.set('#schModal', { autoAlpha: 0 }, 0);
+    tl.to('#schModal', { autoAlpha: 1, duration: .25 }, 49.65);
+    tl.to('#schModal', { autoAlpha: 0, duration: .3 }, 54.3);
+    F.cam && F.cam(49.65, '#schModal .mdl', 1.32, .5, null, 0);
+    sfx(49.65, 'whoosh', .3);
+    SCH_PLATS.forEach(([k], j) => {
+      const t = 50.4 + j * .36;
+      cur(t, '#pl-' + k, { noScroll: true, d: .3 });
+      flag(t, null, '#pl-' + k, 'on');
+    });
+    cur(52.55, '#bSchGo', { noScroll: true, d: .4 });
+    busy(52.55, 53.05, '#bSchGo');
+    flag(53.05, null, '#schMsg', 'show');
+    SCH_PLATS.forEach(([k], j) => { flag(53.1 + j * .1, null, '#pl-' + k, 'done'); });
+    sfx(53.1, 'success', .4);
+  });
+  tl.to('#cur', { autoAlpha: 0, duration: .2 }, 54.0);
+
+  /* ---------- pemutar pratinjau editor ---------- */
+  const SUBW = ART_SCENES.map(s => s.nar.replace(/"/g, '').split(' '));
+  let lastKey = '';
+  return function onSync(t) {
+    if (t < 40.9) return;
+    const pt = Math.max(0, t - 41.0) % 30, k = Math.min(4, Math.floor(pt / 6)), lp = (pt % 6) / 6;
+    for (let j = 0; j < 5; j++) {
+      const el = R.querySelector('#pf' + j);
+      el.style.opacity = j === k ? 1 : 0;
+      if (j === k) el.style.transform = `scale(${1.04 + lp * .1}) translateX(${(k % 2 ? -1 : 1) * lp * 2}%)`;
+    }
+    const w = SUBW[k], idx = Math.min(w.length - 1, Math.floor(lp * w.length * 1.05));
+    const c0 = Math.floor(idx / 3) * 3, chunk = w.slice(c0, c0 + 3);
+    const key = k + ':' + c0 + ':' + idx;
+    if (key !== lastKey) {
+      R.querySelector('#psub').innerHTML = chunk.map((x, n) => c0 + n === idx ? `<span class="on">${x}</span>` : x).join(' ');
+      lastKey = key;
+    }
+    R.querySelector('#pT').textContent = '0:' + String(Math.floor(pt)).padStart(2, '0');
+    R.querySelector('#pBar').style.width = (pt / 30 * 100) + '%';
+  };
+}
+
+(() => {
+const LOGO = document.querySelector('#logoBig img').src;
+const CUES = [
+  {s: 0.4,e: 4.5,file: "audio/vo-01.mp3",nocap: true,text: "Dahulu kala, seorang nelayan menangkap ikan emas yang bisa berbicara."},
+  {s: 6,e: 10.9,file: "audio/vo-02.mp3",text: "Video tadi, dari gambar sampai suaranya, dibuat cuma dari satu kalimat ide."},
+  {s: 11,e: 16.5,file: "audio/vo-03.mp3",text: "Namanya Story Studio di Klipers. Empat langkah, dari ide jadi video."},
+  {s: 16.6,e: 22.95,file: "audio/vo-04.mp3",text: "Tulis idemu, pilih gaya visual, durasi, dan format. Lalu klik Tulis naskah, gratis."},
+  {s: 24.1,e: 29.2,file: "audio/vo-05.mp3",text: "AI menyusun adegan demi adegan, lengkap dengan narasinya. Tinggal kamu rapikan."},
+  {s: 29.8,e: 35.3,file: "audio/vo-06.mp3",text: "Di Storyboard, buat semua gambar sekali klik. Wajah tokohnya tetap sama di tiap adegan."},
+  {s: 35.9,e: 40.85,file: "audio/vo-07.mp3",text: "Rekam narasi dengan suara AI, pasang efek suara otomatis, dan atur gerak kamera."},
+  {s: 41.1,e: 45.75,file: "audio/vo-08.mp3",text: "Di Editor, pilih gaya subtitle dan musik latar, lalu ekspor MP4.",say: "Di Editor, pilih gaya subtitle dan musik latar, lalu ekspor em pe empat."},
+  {s: 46,e: 49,file: "audio/vo-09.mp3",text: "Judul, caption, dan cover juga disiapkan."},
+  {s: 49.8,e: 54.35,file: "audio/vo-10.mp3",text: "Lalu jadwalkan auto upload ke lima platform sekaligus, langsung dari Klipers."},
+  {s: 55.4,e: 61.1,file: "audio/vo-11.mp3",text: "Story Studio di Klipers. Satu ide, jadi video cerita. Download di Google Play sekarang."}
+];
+let hookSub = null, flowSync = null;
+
+storyEngine({
+  W: 1080, H: 1920, D: 63, CUES, capWords: 4,
+  build(A) {
+    const { tl, $, $$, type, say, sfx } = A;
+    const app = $('#app');
+    buildStudio(app, { mode: 'm', aspect: '9:16', logo: LOGO });
+
+    /* ---------- HOOK (0 – 11) ---------- */
+    $('#hv0').innerHTML = art(0, { uid: 'h0' });
+    $('#hv1').innerHTML = art(1, { uid: 'h1' });
+    $('#tagI0').innerHTML = IC.image; $('#tagI1').innerHTML = IC.mic; $('#tagI2').innerHTML = IC.caps;
+    $('#ideaIc').innerHTML = IC.bulb;
+    tl.fromTo('#hv0', { opacity: 0 }, { opacity: 1, duration: .35, immediateRender: false }, 0);
+    tl.fromTo('#hv0', { scale: 1, x: 0 }, { scale: 1.1, x: -30, duration: 3.2, ease: 'none', immediateRender: false }, 0);
+    tl.to('#hv1', { opacity: 1, duration: .25 }, 2.9);
+    tl.fromTo('#hv1', { scale: 1.12 }, { scale: 1.02, duration: 3.2, ease: 'none', immediateRender: false }, 2.9);
+    tl.fromTo('#hbar', { width: 0 }, { width: '19%', duration: 5.8, ease: 'none', immediateRender: false }, 0);
+    sfx(0.05, 'whoosh', .3);
+    tl.to('#hflash', { opacity: .85, duration: .08 }, 5.75);
+    tl.to('#hflash', { opacity: 0, duration: .35 }, 5.83);
+    sfx(5.75, 'strike', .45);
+    tl.to('#hpause', { opacity: 1, duration: .15 }, 5.8);
+    tl.to('#hpause', { opacity: 0, duration: .3 }, 6.9);
+    tl.to('#hv', { scale: .37, x: 70, y: 420, borderRadius: 80, boxShadow: '0 40px 100px rgba(0,0,0,.28)', duration: .8, ease: 'power3.inOut' }, 5.95);
+    tl.to('#hsub', { opacity: 0, duration: .2 }, 5.95);
+    const ws = $$('#hR .w');
+    [6.15, 6.4, 8.55, 8.8, 9.35].forEach((t, k) => tl.fromTo(ws[k], { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: .4, ease: 'back.out(1.6)', immediateRender: false }, t));
+    tl.set(ws, { opacity: 0 }, 0);
+    [[0, 6.95], [1, 7.35], [2, 7.75]].forEach(([k, t]) => { tl.fromTo('#tag' + k, { opacity: 0, scale: .6 }, { opacity: 1, scale: 1, duration: .35, ease: 'back.out(2)', immediateRender: false }, t); sfx(t, 'click', .3); });
+    tl.fromTo('#idea', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: .35, immediateRender: false }, 9.55);
+    type(9.7, 10.5, '#ideaTx', 'Legenda Danau Toba, akhir yang haru.');
+    sfx(9.4, 'success', .3);
+    const c0 = CUES[0];
+    hookSub = t => {
+      if (t > 5.95) return;
+      let wi = -1; c0.words.forEach((w, k) => { if (t >= w.st) wi = k; });
+      const el = $('#hsub');
+      if (wi < 0) { el.innerHTML = ''; return; }
+      const s = Math.floor(wi / 3) * 3;
+      el.innerHTML = c0.words.slice(s, s + 3).map((w, k) => s + k === wi ? `<span class="on">${w.w}</span>` : w.w).join(' ');
+    };
+    tl.to('#hook', { autoAlpha: 0, y: -40, duration: .45, ease: 'power2.in' }, 10.6);
+
+    /* ---------- HP (10,8 – 51,0) ---------- */
+    tl.set('#phone', { autoAlpha: 0 }, 0);
+    tl.fromTo('#phone', { autoAlpha: 0, y: 120 }, { autoAlpha: 1, y: 0, duration: .65, ease: 'power3.out', immediateRender: false }, 10.8);
+    sfx(10.8, 'whoosh', .35);
+    flowSync = storyFlow(A, { root: app, vh: 776, aspect: '9:16', mode: 'm', cursorStart: { x: 260, y: 520 } });
+    const HD = [[10.9, 16.1], [16.1, 24.0], [24.0, 29.8], [29.8, 35.75], [35.75, 41.0], [41.0, 46.0], [46.0, 49.4], [49.4, 54.6]];
+    HD.forEach(([a, b], k) => {
+      tl.set('#hd' + k, { autoAlpha: 0 }, 0);
+      tl.fromTo('#hd' + k, { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: .35, ease: 'power2.out', immediateRender: false }, a);
+      tl.to('#hd' + k, { autoAlpha: 0, y: -16, duration: .25 }, b - .25);
+    });
+    tl.to('#phone', { autoAlpha: 0, y: 80, scale: .96, duration: .5, ease: 'power2.in' }, 54.6);
+
+    /* ---------- CTA (51,4 – 60) ---------- */
+    $('#flow').innerHTML = [['bulb', 'Ide'], ['scroll', 'Naskah'], ['gallery', 'Storyboard'], ['clapper', 'Editor']].map(([k, l]) => `<span>${IC[k]}${l}</span>`).join('<i>→</i>') + `<i>→</i><span class="plats5">${IC.upload}Auto upload ${['youtube', 'tiktok', 'instagram', 'facebook', 'threads'].map(x => PLAT_IC[x]).join('')}</span>`;
+    $('#ctaVid').innerHTML = [0, 1, 2, 4].map(k => `<div>${art(k, { uid: 'cv' + k })}</div>`).join('');
+    tl.set('#cta', { autoAlpha: 0 }, 0);
+    tl.set('#cta', { autoAlpha: 1 }, 55);
+    tl.fromTo('#logoBig', { scale: 0, rotation: -20 }, { scale: 1, rotation: 0, duration: .55, ease: 'back.out(1.8)', immediateRender: false }, 55.05);
+    tl.fromTo('#wordmark', { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: .5, ease: 'power3.out', immediateRender: false }, 55.2);
+    tl.fromTo(['#play', '.gp'], { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: .45, stagger: .1, ease: 'power3.out', immediateRender: false }, 55.6);
+    tl.fromTo('#tagline', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: .45, immediateRender: false }, 56.7);
+    tl.fromTo('#flow span, #flow i', { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: .3, stagger: .08, immediateRender: false }, 57);
+    tl.fromTo('#ctaUrl', { opacity: 0 }, { opacity: 1, duration: .4, immediateRender: false }, 57.6);
+    tl.fromTo('#ctaVid div', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: .4, stagger: .08, immediateRender: false }, 57.8);
+    tl.fromTo('.gp .shine', { x: -160 }, { x: 520, duration: .8, ease: 'power2.inOut', immediateRender: false }, 60);
+    tl.to('.gp', { scale: 1.06, duration: .25, yoyo: true, repeat: 1 }, 59.8);
+    sfx(55.05, 'riser', .3);
+    sfx(55.6, 'success', .35);
+  },
+  onSync(t) { hookSub && hookSub(t); flowSync && flowSync(t); },
+});
+})();
+</script>
+</body>
+</html>

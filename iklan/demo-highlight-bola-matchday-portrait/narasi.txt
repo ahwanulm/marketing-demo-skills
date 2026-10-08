@@ -1,0 +1,32 @@
+A. NARASI UTUH
+Mau bikin konten bola, tapi capek potong videonya satu-satu? Biar Klipers bantu.
+Buka Klipers, pilih Highlight Bola, lalu tempel link video pertandingannya.
+Pilih Storytelling AI, tentukan suara narator, dan atur tampilan papan skor.
+Klipers akan menganalisis pertandingan, memilih momen penting, lalu merangkainya jadi highlight.
+Hasilnya? Video vertikal lengkap dengan narasi, siap kamu unduh dan bagikan.
+Bikin konten bola dengan Klipers. Download sekarang di Google Play.
+
+B. PER KALIMAT
+[vo-01.mp3] 0.00–5.65
+Mau bikin konten bola, tapi capek potong videonya satu-satu? Biar Klipers bantu.
+
+[vo-02.mp3] 5.65–10.44
+Buka Klipers, pilih Highlight Bola, lalu tempel link video pertandingannya.
+
+[vo-03.mp3] 10.44–15.72
+Pilih Storytelling AI, tentukan suara narator, dan atur tampilan papan skor.
+
+[vo-04.mp3] 15.72–21.43
+Klipers akan menganalisis pertandingan, memilih momen penting, lalu merangkainya jadi highlight.
+
+[vo-05.mp3] 21.43–26.69
+Hasilnya? Video vertikal lengkap dengan narasi, siap kamu unduh dan bagikan.
+
+[vo-06.mp3] 26.69–31.085714
+Bikin konten bola dengan Klipers. Download sekarang di Google Play.
+
+CATATAN
+Audio master user: ElevenLabs Zan - Conversational, disimpan audio/full-voiceover.mp3.
+Durasi 31.085714 detik. Batas adegan mengikuti jeda audio via silencedetect.
+Caption kata masih interpolasi per kalimat, bukan forced alignment per kata.
+File vo-NN tidak diperlukan untuk playback: HTML memakai master utuh.

@@ -1,0 +1,1657 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Demo Klipers AI — Image & Video Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+:root{
+  --k:0.56;
+  --bg-app:#0a0a0c;
+  --bg-surface:#121216;
+  --bg-surface-2:#18181e;
+  --bg-surface-3:#22222a;
+  --border-line:#262630;
+  --border-line-strong:#383848;
+  --text-fg:#ffffff;
+  --text-fg-muted:#9494a4;
+  --text-fg-subtle:#626272;
+  --accent-emerald:#10b981;
+  --accent-yellow:#f59e0b;
+  --accent-cyan:#06b6d4;
+  --accent-blue:#3b82f6;
+  --accent-purple:#8b5cf6;
+  --stage-bg:#050507;
+  --inv:#ffffff;
+  --inv-text:#0a0a0c;
+}
+body.light{
+  --bg-app:#f3f4f7;
+  --bg-surface:#ffffff;
+  --bg-surface-2:#f8f9fa;
+  --bg-surface-3:#e9ecef;
+  --border-line:#dee2e6;
+  --border-line-strong:#ced4da;
+  --text-fg:#111827;
+  --text-fg-muted:#6b7280;
+  --text-fg-subtle:#9ca3af;
+  --stage-bg:#e5e7eb;
+  --inv:#111827;
+  --inv-text:#ffffff;
+}
+*{box-sizing:border-box;user-select:none}
+html,body{margin:0;height:100%;background:#000;overflow:hidden;font-family:Inter,system-ui,-apple-system,sans-serif;color:var(--text-fg)}
+body.light{background:#d1d5db}
+svg{display:block}
+
+/* Viewport stage scaling (1920x1080 stage) */
+#viewport{position:fixed;left:0;right:0;top:0;bottom:56px;display:flex;align-items:center;justify-content:center}
+body.rec #viewport{bottom:0}
+#stageWrap{position:relative;width:calc(1920px * var(--k));height:calc(1080px * var(--k))}
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform:scale(var(--k));transform-origin:0 0;overflow:hidden;background:var(--stage-bg)}
+
+.ambient-dots{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,0.06) 1.2px,transparent 1.3px);background-size:36px 36px;-webkit-mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%);mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%)}
+body.light .ambient-dots{background-image:radial-gradient(rgba(0,0,0,0.06) 1.2px,transparent 1.3px)}
+#glowA,#glowB{position:absolute;border-radius:50%;filter:blur(120px);pointer-events:none}
+#glowA{width:900px;height:900px;left:80px;top:-260px;background:radial-gradient(circle,rgba(59,130,246,0.12),transparent 65%)}
+#glowB{width:1000px;height:1000px;right:-220px;bottom:-380px;background:radial-gradient(circle,rgba(16,185,129,0.1),transparent 65%)}
+
+/* Main Browser App Window */
+#appWindow{position:absolute;left:80px;top:40px;width:1760px;height:940px;border-radius:24px;background:var(--bg-app);border:1px solid var(--border-line-strong);box-shadow:0 50px 140px rgba(0,0,0,0.85);overflow:hidden;display:flex;flex-direction:column}
+body.light #appWindow{box-shadow:0 30px 90px rgba(0,0,0,0.18)}
+
+/* Window Header Bar */
+.window-topbar{height:52px;background:var(--bg-surface);border-bottom:1px solid var(--border-line);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;z-index:40}
+.mac-dots{display:flex;align-items:center;gap:8px}
+.mac-dot{width:12px;height:12px;border-radius:50%}
+.mac-dot.red{background:#ef4444}
+.mac-dot.yellow{background:#f59e0b}
+.mac-dot.green{background:#10b981}
+
+.url-capsule{display:flex;align-items:center;gap:10px;padding:6px 20px;border-radius:12px;background:var(--bg-surface-2);border:1px solid var(--border-line);font-size:13px;font-weight:500;color:var(--text-fg-muted);letter-spacing:0.2px}
+.url-capsule svg{width:14px;height:14px;color:var(--text-fg-subtle)}
+.url-capsule b{color:var(--text-fg)}
+
+.topbar-actions{display:flex;align-items:center;gap:14px}
+.credit-badge{display:flex;align-items:center;gap:7px;padding:5px 14px;border-radius:999px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);font-size:12px;font-weight:700;color:#fbbf24;box-shadow:0 0 16px rgba(245,158,11,0.15)}
+.new-chat-btn{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:10px;background:var(--bg-surface-2);border:1px solid var(--border-line);font-size:12px;font-weight:600;color:var(--text-fg);cursor:pointer;transition:all .2s}
+.new-chat-btn:hover{background:var(--bg-surface-3)}
+
+/* App Layout Grid: Sidebar + Canvas */
+.app-body{display:grid;grid-template-columns:250px 1fr;flex:1;overflow:hidden;position:relative}
+
+/* Left Sidebar */
+.app-sidebar{background:var(--bg-surface);border-right:1px solid var(--border-line);padding:18px 14px;display:flex;flex-direction:column;gap:6px;z-index:20}
+.brand-box{display:flex;align-items:center;gap:12px;padding:4px 8px 16px;border-bottom:1px solid var(--border-line);margin-bottom:6px}
+.brand-logo{width:36px;height:36px;border-radius:50%;background:#ffffff;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 0 12px rgba(255,255,255,0.25);flex-shrink:0}
+.brand-logo img{width:90%;height:90%;object-fit:contain}
+.brand-name{font-family:Montserrat,sans-serif;font-weight:900;font-size:16px;letter-spacing:-0.5px}
+.brand-name small{display:block;font-family:Inter,sans-serif;font-weight:600;font-size:10px;color:var(--text-fg-muted);letter-spacing:1px;text-transform:uppercase}
+
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;font-size:13.5px;font-weight:600;color:var(--text-fg-muted);cursor:pointer;transition:all .18s;position:relative}
+.nav-item:hover{background:var(--bg-surface-2);color:var(--text-fg)}
+.nav-item.active{background:rgba(255,255,255,0.08);color:var(--text-fg);border:1px solid var(--border-line)}
+body.light .nav-item.active{background:#ffffff;border-color:var(--border-line-strong);box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.nav-item svg{width:18px;height:18px;flex-shrink:0}
+.nav-badge{margin-left:auto;font-size:10px;font-weight:800;padding:2px 7px;border-radius:6px;background:rgba(16,185,129,0.15);color:var(--accent-emerald)}
+
+.sidebar-bottom{margin-top:auto;padding-top:14px;border-top:1px solid var(--border-line);display:flex;flex-direction:column;gap:6px}
+.user-profile-bar{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;background:var(--bg-surface-2)}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:#fff}
+.user-meta{font-size:12px;font-weight:700}
+.user-meta small{display:block;font-size:10px;font-weight:500;color:var(--text-fg-muted)}
+
+/* Main Workspace Viewport */
+.main-viewport{position:relative;flex:1;overflow-y:auto;overflow-x:hidden;background:var(--bg-app);display:flex;flex-direction:column;padding:24px 36px 36px}
+.workspace-watermark{position:absolute;left:50%;top:32%;transform:translate(-50%,-50%);font-family:Montserrat,sans-serif;font-weight:900;font-size:160px;letter-spacing:-6px;color:rgba(255,255,255,0.02);pointer-events:none;white-space:nowrap;z-index:0}
+body.light .workspace-watermark{color:rgba(0,0,0,0.03)}
+
+/* Interactive Tab Controller Bar */
+.mode-switch-pills{display:flex;align-items:center;gap:8px;background:var(--bg-surface);padding:4px;border-radius:14px;border:1px solid var(--border-line);width:fit-content;margin:0 auto 20px;z-index:10}
+.mode-pill{display:flex;align-items:center;gap:8px;padding:8px 18px;border-radius:10px;font-size:13px;font-weight:700;color:var(--text-fg-muted);cursor:pointer;transition:all .2s}
+.mode-pill.active{background:var(--inv);color:var(--inv-text);box-shadow:0 4px 14px rgba(0,0,0,0.25)}
+.mode-pill svg{width:15px;height:15px}
+
+/* Page Containers */
+.generator-page{display:none;flex-direction:column;align-items:center;width:100%;max-width:1100px;margin:0 auto;position:relative;z-index:10}
+.generator-page.active{display:flex}
+
+/* Header Showcase / Title Area */
+.page-title-box{text-align:center;margin-bottom:22px}
+.page-title-box h1{margin:0 0 6px;font-family:Montserrat,sans-serif;font-weight:900;font-size:34px;letter-spacing:-1px}
+.page-title-box p{margin:0;font-size:14px;color:var(--text-fg-muted)}
+
+/* Top Toolbar: Model Selector + Settings Pills */
+.toolbar-ribbon{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;position:relative;z-index:30}
+
+/* Model Selector Button */
+.model-dropdown-trigger{position:relative;display:flex;align-items:center;gap:10px;padding:8px 16px;border-radius:999px;background:var(--bg-surface);border:1px solid var(--border-line);cursor:pointer;font-size:13px;font-weight:700;color:var(--text-fg);box-shadow:0 2px 8px rgba(0,0,0,0.18);transition:all .2s}
+.model-dropdown-trigger:hover{border-color:var(--border-line-strong);background:var(--bg-surface-2)}
+.model-dropdown-trigger .m-icon{width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,#3b82f6,#10b981);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:900}
+.model-dropdown-trigger .promo-tag{padding:2px 8px;border-radius:6px;background:rgba(16,185,129,0.18);color:var(--accent-emerald);font-size:10px;font-weight:800;letter-spacing:0.4px}
+.model-dropdown-trigger .cost-tag{font-size:11px;color:#fbbf24;font-weight:800}
+
+/* Custom Dropdown Menus */
+.custom-dropdown-panel{position:absolute;left:0;top:calc(100% + 8px);width:340px;background:var(--bg-surface);border:1px solid var(--border-line-strong);border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,0.6);padding:8px;z-index:100;display:none;animation:dropIn .18s cubic-bezier(0.16, 1, 0.3, 1) forwards}
+.custom-dropdown-panel.open{display:block}
+@keyframes dropIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.dd-search-box{display:flex;align-items:center;gap:8px;background:var(--bg-surface-2);border:1px solid var(--border-line);border-radius:10px;padding:8px 12px;margin-bottom:8px}
+.dd-search-box input{background:transparent;border:0;outline:none;font-size:12px;color:var(--text-fg);width:100%}
+.dd-group-header{padding:6px 10px 4px;font-size:10px;font-weight:800;color:var(--text-fg-subtle);letter-spacing:0.8px;text-transform:uppercase}
+.dd-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:10px;cursor:pointer;transition:all .15s;font-size:12.5px;font-weight:600;color:var(--text-fg-muted)}
+.dd-item:hover{background:var(--bg-surface-2);color:var(--text-fg)}
+.dd-item.selected{background:var(--bg-surface-3);color:var(--text-fg);font-weight:700}
+.dd-item-meta{display:flex;align-items:center;gap:8px}
+.dd-item-check{color:var(--accent-emerald);opacity:0}
+.dd-item.selected .dd-item-check{opacity:1}
+
+/* Adjustments Toolbar Pills (Aspect, Style, Res) */
+.adjustments-pills-bar{display:flex;align-items:center;gap:8px;background:var(--bg-surface);padding:4px 8px;border-radius:999px;border:1px solid var(--border-line)}
+.adj-pill{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;color:var(--text-fg-muted);cursor:pointer;transition:all .18s;background:transparent;border:0}
+.adj-pill:hover{color:var(--text-fg);background:var(--bg-surface-2)}
+.adj-pill.active{background:rgba(255,255,255,0.08);color:var(--text-fg)}
+body.light .adj-pill.active{background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.1)}
+
+/* Ratio Mini Preview Box */
+.ratio-box-preview{border:1.5px solid var(--text-fg-muted);border-radius:2px;display:inline-block;transition:all .15s}
+.ratio-box-preview.active{border-color:var(--accent-emerald)}
+
+/* Dropdown Modal for Ratio, Style & Advanced */
+.settings-flyout{position:absolute;top:calc(100% + 8px);right:0;background:var(--bg-surface);border:1px solid var(--border-line-strong);border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,0.6);padding:14px;z-index:90;display:none;width:380px}
+.settings-flyout.open{display:block}
+.flyout-title{font-size:11px;font-weight:800;letter-spacing:0.8px;text-transform:uppercase;color:var(--text-fg-subtle);margin-bottom:10px}
+.ratio-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px}
+.ratio-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:8px 4px;border-radius:10px;background:var(--bg-surface-2);border:1px solid var(--border-line);cursor:pointer;transition:all .18s}
+.ratio-tile:hover{border-color:var(--border-line-strong);background:var(--bg-surface-3)}
+.ratio-tile.selected{border-color:var(--accent-emerald);background:rgba(16,185,129,0.08)}
+.ratio-tile span{font-size:11px;font-weight:700}
+
+.styles-pill-grid{display:flex;flex-wrap:wrap;gap:6px;max-height:160px;overflow-y:auto;padding-right:4px}
+.style-chip{padding:5px 10px;border-radius:8px;background:var(--bg-surface-2);border:1px solid var(--border-line);font-size:11.5px;font-weight:600;color:var(--text-fg-muted);cursor:pointer;transition:all .15s}
+.style-chip:hover{background:var(--bg-surface-3);color:var(--text-fg)}
+.style-chip.selected{background:var(--inv);color:var(--inv-text);border-color:var(--inv);font-weight:700}
+
+/* Prompt Box (Matching ImagePage.tsx exact) */
+.prompt-container-card{width:100%;background:var(--bg-surface);border:1px solid var(--border-line);border-radius:24px;padding:16px 20px;box-shadow:0 20px 50px rgba(0,0,0,0.25);position:relative;margin-bottom:20px;transition:border-color .2s}
+.prompt-container-card:focus-within{border-color:var(--border-line-strong)}
+
+.prompt-textarea-box{display:flex;align-items:flex-start;gap:14px}
+.prompt-textarea{width:100%;background:transparent;border:0;outline:none;font-size:16px;line-height:1.45;color:var(--text-fg);font-family:Inter,sans-serif;font-weight:500;resize:none;min-height:56px}
+.prompt-textarea::placeholder{color:var(--text-fg-subtle)}
+
+/* Reference Attachment Bar inside prompt */
+.ref-attachment-row{display:none;align-items:center;gap:10px;padding-bottom:12px;margin-bottom:10px;border-bottom:1px solid var(--border-line)}
+.ref-attachment-row.visible{display:flex}
+.ref-thumb{width:46px;height:46px;border-radius:8px;overflow:hidden;border:1px solid var(--border-line-strong);position:relative}
+.ref-thumb img{width:100%;height:100%;object-fit:cover}
+.ref-thumb-del{position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:50%;background:rgba(0,0,0,0.7);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;cursor:pointer}
+.ref-info-text{font-size:12px;color:var(--text-fg-muted)}
+.ref-info-text b{color:var(--text-fg)}
+
+/* Quick Sample Chips */
+.quick-prompt-chips{display:flex;align-items:center;gap:6px;margin:8px 0 12px;overflow-x:auto;padding-bottom:4px}
+.quick-chip{padding:4px 10px;border-radius:8px;background:var(--bg-surface-2);border:1px solid var(--border-line);font-size:11px;font-weight:500;color:var(--text-fg-muted);cursor:pointer;white-space:nowrap;transition:all .15s}
+.quick-chip:hover{background:var(--bg-surface-3);color:var(--text-fg)}
+
+/* Prompt Footer Actions */
+.prompt-footer-row{display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06)}
+.prompt-tools-left{display:flex;align-items:center;gap:10px}
+.tool-btn{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:var(--bg-surface-2);border:1px solid var(--border-line);font-size:12px;font-weight:600;color:var(--text-fg-muted);cursor:pointer;transition:all .18s}
+.tool-btn:hover{background:var(--bg-surface-3);color:var(--text-fg)}
+.tool-btn.active{background:var(--inv);color:var(--inv-text);border-color:var(--inv)}
+.tool-btn svg{width:14px;height:14px}
+
+/* Toggle Pill for Auto-Enhance */
+.auto-toggle-pill{width:22px;height:12px;border-radius:999px;background:#383848;position:relative;display:inline-block;transition:all .2s}
+.auto-toggle-pill .dot{position:absolute;left:2px;top:2px;width:8px;height:8px;border-radius:50%;background:#ffffff;transition:all .2s}
+.tool-btn.active .auto-toggle-pill{background:#111}
+.tool-btn.active .auto-toggle-pill .dot{left:12px;background:#000}
+
+/* Main Generate Button */
+.generate-btn{display:flex;align-items:center;gap:8px;padding:9px 22px;border-radius:999px;background:var(--inv);color:var(--inv-text);font-size:13.5px;font-weight:800;cursor:pointer;border:0;box-shadow:0 4px 18px rgba(255,255,255,0.25);transition:all .2s}
+.generate-btn:hover{transform:scale(1.02);box-shadow:0 6px 24px rgba(255,255,255,0.35)}
+.generate-btn:active{transform:scale(0.98)}
+.generate-btn svg{width:16px;height:16px}
+.generate-btn .credit-cost{padding:2px 8px;border-radius:6px;background:rgba(0,0,0,0.12);font-size:11px;font-weight:800}
+body.light .generate-btn .credit-cost{background:rgba(255,255,255,0.25)}
+
+/* Loading / Generating State Card */
+.generating-card{width:100%;background:var(--bg-surface);border:1px solid var(--border-line);border-radius:24px;padding:32px;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;margin-bottom:20px;box-shadow:0 20px 50px rgba(0,0,0,0.4)}
+.generating-card.visible{display:flex}
+
+/* Pixel / Radar Spinner Animation */
+.ai-cube-spinner{position:relative;width:64px;height:64px;perspective:800px}
+.cube-box{width:100%;height:100%;position:relative;transform-style:preserve-3d;animation:spinCube 3s infinite linear}
+@keyframes spinCube{0%{transform:rotateX(0deg) rotateY(0deg)}100%{transform:rotateX(360deg) rotateY(360deg)}}
+.cube-face{position:absolute;width:64px;height:64px;border:2px solid rgba(59,130,246,0.6);background:rgba(59,130,246,0.08);border-radius:8px}
+.cube-face.f1{transform:translateZ(32px)}
+.cube-face.f2{transform:rotateY(180deg) translateZ(32px)}
+.cube-face.f3{transform:rotateY(90deg) translateZ(32px);border-color:rgba(16,185,129,0.6)}
+.cube-face.f4{transform:rotateY(-90deg) translateZ(32px);border-color:rgba(16,185,129,0.6)}
+.cube-face.f5{transform:rotateX(90deg) translateZ(32px);border-color:rgba(245,158,11,0.6)}
+.cube-face.f6{transform:rotateX(-90deg) translateZ(32px);border-color:rgba(245,158,11,0.6)}
+
+.gen-status-text{font-size:15px;font-weight:700;color:var(--text-fg);display:flex;align-items:center;gap:8px}
+.gen-progress-track{width:360px;height:6px;border-radius:999px;background:var(--bg-surface-3);overflow:hidden;position:relative}
+.gen-progress-fill{position:absolute;left:0;top:0;height:100%;width:0;background:linear-gradient(90deg,#3b82f6,#10b981,#3b82f6);border-radius:999px;transition:width .3s}
+
+/* Result Presentation Showcase Card */
+.result-showcase-card{width:100%;background:var(--bg-surface);border:1px solid var(--border-line);border-radius:24px;overflow:hidden;display:none;flex-direction:column;box-shadow:0 30px 80px rgba(0,0,0,0.5);margin-bottom:20px}
+.result-showcase-card.visible{display:flex}
+
+.result-media-stage{width:100%;height:460px;position:relative;background:#000;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.result-media-stage img, .result-media-stage svg{width:100%;height:100%;object-fit:cover}
+
+/* Result Metadata Overlay Header */
+.result-meta-overlay{position:absolute;top:16px;left:16px;right:16px;display:flex;align-items:center;justify-content:space-between;z-index:20;pointer-events:none}
+.result-tag-pill{display:flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:rgba(10,10,12,0.75);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.15);font-size:12px;font-weight:700;color:#ffffff}
+.result-tag-pill span.dot{width:6px;height:6px;border-radius:50%;background:var(--accent-emerald)}
+
+/* Result Action Buttons Footer */
+.result-actions-footer{padding:14px 20px;background:var(--bg-surface);border-top:1px solid var(--border-line);display:flex;align-items:center;justify-content:space-between}
+.result-prompt-summary{font-size:13px;font-weight:500;color:var(--text-fg-muted);max-width:540px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.result-btn-group{display:flex;align-items:center;gap:10px}
+
+.bridge-to-video-btn{display:flex;align-items:center;gap:8px;padding:8px 18px;border-radius:999px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;font-size:13px;font-weight:800;cursor:pointer;border:0;box-shadow:0 4px 16px rgba(59,130,246,0.35);transition:all .2s}
+.bridge-to-video-btn:hover{transform:scale(1.03);box-shadow:0 6px 22px rgba(59,130,246,0.5)}
+.bridge-to-video-btn svg{width:16px;height:16px}
+
+.secondary-action-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;background:var(--bg-surface-2);border:1px solid var(--border-line);font-size:12px;font-weight:600;color:var(--text-fg);cursor:pointer;transition:all .18s}
+.secondary-action-btn:hover{background:var(--bg-surface-3)}
+
+/* Video Player in Video Result */
+.video-player-container{width:100%;height:100%;position:relative;background:#000;display:flex;align-items:center;justify-content:center}
+.video-scrub-bar{position:absolute;left:20px;right:20px;bottom:16px;background:rgba(18,18,24,0.85);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:8px 16px;display:flex;align-items:center;gap:14px;z-index:25}
+.v-play-btn{width:32px;height:32px;border-radius:50%;background:#ffffff;color:#000;border:0;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;font-weight:900}
+.v-progress-rail{flex:1;height:5px;border-radius:999px;background:rgba(255,255,255,0.2);position:relative;cursor:pointer}
+.v-progress-fill{position:absolute;left:0;top:0;height:100%;width:45%;background:#3b82f6;border-radius:999px}
+.v-time-code{font-family:JetBrains Mono,monospace;font-size:11px;font-weight:700;color:#ffffff}
+
+/* Motion Simulated Cursor */
+#simCursor{position:absolute;left:960px;top:540px;width:24px;height:24px;z-index:9999;pointer-events:none;filter:drop-shadow(0 4px 10px rgba(0,0,0,0.6));opacity:0}
+#cursorRing{position:absolute;left:-16px;top:-16px;width:32px;height:32px;border-radius:50%;border:2px solid #ffffff;opacity:0;pointer-events:none}
+
+/* Synchronized Caption Bar (per marketing-ads convention) */
+#capsOverlay{position:absolute;left:0;right:0;bottom:30px;text-align:center;z-index:100;opacity:0;pointer-events:none}
+#capsOverlay .caps-box{display:inline-block;padding:12px 28px;border-radius:18px;background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.12);max-width:1400px}
+#capsOverlay .caps-word{display:inline-block;margin:0 5px;font-family:Montserrat,sans-serif;font-weight:900;font-size:36px;line-height:1.2;color:#ffffff;-webkit-text-stroke:4px rgba(0,0,0,0.8);paint-order:stroke fill}
+#capsOverlay .caps-word.active{color:#000000;-webkit-text-stroke:0;background:#ffffff;border-radius:8px;padding:0 8px}
+body.nocaps #capsOverlay{display:none}
+
+/* Player Control Bar (bottom 56px per marketing-ads convention) */
+#playerControlsBar{position:fixed;left:0;right:0;bottom:0;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:#0c0c10;border-top:1px solid #202028;font-size:13px;font-weight:600;color:#9ca3af;z-index:900}
+.ctl-group{display:flex;align-items:center;gap:12px}
+.ctl-btn{height:34px;padding:0 14px;border-radius:8px;border:1px solid #2a2a38;background:#181822;color:#ffffff;font-size:12.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s}
+.ctl-btn:hover{background:#222230}
+.ctl-btn.active{background:#ffffff;color:#000000;border-color:#ffffff}
+.timeline-slider{width:300px;height:6px;border-radius:999px;background:#262634;position:relative;cursor:pointer}
+.timeline-fill{position:absolute;left:0;top:0;height:100%;width:0;background:#3b82f6;border-radius:999px}
+.time-display{font-family:JetBrains Mono,monospace;font-size:12px;font-weight:700;color:#ffffff}
+</style>
+</head>
+<body>
+
+<div id="viewport">
+  <div id="stageWrap">
+    <div id="stage">
+      <div class="ambient-dots"></div>
+      <div id="glowA"></div>
+      <div id="glowB"></div>
+
+      <!-- Simulated Pointer Cursor -->
+      <div id="simCursor">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M4 3L11 20L14 13L21 10L4 3Z" fill="#ffffff" stroke="#000000" stroke-width="2" stroke-linejoin="round"/>
+        </svg>
+        <div id="cursorRing"></div>
+      </div>
+
+      <!-- Main Studio App Window -->
+      <div id="appWindow">
+        <!-- Top Window Navigation Bar -->
+        <div class="window-topbar">
+          <div class="mac-dots">
+            <div class="mac-dot red"></div>
+            <div class="mac-dot yellow"></div>
+            <div class="mac-dot green"></div>
+          </div>
+
+          <div class="url-capsule" id="urlDisplay">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <span id="urlPathText">https://<b>ai.klipers.pro</b>/image</span>
+          </div>
+
+          <div class="topbar-actions">
+            <div class="credit-badge" title="Saldo Segment / Kredit AI">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M6 3h12l4 6-10 12L2 9l4-6z"/>
+              </svg>
+              <span>250 💎 Credits</span>
+            </div>
+            <button class="new-chat-btn" id="newChatBtn" onclick="resetState()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+              <span>Sesi Baru</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- App Body Layout -->
+        <div class="app-body">
+          <!-- Left Navigation Sidebar -->
+          <div class="app-sidebar">
+            <div class="brand-box">
+              <div class="brand-logo">
+                <img id="mainLogoImg" src="" alt="Klipers Pro Logo">
+              </div>
+              <div class="brand-name">
+                Klipers AI
+                <small>Creative Workspace</small>
+              </div>
+            </div>
+
+            <div class="nav-item active" id="navImageTab" onclick="switchMode('image')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+              <span>AI Gambar</span>
+              <span class="nav-badge">PROMO</span>
+            </div>
+
+            <div class="nav-item" id="navVideoTab" onclick="switchMode('video')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="23 7 16 12 23 17 23 7"/>
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+              </svg>
+              <span>AI Video</span>
+            </div>
+
+            <div class="nav-item" onclick="alert('Workflow Node Editor aktif di mode penuh')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="12" r="3"/>
+                <line x1="8.5" y1="7.5" x2="15.5" y2="10.5"/><line x1="8.5" y1="16.5" x2="15.5" y2="13.5"/>
+              </svg>
+              <span>Workflow Node</span>
+            </div>
+
+            <div class="nav-item" onclick="alert('Galeri Karya')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 11H5m14 0a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2m14 0V9a2 2 0 0 0-2-2M5 11V9a2 2 0 0 1 2-2m0 0V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2M7 7h10"/>
+              </svg>
+              <span>Galeri Saya</span>
+            </div>
+
+            <div class="sidebar-bottom">
+              <div class="user-profile-bar">
+                <div class="user-avatar">KP</div>
+                <div class="user-meta">
+                  Klipers Pro Creator
+                  <small>Pro Plan Active</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Canvas Viewport -->
+          <div class="main-viewport" id="scrollContainer">
+            <div class="workspace-watermark">KLIPERS AI</div>
+
+            <!-- Fast Mode Pills -->
+            <div class="mode-switch-pills">
+              <div class="mode-pill active" id="btnModeImg" onclick="switchMode('image')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <span>AI Gambar (Canvas)</span>
+              </div>
+              <div class="mode-pill" id="btnModeVid" onclick="switchMode('video')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="23 7 16 12 23 17 23 7"/>
+                  <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                </svg>
+                <span>AI Video Generator</span>
+              </div>
+            </div>
+
+            <!-- ================= PAGE 1: AI IMAGE ================= -->
+            <div class="generator-page active" id="pageImage">
+              <div class="page-title-box">
+                <h1>AI Image Studio</h1>
+                <p>Generate gambar ultra-detail dengan model canggih dunia dalam hitungan detik.</p>
+              </div>
+
+              <!-- Top Toolbar (Model Selector + Adjustments) -->
+              <div class="toolbar-ribbon">
+                <!-- Model Dropdown Trigger -->
+                <div style="position:relative">
+                  <div class="model-dropdown-trigger" id="imgModelTrigger" onclick="toggleDropdown('imgModelDropdown')">
+                    <div class="m-icon">✦</div>
+                    <span id="selectedImgModelName">Seedream 5.0 Pro</span>
+                    <span class="promo-tag">Promo</span>
+                    <span class="cost-tag">1 💎</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                  </div>
+
+                  <!-- Model Dropdown List -->
+                  <div class="custom-dropdown-panel" id="imgModelDropdown">
+                    <div class="dd-search-box">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                      <input type="text" placeholder="Cari model gambar..." id="imgModelSearch" onkeyup="filterModels(this.value)">
+                    </div>
+
+                    <div class="dd-group-header">✨ Model Rekomendasi</div>
+                    <div class="dd-item selected" onclick="pickImgModel('Seedream 5.0 Pro', '1 💎', true)">
+                      <div class="dd-item-meta">
+                        <span>Seedream 5.0 Pro</span>
+                        <span class="promo-tag">Promo</span>
+                      </div>
+                      <span class="dd-item-check">✓</span>
+                    </div>
+                    <div class="dd-item" onclick="pickImgModel('Krea 2 Turbo', '1 💎', false)">
+                      <div class="dd-item-meta">
+                        <span>Krea 2 Turbo</span>
+                        <span style="font-size:10px;color:#06b6d4;font-weight:700">Realtime</span>
+                      </div>
+                      <span class="dd-item-check">✓</span>
+                    </div>
+                    <div class="dd-item" onclick="pickImgModel('GPT Image 2', '1 💎', false)">
+                      <div class="dd-item-meta">
+                        <span>GPT Image 2</span>
+                        <span style="font-size:10px;color:#a855f7;font-weight:700">Prompt Master</span>
+                      </div>
+                      <span class="dd-item-check">✓</span>
+                    </div>
+
+                    <div class="dd-group-header">⚡ Fast & Lightweight</div>
+                    <div class="dd-item" onclick="pickImgModel('Nano Banana 2 Lite', 'FREE', false)">
+                      <div class="dd-item-meta">
+                        <span>Nano Banana 2 Lite</span>
+                        <span style="font-size:9px;color:#10b981;font-weight:800;background:rgba(16,185,129,0.15);padding:1px 5px;border-radius:4px">FREE</span>
+                      </div>
+                      <span class="dd-item-check">✓</span>
+                    </div>
+                    <div class="dd-item" onclick="pickImgModel('Grok Imagine 3.0', '1 💎', false)">
+                      <div class="dd-item-meta">
+                        <span>Grok Imagine 3.0</span>
+                      </div>
+                      <span class="dd-item-check">✓</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Adjustments Bar -->
+                <div style="position:relative">
+                  <div class="adjustments-pills-bar">
+                    <!-- Aspect Ratio Pill -->
+                    <button class="adj-pill" id="pillRatioTrigger" onclick="toggleFlyout('ratioFlyout')">
+                      <span class="ratio-box-preview" id="ratioMiniBox" style="width:18px;height:10px"></span>
+                      <span id="activeRatioText">16:9</span>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+
+                    <!-- Style Preset Pill -->
+                    <button class="adj-pill" id="pillStyleTrigger" onclick="toggleFlyout('styleFlyout')">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                      <span id="activeStyleText">Cinematic</span>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+
+                    <!-- Resolution Pill -->
+                    <button class="adj-pill" id="pillResTrigger" onclick="cycleResolution()">
+                      <span style="font-size:11px;font-weight:800;color:var(--accent-emerald)" id="activeResText">2K</span>
+                    </button>
+
+                    <!-- Advanced Settings -->
+                    <button class="adj-pill" onclick="toggleFlyout('advFlyout')">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                      <span>Advanced</span>
+                    </button>
+                  </div>
+
+                  <!-- Ratio Flyout Panel -->
+                  <div class="settings-flyout" id="ratioFlyout">
+                    <div class="flyout-title">Pilih Aspek Rasio</div>
+                    <div class="ratio-grid">
+                      <div class="ratio-tile" onclick="pickRatio('1:1', 14, 14)">
+                        <div class="ratio-box-preview" style="width:14px;height:14px"></div>
+                        <span>1:1</span>
+                      </div>
+                      <div class="ratio-tile selected" onclick="pickRatio('16:9', 18, 10)">
+                        <div class="ratio-box-preview active" style="width:18px;height:10px"></div>
+                        <span>16:9</span>
+                      </div>
+                      <div class="ratio-tile" onclick="pickRatio('9:16', 10, 18)">
+                        <div class="ratio-box-preview" style="width:10px;height:18px"></div>
+                        <span>9:16</span>
+                      </div>
+                      <div class="ratio-tile" onclick="pickRatio('4:3', 16, 12)">
+                        <div class="ratio-box-preview" style="width:16px;height:12px"></div>
+                        <span>4:3</span>
+                      </div>
+                      <div class="ratio-tile" onclick="pickRatio('21:9', 22, 9)">
+                        <div class="ratio-box-preview" style="width:22px;height:9px"></div>
+                        <span>21:9</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Style Flyout Panel -->
+                  <div class="settings-flyout" id="styleFlyout">
+                    <div class="flyout-title">Gaya Visual (Style Preset)</div>
+                    <div class="styles-pill-grid">
+                      <div class="style-chip selected" onclick="pickStyle('Cinematic')">Cinematic</div>
+                      <div class="style-chip" onclick="pickStyle('Realistic')">Realistic</div>
+                      <div class="style-chip" onclick="pickStyle('Cyberpunk')">Cyberpunk</div>
+                      <div class="style-chip" onclick="pickStyle('Anime')">Anime</div>
+                      <div class="style-chip" onclick="pickStyle('3D Render')">3D Render</div>
+                      <div class="style-chip" onclick="pickStyle('Fantasy')">Fantasy</div>
+                      <div class="style-chip" onclick="pickStyle('Film Noir')">Film Noir</div>
+                      <div class="style-chip" onclick="pickStyle('Watercolor')">Watercolor</div>
+                      <div class="style-chip" onclick="pickStyle('Auto')">Auto</div>
+                    </div>
+                  </div>
+
+                  <!-- Advanced Flyout Panel -->
+                  <div class="settings-flyout" id="advFlyout">
+                    <div class="flyout-title">Klipers Advanced Tuning</div>
+                    <div style="font-size:11px;color:var(--text-fg-muted);margin-bottom:6px">Negative Prompt</div>
+                    <input type="text" value="blurry, low quality, deformed, artifacts" style="width:100%;padding:6px 10px;border-radius:8px;background:var(--bg-surface-2);border:1px solid var(--border-line);font-size:12px;color:var(--text-fg);outline:none;margin-bottom:12px">
+                    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-fg-muted)">
+                      <span>Guidance Scale</span>
+                      <b style="color:var(--text-fg)">7.0</b>
+                    </div>
+                    <input type="range" min="1" max="20" value="7" style="width:100%;accent-color:#ffffff;margin:4px 0 10px">
+                    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-fg-muted)">
+                      <span>Inference Steps</span>
+                      <b style="color:var(--text-fg)">30</b>
+                    </div>
+                    <input type="range" min="10" max="60" value="30" style="width:100%;accent-color:#ffffff">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Main Prompt Input Box -->
+              <div class="prompt-container-card" id="imgPromptCard">
+                <!-- Reference Image Row (if attached) -->
+                <div class="ref-attachment-row" id="imgRefAttachment">
+                  <div class="ref-thumb">
+                    <img id="imgRefThumbPreview" src="" alt="Ref">
+                    <div class="ref-thumb-del" onclick="removeImageRef()">×</div>
+                  </div>
+                  <div class="ref-info-text">
+                    Gambar Referensi Aktif · <b>Slot 1/1</b>
+                  </div>
+                </div>
+
+                <div class="prompt-textarea-box">
+                  <textarea class="prompt-textarea" id="imgPromptTextarea" placeholder="Deskripsikan ide gambarmu secara bebas... (contoh: Penjual sate keliling di Jakarta masa depan dengan lampu neon...)"></textarea>
+                </div>
+
+                <!-- Quick Prompt Chips -->
+                <div class="quick-prompt-chips">
+                  <div class="quick-chip" onclick="applySamplePrompt('Cyberpunk street food vendor in futuristic Jakarta under neon rain, steam rising, reflections on asphalt, photorealistic 8k cinematic lighting')">
+                    🍜 Cyberpunk Jakarta Neon
+                  </div>
+                  <div class="quick-chip" onclick="applySamplePrompt('Portrait of Indonesian barista crafting latte art in a cozy rustic modern café, warm golden hour sunbeams, cinematic 35mm lens')">
+                    ☕ Barista Golden Hour
+                  </div>
+                  <div class="quick-chip" onclick="applySamplePrompt('Mythical Garuda warrior flying above ancient Borobudur temple surrounded by misty mountain sunrise, hyper-detailed epic fantasy art')">
+                    🦅 Garuda di Borobudur
+                  </div>
+                </div>
+
+                <!-- Prompt Footer Bar -->
+                <div class="prompt-footer-row">
+                  <div class="prompt-tools-left">
+                    <button class="tool-btn" id="attachBtn" onclick="simulateAttach()">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      <span>Attach</span>
+                    </button>
+
+                    <button class="tool-btn active" id="autoEnhanceBtn" onclick="toggleAutoEnhance()">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 4V2m0 16v-2m8-8h-2M4 10H2m17.07-5.07l-1.41 1.41M6.34 17.66l-1.41 1.41M19.07 15.07l-1.41-1.41M6.34 6.34L4.93 4.93M14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"/></svg>
+                      <span>Auto</span>
+                      <span class="auto-toggle-pill"><span class="dot"></span></span>
+                    </button>
+                  </div>
+
+                  <button class="generate-btn" id="btnDoGenerateImg" onclick="triggerGenerateImage()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    <span>Generate</span>
+                    <span class="credit-cost" id="btnImgCostBadge">1 💎</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Generating Progress Card -->
+              <div class="generating-card" id="imgGenCard">
+                <div class="ai-cube-spinner">
+                  <div class="cube-box">
+                    <div class="cube-face f1"></div>
+                    <div class="cube-face f2"></div>
+                    <div class="cube-face f3"></div>
+                    <div class="cube-face f4"></div>
+                    <div class="cube-face f5"></div>
+                    <div class="cube-face f6"></div>
+                  </div>
+                </div>
+
+                <div class="gen-status-text" id="imgGenStatusText">
+                  <span>Menganalisis prompt & semantic structure...</span>
+                </div>
+
+                <div class="gen-progress-track">
+                  <div class="gen-progress-fill" id="imgProgressBar"></div>
+                </div>
+              </div>
+
+              <!-- Result Showcase Card (Image) -->
+              <div class="result-showcase-card" id="imgResultCard">
+                <div class="result-media-stage">
+                  <div class="result-meta-overlay">
+                    <div class="result-tag-pill">
+                      <span class="dot"></span>
+                      <span id="imgResultMeta">Seedream 5.0 Pro · 16:9 · 2K · 1.2s</span>
+                    </div>
+                  </div>
+
+                  <!-- Generated SVG Art (Cyberpunk Jakarta Street) -->
+                  <div id="imageArtContainer" style="width:100%;height:100%;position:relative"></div>
+                </div>
+
+                <!-- Result Actions Bar -->
+                <div class="result-actions-footer">
+                  <div class="result-prompt-summary" id="resultPromptTextSummary">
+                    "Cyberpunk street food vendor in futuristic Jakarta under neon rain..."
+                  </div>
+
+                  <div class="result-btn-group">
+                    <button class="secondary-action-btn" onclick="alert('Prompt disalin ke clipboard!')">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                      <span>Salin Prompt</span>
+                    </button>
+                    <button class="secondary-action-btn" onclick="alert('Mengunduh hasil resolusi 2K...')">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                      <span>Unduh HD</span>
+                    </button>
+                    <!-- Bridge to Video Generator Button! -->
+                    <button class="bridge-to-video-btn" id="btnBridgeToVideo" onclick="bridgeImageToVideo()">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                      <span>🎬 Jadikan Video AI</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ================= PAGE 2: AI VIDEO ================= -->
+            <div class="generator-page" id="pageVideo">
+              <div class="page-title-box">
+                <h1>AI Video Generator</h1>
+                <p>Hidupkan gambar atau teks jadi klip video sinematik dengan model AI terkemuka.</p>
+              </div>
+
+              <!-- Top Toolbar (Video Model Selector + Settings) -->
+              <div class="toolbar-ribbon">
+                <!-- Video Model Dropdown Trigger -->
+                <div style="position:relative">
+                  <div class="model-dropdown-trigger" id="vidModelTrigger" onclick="toggleDropdown('vidModelDropdown')">
+                    <div class="m-icon" style="background:linear-gradient(135deg,#8b5cf6,#ec4899)">▶</div>
+                    <span id="selectedVidModelName">MiniMax H3</span>
+                    <span class="promo-tag" style="background:rgba(139,92,246,0.18);color:#a855f7">Camera Master</span>
+                    <span class="cost-tag">4 💎</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                  </div>
+
+                  <!-- Video Model Dropdown List -->
+                  <div class="custom-dropdown-panel" id="vidModelDropdown">
+                    <div class="dd-group-header">🎬 Model Video Unggulan</div>
+                    <div class="dd-item selected" onclick="pickVidModel('MiniMax H3', '4 💎', 'Camera Master')">
+                      <div class="dd-item-meta">
+                        <span>MiniMax H3</span>
+                        <span style="font-size:10px;color:#a855f7;font-weight:700">Camera Master</span>
+                      </div>
+                      <span class="dd-item-check">✓</span>
+                    </div>
+                    <div class="dd-item" onclick="pickVidModel('Seedance 2.5', '4 💎', 'Fluid Motion')">
+                      <div class="dd-item-meta">
+                        <span>Seedance 2.5</span>
+                        <span style="font-size:10px;color:#10b981;font-weight:700">Fluid Motion</span>
+                      </div>
+                      <span class="dd-item-check">✓</span>
+                    </div>
+                    <div class="dd-item" onclick="pickVidModel('Gemini Omni Flash 1.1', '4 💎', 'Fast 10s')">
+                      <div class="dd-item-meta">
+                        <span>Gemini Omni Flash</span>
+                      </div>
+                      <span class="dd-item-check">✓</span>
+                    </div>
+                    <div class="dd-item" onclick="pickVidModel('Wan 3.0', '4 💎', 'HDR Dynamic')">
+                      <div class="dd-item-meta">
+                        <span>Wan 3.0</span>
+                      </div>
+                      <span class="dd-item-check">✓</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Video Settings Pills -->
+                <div class="adjustments-pills-bar">
+                  <!-- Duration Selector -->
+                  <button class="adj-pill active" id="durPill4" onclick="pickDuration('4s')">4s</button>
+                  <button class="adj-pill" id="durPill6" onclick="pickDuration('6s')">6s</button>
+                  <button class="adj-pill" id="durPill8" onclick="pickDuration('8s')">8s</button>
+
+                  <!-- Ratio Selector -->
+                  <div style="width:1px;height:14px;background:var(--border-line)"></div>
+                  <button class="adj-pill active" id="vidRatioPill" onclick="cycleVideoRatio()">16:9</button>
+
+                  <!-- Camera Motion Preset -->
+                  <button class="adj-pill" id="vidMotionPill" onclick="cycleCameraMotion()">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10l5 5-5 5"/><path d="M4 4v7a4 4 0 0 0 4 4h11"/></svg>
+                    <span id="activeMotionText">Pan Kanan</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Video Prompt Box -->
+              <div class="prompt-container-card">
+                <!-- Video Image Reference Row (Preloaded from Image generator) -->
+                <div class="ref-attachment-row visible" id="vidRefAttachment">
+                  <div class="ref-thumb" style="width:52px;height:52px">
+                    <div id="vidRefThumbArt" style="width:100%;height:100%"></div>
+                  </div>
+                  <div class="ref-info-text">
+                    Frame Awal (Start Frame): <b>Cyberpunk Jakarta 2K</b>
+                    <small style="display:block;color:var(--text-fg-subtle)">Gambar di-bridge langsung dari AI Canvas</small>
+                  </div>
+                </div>
+
+                <div class="prompt-textarea-box">
+                  <textarea class="prompt-textarea" id="vidPromptTextarea" placeholder="Deskripsikan pergerakan kamera atau adegan video...">Kamera perlahan bergerak maju menyusuri jalanan neon, pantulan genangan air hujan di aspal berkilau dinamis, asap mengepul halus dari gerobak sate, gerakan warga berjalan santai sinematik.</textarea>
+                </div>
+
+                <div class="prompt-footer-row">
+                  <div class="prompt-tools-left">
+                    <span style="font-size:12px;color:var(--text-fg-muted)">Durasi terpilih: <b style="color:var(--text-fg)" id="vidSelectedDurLabel">6 Detik</b></span>
+                  </div>
+
+                  <button class="generate-btn" id="btnDoGenerateVid" onclick="triggerGenerateVideo()" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                    <span>Generate Video</span>
+                    <span class="credit-cost" style="background:rgba(255,255,255,0.25);color:#fff">4 💎</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Video Generating Progress Card -->
+              <div class="generating-card" id="vidGenCard">
+                <div class="ai-cube-spinner">
+                  <div class="cube-box" style="animation-duration:2s">
+                    <div class="cube-face f1" style="border-color:#8b5cf6"></div>
+                    <div class="cube-face f2" style="border-color:#8b5cf6"></div>
+                    <div class="cube-face f3" style="border-color:#3b82f6"></div>
+                    <div class="cube-face f4" style="border-color:#3b82f6"></div>
+                    <div class="cube-face f5" style="border-color:#ec4899"></div>
+                    <div class="cube-face f6" style="border-color:#ec4899"></div>
+                  </div>
+                </div>
+
+                <div class="gen-status-text" id="vidGenStatusText">
+                  <span>Sintesis frame temporal & physics consistency...</span>
+                </div>
+
+                <div class="gen-progress-track">
+                  <div class="gen-progress-fill" id="vidProgressBar" style="background:linear-gradient(90deg,#8b5cf6,#3b82f6,#ec4899)"></div>
+                </div>
+              </div>
+
+              <!-- Result Showcase Card (Video Player) -->
+              <div class="result-showcase-card" id="vidResultCard">
+                <div class="result-media-stage" style="height:480px">
+                  <div class="result-meta-overlay">
+                    <div class="result-tag-pill">
+                      <span class="dot" style="background:#8b5cf6"></span>
+                      <span>MiniMax H3 · 16:9 · 1080p 60fps · 6s</span>
+                    </div>
+                  </div>
+
+                  <!-- Animated Simulated Video Player Stage -->
+                  <div class="video-player-container" id="videoPlayerCanvas">
+                    <div id="videoAnimatedStage" style="width:100%;height:100%;position:relative;overflow:hidden"></div>
+
+                    <!-- Custom Player Controls Bar -->
+                    <div class="video-scrub-bar">
+                      <button class="v-play-btn" id="vPlayToggle" onclick="toggleSimVideoPlayback()">❚❚</button>
+                      <div class="v-progress-rail" onclick="seekSimVideo(event)">
+                        <div class="v-progress-fill" id="vPlayheadFill"></div>
+                      </div>
+                      <div class="v-time-code" id="vTimeCodeText">00:03 / 00:06</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="result-actions-footer">
+                  <div class="result-prompt-summary">
+                    "Kamera perlahan bergerak maju menyusuri jalanan neon, pantulan genangan air berkilau..."
+                  </div>
+
+                  <div class="result-btn-group">
+                    <button class="secondary-action-btn" onclick="alert('Mengulang video...')">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                      <span>Replay</span>
+                    </button>
+                    <button class="generate-btn" onclick="alert('Mendownload MP4 Video Full HD...')" style="background:#10b981;color:#fff">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                      <span>Download MP4</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Synchronized Subtitle / Voiceover Captions (per marketing-ads convention) -->
+      <div id="capsOverlay">
+        <div class="caps-box" id="capsTextBox">
+          <span class="caps-word active">Mau</span>
+          <span class="caps-word">bikin</span>
+          <span class="caps-word">gambar</span>
+          <span class="caps-word">dan</span>
+          <span class="caps-word">video</span>
+          <span class="caps-word">AI?</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Player Control Bar -->
+<div id="playerControlsBar">
+  <div class="ctl-group">
+    <button class="ctl-btn" id="btnMasterPlay" onclick="toggleMasterPlay()">▶ Putar Iklan Demo</button>
+    <button class="ctl-btn" id="btnInteractiveMode" onclick="toggleInteractiveMode()">👆 Coba Interaktif</button>
+    <div class="timeline-slider" id="masterTimelineSlider" onclick="seekTimeline(event)">
+      <div class="timeline-fill" id="masterTimelineFill"></div>
+    </div>
+    <div class="time-display" id="masterTimeDisplay">00:00 / 01:01</div>
+  </div>
+
+  <div class="ctl-group">
+    <button class="ctl-btn" id="btnSpeed" onclick="cycleSpeed()">1.0x</button>
+    <button class="ctl-btn" id="btnCapsToggle" onclick="toggleCaptions()">CC: On</button>
+    <button class="ctl-btn" id="btnThemeToggle" onclick="toggleTheme()">🌓 Tema</button>
+    <button class="ctl-btn" id="btnVoiceToggle" onclick="toggleVoiceover()">🔊 Suara: On</button>
+  </div>
+</div>
+
+<script>
+// Base64 authentic Klipers logo
+const KL_LOGO = "data:image/png;base64,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";
+
+// State management
+let currentMode = 'image'; // 'image' | 'video'
+let selectedImgModel = 'Seedream 5.0 Pro';
+let selectedVidModel = 'MiniMax H3';
+let currentRatio = '16:9';
+let currentStyle = 'Cinematic';
+let currentRes = '2K';
+let currentVidDuration = '6s';
+let currentVidMotion = 'Pan Kanan';
+let isAutoEnhance = true;
+let isGenerating = false;
+let isInteractive = true;
+let masterTimeline = null;
+let speechSynth = window.speechSynthesis || null;
+let activeUtterance = null;
+let voiceEnabled = true;
+
+// Sample Prompts
+const PROMPT_IMG_BASE = "Cyberpunk street food vendor in futuristic Jakarta under neon rain";
+const PROMPT_IMG_ENHANCED = "Cyberpunk street food vendor in futuristic Jakarta under heavy neon rain, holographic traditional banners, aromatic steam rising from brass wok, glowing reflections on wet asphalt, photorealistic 8k cinematic lighting, anamorphic 35mm lens, atmospheric haze";
+const PROMPT_VID_DEFAULT = "Kamera perlahan bergerak maju menyusuri jalanan neon, pantulan genangan air hujan di aspal berkilau dinamis, asap mengepul halus dari gerobak sate, gerakan warga berjalan santai sinematik.";
+
+// CUES for GSAP Timeline & Narration (per marketing-ads convention)
+const CUES = [
+  { s: 0.3,  e: 5.2,  text: "Mau bikin gambar dan video AI berkualitas tinggi tanpa ribet prompt engineering?" },
+  { s: 5.6,  e: 9.8,  text: "Buka Klipers AI. Workspace kreatif serba bisa untuk creator Indonesia." },
+  { s: 10.2, e: 16.0, text: "Pertama, AI Image Generator. Pilih model terbaik dunia, seperti Seedream 5.0 Pro atau Krea 2 Turbo." },
+  { s: 16.5, e: 22.5, text: "Atur aspek rasio sinematik 16:9, pilih gaya visual, dan tentukan resolusi hingga 2K." },
+  { s: 23.0, e: 28.5, text: "Tulis idemu. Aktifkan tombol Auto-Enhance agar AI menyempurnakan prompt secara instan." },
+  { s: 29.0, e: 34.2, text: "Klik Generate. Dalam hitungan detik, visual fotorealistik spektakuler langsung tersaji." },
+  { s: 34.7, e: 39.2, text: "Keren kan? Tanpa perlu keluar halaman, klik Jadikan Video AI." },
+  { s: 39.6, e: 45.5, text: "Gambar tadi langsung masuk ke AI Video Generator. Pilih model MiniMax H3 atau Seedance 2.5." },
+  { s: 46.0, e: 50.8, text: "Tentukan durasi, pergerakan kamera, lalu klik generate." },
+  { s: 51.2, e: 56.0, text: "Videonya jadi! Pergerakan mulus, pencahayaan hidup, dan kualitas sinematik kelas studio." },
+  { s: 56.5, e: 61.5, text: "Klipers AI. Bikin gambar dan video AI semudah ini. Coba gratis sekarang di ai.klipers.pro." }
+];
+
+// Initialize
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('mainLogoImg').src = KL_LOGO;
+  renderCyberpunkSvgArt('imageArtContainer', false);
+  renderCyberpunkSvgArt('vidRefThumbArt', false);
+  renderCyberpunkVideoCanvas('videoAnimatedStage');
+  buildGsapTimeline();
+
+  // URL params check
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('record') === '1') {
+    document.body.classList.add('rec');
+    voiceEnabled = false;
+  }
+  if (params.get('theme') === 'light') toggleTheme(true);
+  if (params.get('nocaps') === '1') document.body.classList.add('nocaps');
+  if (params.get('interactive') === '1') setInteractiveMode(true);
+  if (params.get('t')) {
+    const t = parseFloat(params.get('t'));
+    if (!isNaN(t)) masterTimeline.seek(t, false);
+  }
+
+  // Preload prompt
+  document.getElementById('imgPromptTextarea').value = PROMPT_IMG_BASE;
+  window.__ready = true;
+  window.__duration = 61.5;
+  window.__seek = (t) => masterTimeline.seek(t, false);
+});
+
+// UI Mode Switcher (Image vs Video)
+function switchMode(mode) {
+  currentMode = mode;
+  document.getElementById('btnModeImg').classList.toggle('active', mode === 'image');
+  document.getElementById('btnModeVid').classList.toggle('active', mode === 'video');
+  document.getElementById('navImageTab').classList.toggle('active', mode === 'image');
+  document.getElementById('navVideoTab').classList.toggle('active', mode === 'video');
+  document.getElementById('pageImage').classList.toggle('active', mode === 'image');
+  document.getElementById('pageVideo').classList.toggle('active', mode === 'video');
+  document.getElementById('urlPathText').innerHTML = `https://<b>ai.klipers.pro</b>/${mode}`;
+  closeAllDropdowns();
+}
+
+// Dropdown Toggles
+function toggleDropdown(id) {
+  const el = document.getElementById(id);
+  const isOpen = el.classList.contains('open');
+  closeAllDropdowns();
+  if (!isOpen) el.classList.add('open');
+}
+function toggleFlyout(id) {
+  const el = document.getElementById(id);
+  const isOpen = el.classList.contains('open');
+  closeAllDropdowns();
+  if (!isOpen) el.classList.add('open');
+}
+function closeAllDropdowns() {
+  document.querySelectorAll('.custom-dropdown-panel, .settings-flyout').forEach(e => e.classList.remove('open'));
+}
+window.addEventListener('click', (e) => {
+  if (!e.target.closest('.toolbar-ribbon') && !e.target.closest('.settings-flyout') && !e.target.closest('.custom-dropdown-panel')) {
+    closeAllDropdowns();
+  }
+});
+
+// Image Model Picker
+function pickImgModel(name, cost, isPromo) {
+  selectedImgModel = name;
+  document.getElementById('selectedImgModelName').textContent = name;
+  document.getElementById('btnImgCostBadge').textContent = cost;
+  document.querySelector('.model-dropdown-trigger .cost-tag').textContent = cost;
+  document.querySelectorAll('#imgModelDropdown .dd-item').forEach(el => {
+    el.classList.toggle('selected', el.textContent.includes(name));
+  });
+  closeAllDropdowns();
+}
+
+// Video Model Picker
+function pickVidModel(name, cost, tag) {
+  selectedVidModel = name;
+  document.getElementById('selectedVidModelName').textContent = name;
+  document.querySelectorAll('#vidModelDropdown .dd-item').forEach(el => {
+    el.classList.toggle('selected', el.textContent.includes(name));
+  });
+  closeAllDropdowns();
+}
+
+// Ratio Picker
+function pickRatio(ratio, w, h) {
+  currentRatio = ratio;
+  document.getElementById('activeRatioText').textContent = ratio;
+  const mb = document.getElementById('ratioMiniBox');
+  mb.style.width = w + 'px';
+  mb.style.height = h + 'px';
+  document.querySelectorAll('#ratioFlyout .ratio-tile').forEach(el => {
+    el.classList.toggle('selected', el.textContent.includes(ratio));
+  });
+  closeAllDropdowns();
+}
+
+// Style Picker
+function pickStyle(style) {
+  currentStyle = style;
+  document.getElementById('activeStyleText').textContent = style;
+  document.querySelectorAll('#styleFlyout .style-chip').forEach(el => {
+    el.classList.toggle('selected', el.textContent.trim() === style);
+  });
+  closeAllDropdowns();
+}
+
+// Resolution Cycler
+const RES_LIST = ['1K', '2K', '4K', 'Auto'];
+function cycleResolution() {
+  let idx = (RES_LIST.indexOf(currentRes) + 1) % RES_LIST.length;
+  currentRes = RES_LIST[idx];
+  document.getElementById('activeResText').textContent = currentRes;
+}
+
+// Duration Picker
+function pickDuration(dur) {
+  currentVidDuration = dur;
+  ['4s', '6s', '8s'].forEach(d => {
+    const el = document.getElementById('durPill' + d.replace('s',''));
+    if (el) el.classList.toggle('active', d === dur);
+  });
+  document.getElementById('vidSelectedDurLabel').textContent = dur.replace('s','') + ' Detik';
+}
+
+// Camera Motion Cycler
+const MOTIONS = ['Pan Kanan', 'Zoom In', 'Orbit 360°', 'Drone Fly'];
+function cycleCameraMotion() {
+  let idx = (MOTIONS.indexOf(currentVidMotion) + 1) % MOTIONS.length;
+  currentVidMotion = MOTIONS[idx];
+  document.getElementById('activeMotionText').textContent = currentVidMotion;
+}
+
+// Auto-Prompt Enhance Toggle
+function toggleAutoEnhance() {
+  isAutoEnhance = !isAutoEnhance;
+  const btn = document.getElementById('autoEnhanceBtn');
+  btn.classList.toggle('active', isAutoEnhance);
+  const ta = document.getElementById('imgPromptTextarea');
+  if (isAutoEnhance) {
+    ta.value = PROMPT_IMG_ENHANCED;
+  } else {
+    ta.value = PROMPT_IMG_BASE;
+  }
+}
+
+// Sample Prompt Setter
+function applySamplePrompt(text) {
+  document.getElementById('imgPromptTextarea').value = text;
+}
+
+// Attach Simulator
+function simulateAttach() {
+  const row = document.getElementById('imgRefAttachment');
+  const img = document.getElementById('imgRefThumbPreview');
+  row.classList.add('visible');
+  img.src = KL_LOGO;
+  document.getElementById('attachBtn').classList.add('active');
+}
+function removeImageRef() {
+  document.getElementById('imgRefAttachment').classList.remove('visible');
+  document.getElementById('attachBtn').classList.remove('active');
+}
+
+// Reset State (Sesi Baru)
+function resetState() {
+  document.getElementById('imgPromptTextarea').value = PROMPT_IMG_BASE;
+  document.getElementById('imgGenCard').classList.remove('visible');
+  document.getElementById('imgResultCard').classList.remove('visible');
+  document.getElementById('vidGenCard').classList.remove('visible');
+  document.getElementById('vidResultCard').classList.remove('visible');
+  switchMode('image');
+}
+
+// TRIGGER GENERATE IMAGE (Interactive)
+function triggerGenerateImage() {
+  if (isGenerating) return;
+  isGenerating = true;
+
+  const promptVal = document.getElementById('imgPromptTextarea').value.trim() || PROMPT_IMG_BASE;
+  const genCard = document.getElementById('imgGenCard');
+  const resCard = document.getElementById('imgResultCard');
+  const statusTx = document.getElementById('imgGenStatusText');
+  const bar = document.getElementById('imgProgressBar');
+
+  resCard.classList.remove('visible');
+  genCard.classList.add('visible');
+  bar.style.width = '0%';
+
+  const steps = [
+    { p: '25%', t: 'Menganalisis prompt & semantic structure...' },
+    { p: '55%', t: `Menghubungkan ke cluster ${selectedImgModel}...` },
+    { p: '80%', t: 'Sintesis diffusion latent space (Step 22/30)...' },
+    { p: '100%', t: 'Upscaling resolusi 2K & tekstur finishing...' }
+  ];
+
+  let stepIdx = 0;
+  statusTx.innerHTML = `<span>${steps[0].t}</span>`;
+  bar.style.width = steps[0].p;
+
+  const interval = setInterval(() => {
+    stepIdx++;
+    if (stepIdx < steps.length) {
+      statusTx.innerHTML = `<span>${steps[stepIdx].t}</span>`;
+      bar.style.width = steps[stepIdx].p;
+    } else {
+      clearInterval(interval);
+      setTimeout(() => {
+        genCard.classList.remove('visible');
+        resCard.classList.add('visible');
+        document.getElementById('imgResultMeta').textContent = `${selectedImgModel} · ${currentRatio} · ${currentRes} · 1.2s`;
+        document.getElementById('resultPromptTextSummary').textContent = `"${promptVal.substring(0, 65)}..."`;
+        isGenerating = false;
+        // Scroll into view if needed
+        document.getElementById('scrollContainer').scrollTo({ top: 400, behavior: 'smooth' });
+      }, 400);
+    }
+  }, 600);
+}
+
+// BRIDGE: 1-Click Jadikan Video AI!
+function bridgeImageToVideo() {
+  switchMode('video');
+  document.getElementById('vidPromptTextarea').value = PROMPT_VID_DEFAULT;
+  document.getElementById('vidResultCard').classList.remove('visible');
+  document.getElementById('scrollContainer').scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// TRIGGER GENERATE VIDEO (Interactive)
+function triggerGenerateVideo() {
+  if (isGenerating) return;
+  isGenerating = true;
+
+  const genCard = document.getElementById('vidGenCard');
+  const resCard = document.getElementById('vidResultCard');
+  const statusTx = document.getElementById('vidGenStatusText');
+  const bar = document.getElementById('vidProgressBar');
+
+  resCard.classList.remove('visible');
+  genCard.classList.add('visible');
+  bar.style.width = '0%';
+
+  const steps = [
+    { p: '20%', t: 'Inisialisasi frame acuan gambar...' },
+    { p: '50%', t: `Sintesis temporal model ${selectedVidModel}...` },
+    { p: '85%', t: `Reka gerakan ${currentVidMotion} & konsistensi fisika...` },
+    { p: '100%', t: 'Encoding MP4 1080p 60fps selesai!' }
+  ];
+
+  let stepIdx = 0;
+  statusTx.innerHTML = `<span>${steps[0].t}</span>`;
+  bar.style.width = steps[0].p;
+
+  const interval = setInterval(() => {
+    stepIdx++;
+    if (stepIdx < steps.length) {
+      statusTx.innerHTML = `<span>${steps[stepIdx].t}</span>`;
+      bar.style.width = steps[stepIdx].p;
+    } else {
+      clearInterval(interval);
+      setTimeout(() => {
+        genCard.classList.remove('visible');
+        resCard.classList.add('visible');
+        isGenerating = false;
+        startVideoLoopAnimation();
+        document.getElementById('scrollContainer').scrollTo({ top: 400, behavior: 'smooth' });
+      }, 400);
+    }
+  }, 700);
+}
+
+// Video Player Mockup Loop Animation
+let videoLoopAnim = null;
+let isVideoPlaying = true;
+function startVideoLoopAnimation() {
+  const playhead = document.getElementById('vPlayheadFill');
+  const timeCode = document.getElementById('vTimeCodeText');
+  let sec = 0;
+  if (videoLoopAnim) clearInterval(videoLoopAnim);
+  videoLoopAnim = setInterval(() => {
+    if (!isVideoPlaying) return;
+    sec += 0.1;
+    if (sec > 6) sec = 0;
+    const pct = (sec / 6) * 100;
+    playhead.style.width = pct + '%';
+    const sInt = Math.floor(sec);
+    timeCode.textContent = `00:0${sInt} / 00:06`;
+  }, 100);
+}
+function toggleSimVideoPlayback() {
+  isVideoPlaying = !isVideoPlaying;
+  document.getElementById('vPlayToggle').textContent = isVideoPlaying ? '❚❚' : '▶';
+}
+function seekSimVideo(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const clickX = e.clientX - rect.left;
+  const pct = Math.max(0, Math.min(100, (clickX / rect.width) * 100));
+  document.getElementById('vPlayheadFill').style.width = pct + '%';
+}
+
+// RENDER RICH SVG ART: Cyberpunk Jakarta Street Scene
+function renderCyberpunkSvgArt(containerId, isAnimated) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = `
+    <svg viewBox="0 0 1600 900" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#080816"/>
+          <stop offset="40%" stop-color="#14102c"/>
+          <stop offset="70%" stop-color="#2a123f"/>
+          <stop offset="100%" stop-color="#3d1445"/>
+        </linearGradient>
+        <linearGradient id="neonCyan" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#00f0ff"/>
+          <stop offset="100%" stop-color="#00a8ff"/>
+        </linearGradient>
+        <linearGradient id="neonPink" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ff007f"/>
+          <stop offset="100%" stop-color="#ff00bb"/>
+        </linearGradient>
+        <linearGradient id="wetRoad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#181424"/>
+          <stop offset="50%" stop-color="#0e0a16"/>
+          <stop offset="100%" stop-color="#050308"/>
+        </linearGradient>
+        <filter id="neonGlow" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="8" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        <filter id="megaGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="18" result="blur2"/>
+          <feMerge>
+            <feMergeNode in="blur2"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+
+      <!-- Background Sky & Distant Megastructures -->
+      <rect width="1600" height="900" fill="url(#skyGrad)"/>
+      <g opacity="0.45">
+        <rect x="120" y="160" width="140" height="520" fill="#110d24"/>
+        <rect x="290" y="80" width="180" height="600" fill="#0d0a1c"/>
+        <rect x="520" y="220" width="110" height="460" fill="#140f28"/>
+        <rect x="980" y="120" width="220" height="560" fill="#0d0a1c"/>
+        <rect x="1240" y="190" width="160" height="490" fill="#120e24"/>
+      </g>
+
+      <!-- Distant Jakarta Megatowers Spire / Monas Hologram in Sky -->
+      <path d="M800 60 L806 280 L794 280 Z" fill="#00f0ff" opacity="0.6" filter="url(#neonGlow)"/>
+      <ellipse cx="800" cy="60" rx="34" ry="12" fill="#ff007f" opacity="0.8" filter="url(#neonGlow)"/>
+      <text x="800" y="240" fill="#00f0ff" font-size="28" font-family="Montserrat" font-weight="900" letter-spacing="8" text-anchor="middle" filter="url(#neonGlow)" opacity="0.85">JAKARTA 2088</text>
+
+      <!-- Midground Overpass & Flying Vehicles (Traffic Stream) -->
+      <rect x="0" y="380" width="1600" height="24" fill="#1a1430"/>
+      <line x1="0" y1="384" x2="1600" y2="384" stroke="#ff00bb" stroke-width="4" filter="url(#neonGlow)" opacity="0.7"/>
+      <line x1="0" y1="396" x2="1600" y2="396" stroke="#00f0ff" stroke-width="3" filter="url(#neonGlow)" opacity="0.6"/>
+
+      <!-- Wet Asphalt Street Ground -->
+      <polygon points="0,520 1600,520 1600,900 0,900" fill="url(#wetRoad)"/>
+
+      <!-- Reflections on Wet Asphalt -->
+      <ellipse cx="400" cy="740" rx="220" ry="34" fill="#00f0ff" opacity="0.22" filter="url(#megaGlow)"/>
+      <ellipse cx="880" cy="760" rx="280" ry="40" fill="#ff007f" opacity="0.28" filter="url(#megaGlow)"/>
+      <ellipse cx="1320" cy="720" rx="190" ry="30" fill="#ffe600" opacity="0.18" filter="url(#megaGlow)"/>
+
+      <!-- Cyberpunk Street Food Stall (Gerobak Sate & Nasi Goreng Masa Depan) -->
+      <g transform="translate(680, 420)">
+        <!-- Stall Roof with Traditional Limasan silhouette + Neon Pipes -->
+        <path d="M60 120 L180 30 L300 120 Z" fill="#1f1836" stroke="#00f0ff" stroke-width="4" filter="url(#neonGlow)"/>
+        <line x1="70" y1="120" x2="290" y2="120" stroke="#ff007f" stroke-width="6" filter="url(#neonGlow)"/>
+
+        <!-- Indonesian Traditional Warung Sign in Holographic Neon -->
+        <rect x="110" y="65" width="140" height="42" rx="8" fill="rgba(0,0,0,0.7)" stroke="#ffe600" stroke-width="2"/>
+        <text x="180" y="92" fill="#ffe600" font-size="18" font-family="Montserrat" font-weight="900" text-anchor="middle" filter="url(#neonGlow)">SATE MADURA</text>
+
+        <!-- Cart Body -->
+        <rect x="90" y="126" width="180" height="150" rx="10" fill="#161226" stroke="#2e224d" stroke-width="3"/>
+        <circle cx="120" cy="276" r="32" fill="#0d0a17" stroke="#00f0ff" stroke-width="4" filter="url(#neonGlow)"/>
+        <circle cx="240" cy="276" r="32" fill="#0d0a17" stroke="#00f0ff" stroke-width="4" filter="url(#neonGlow)"/>
+
+        <!-- Glowing Wok & Coals -->
+        <ellipse cx="180" cy="150" rx="36" ry="14" fill="#ff4500" filter="url(#megaGlow)"/>
+        <ellipse cx="180" cy="148" rx="26" ry="9" fill="#ffea00" filter="url(#neonGlow)"/>
+
+        <!-- Steam & Smoke Puffs -->
+        <path d="M175 140 Q165 90 185 60 Q205 30 180 10" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="8" stroke-linecap="round" filter="url(#megaGlow)"/>
+        <path d="M190 142 Q210 100 195 70" fill="none" stroke="rgba(0,240,255,0.3)" stroke-width="6" stroke-linecap="round" filter="url(#neonGlow)"/>
+
+        <!-- Vendor Silhoutte wearing Cyber Visor -->
+        <circle cx="180" cy="100" r="18" fill="#140e24"/>
+        <rect x="170" y="96" width="20" height="6" rx="2" fill="#00f0ff" filter="url(#neonGlow)"/>
+      </g>
+
+      <!-- Indonesian Neon Hologram Signage: 'KLIPERS', 'KOPI JOSS', 'ES TEH' -->
+      <g transform="translate(180, 320)">
+        <rect x="0" y="0" width="140" height="220" rx="14" fill="rgba(10,8,20,0.8)" stroke="#ff007f" stroke-width="3" filter="url(#neonGlow)"/>
+        <text x="70" y="55" fill="#ff007f" font-size="22" font-family="Montserrat" font-weight="900" text-anchor="middle" filter="url(#neonGlow)">KOPI</text>
+        <text x="70" y="95" fill="#00f0ff" font-size="22" font-family="Montserrat" font-weight="900" text-anchor="middle" filter="url(#neonGlow)">JOSS</text>
+        <text x="70" y="145" fill="#ffe600" font-size="16" font-family="Inter" font-weight="800" text-anchor="middle">24 JAM</text>
+        <text x="70" y="185" fill="#10b981" font-size="18" font-family="Montserrat" font-weight="900" text-anchor="middle" filter="url(#neonGlow)">CYBER</text>
+      </g>
+
+      <g transform="translate(1220, 300)">
+        <rect x="0" y="0" width="160" height="240" rx="14" fill="rgba(10,8,20,0.8)" stroke="#00f0ff" stroke-width="3" filter="url(#neonGlow)"/>
+        <text x="80" y="55" fill="#00f0ff" font-size="24" font-family="Montserrat" font-weight="900" text-anchor="middle" filter="url(#neonGlow)">KLIPERS</text>
+        <text x="80" y="90" fill="#fff" font-size="14" font-family="Inter" font-weight="700" text-anchor="middle" letter-spacing="4">STUDIO</text>
+        <line x1="20" y1="110" x2="140" y2="110" stroke="#ff007f" stroke-width="2"/>
+        <text x="80" y="150" fill="#ff007f" font-size="18" font-family="Montserrat" font-weight="900" text-anchor="middle" filter="url(#neonGlow)">AI PRO</text>
+        <text x="80" y="195" fill="#ffe600" font-size="13" font-family="Montserrat" font-weight="800" text-anchor="middle">4K 60FPS</text>
+      </g>
+
+      <!-- Diagonal Neon Rain Streaks -->
+      <g stroke="rgba(0,240,255,0.22)" stroke-width="1.8" stroke-linecap="round">
+        <line x1="200" y1="100" x2="140" y2="280"/>
+        <line x1="450" y1="40" x2="390" y2="240"/>
+        <line x1="720" y1="80" x2="660" y2="300"/>
+        <line x1="940" y1="120" x2="880" y2="320"/>
+        <line x1="1180" y1="60" x2="1120" y2="260"/>
+        <line x1="1420" y1="110" x2="1360" y2="310"/>
+        <line x1="300" y1="400" x2="240" y2="600"/>
+        <line x1="600" y1="360" x2="540" y2="580"/>
+        <line x1="880" y1="420" x2="820" y2="640"/>
+        <line x1="1100" y1="380" x2="1040" y2="590"/>
+        <line x1="1350" y1="430" x2="1290" y2="650"/>
+      </g>
+    </svg>
+  `;
+}
+
+// RENDER VIDEO STAGE CANVAS (with Camera Motion & Neon Pulsing)
+function renderCyberpunkVideoCanvas(containerId) {
+  renderCyberpunkSvgArt(containerId, true);
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  // Subtle camera pan & zoom animation
+  el.style.transformOrigin = '55% 55%';
+  el.style.animation = 'cameraPanLoop 6s infinite ease-in-out alternate';
+  const styleSheet = document.createElement('style');
+  styleSheet.textContent = `
+    @keyframes cameraPanLoop {
+      0% { transform: scale(1) translate(0px, 0px); }
+      50% { transform: scale(1.06) translate(-25px, -12px); }
+      100% { transform: scale(1.12) translate(30px, -20px); }
+    }
+  `;
+  document.head.appendChild(styleSheet);
+}
+
+// =========================================================================
+// GSAP AUTO-DEMO TIMELINE (Ad Video Mode adhering to marketing-ads skill)
+// =========================================================================
+function buildGsapTimeline() {
+  masterTimeline = gsap.timeline({
+    paused: true,
+    onUpdate: onTimelineUpdate,
+    onComplete: () => {
+      document.getElementById('btnMasterPlay').textContent = '▶ Putar Ulang';
+    }
+  });
+
+  const tl = masterTimeline;
+  const cur = '#simCursor';
+  const curRing = '#cursorRing';
+
+  // Helper for simulated cursor click
+  function clickSim(x, y, t) {
+    tl.to(cur, { left: x, top: y, duration: 0.6, ease: 'power2.out', autoAlpha: 1 }, t);
+    tl.fromTo(curRing, { scale: 0.4, opacity: 1 }, { scale: 1.8, opacity: 0, duration: 0.35, ease: 'power1.out' }, t + 0.6);
+  }
+
+  // Initial State Setup (Seek-safe per marketing-ads contract)
+  tl.set(cur, { autoAlpha: 0, left: 960, top: 540 });
+  tl.set('#appWindow', { scale: 0.94, autoAlpha: 0 });
+  tl.set('#pageImage', { display: 'flex' });
+  tl.set('#pageVideo', { display: 'none' });
+  tl.set('#imgGenCard', { display: 'none' });
+  tl.set('#imgResultCard', { display: 'none' });
+  tl.set('#vidGenCard', { display: 'none' });
+  tl.set('#vidResultCard', { display: 'none' });
+  tl.set('#imgRefAttachment', { display: 'none' });
+
+  // SCENE 1: HOOK (0.3s - 5.2s) - Ambient Studio Reveal
+  tl.to('#appWindow', { scale: 1, autoAlpha: 1, duration: 1.2, ease: 'power3.out' }, 0.4);
+
+  // SCENE 2: Buka Klipers AI (5.6s - 9.8s) - Sidebar Canvas highlight
+  tl.to('#navImageTab', { background: 'rgba(255,255,255,0.14)', duration: 0.4, repeat: 1, yoyo: true }, 6.0);
+
+  // SCENE 3: Pilih Model Gambar (10.2s - 16.0s)
+  // Move cursor to Model Dropdown & click
+  clickSim(540, 240, 10.5);
+  tl.call(() => toggleDropdown('imgModelDropdown'), null, 11.1);
+  // Cursor moves to 'Seedream 5.0 Pro' item & clicks
+  clickSim(560, 340, 12.4);
+  tl.call(() => pickImgModel('Seedream 5.0 Pro', '1 💎', true), null, 13.0);
+
+  // SCENE 4: Penyesuaian Rasio 16:9 & Style (16.5s - 22.5s)
+  clickSim(1050, 240, 16.8);
+  tl.call(() => toggleFlyout('ratioFlyout'), null, 17.4);
+  clickSim(1140, 310, 18.2);
+  tl.call(() => pickRatio('16:9', 18, 10), null, 18.8);
+
+  clickSim(1160, 240, 19.5);
+  tl.call(() => toggleFlyout('styleFlyout'), null, 20.1);
+  clickSim(1180, 320, 20.8);
+  tl.call(() => pickStyle('Cinematic'), null, 21.4);
+
+  // SCENE 5: Tulis Prompt & Auto-Enhance (23.0s - 28.5s)
+  clickSim(960, 410, 23.2);
+  // Typing simulation
+  tl.call(() => {
+    const ta = document.getElementById('imgPromptTextarea');
+    ta.value = "";
+    let str = PROMPT_IMG_BASE;
+    let i = 0;
+    const typeInt = setInterval(() => {
+      if (i < str.length) {
+        ta.value += str[i];
+        i++;
+      } else {
+        clearInterval(typeInt);
+      }
+    }, 30);
+  }, null, 23.8);
+
+  // Click Auto-Enhance Wand2
+  clickSim(590, 480, 26.5);
+  tl.call(() => toggleAutoEnhance(), null, 27.1);
+
+  // SCENE 6: Klik Generate & Proses Render (29.0s - 34.2s)
+  clickSim(1370, 480, 29.2);
+  tl.call(() => triggerGenerateImage(), null, 29.8);
+
+  // SCENE 7: Hasil Gambar Jadi & Klik "Jadikan Video AI" (34.7s - 39.2s)
+  tl.to(cur, { autoAlpha: 0, duration: 0.3 }, 34.0);
+  clickSim(1340, 840, 36.5);
+  tl.call(() => bridgeImageToVideo(), null, 37.2);
+
+  // SCENE 8: Masuk AI Video & Pemilihan Model (39.6s - 45.5s)
+  clickSim(540, 240, 40.2);
+  tl.call(() => toggleDropdown('vidModelDropdown'), null, 40.8);
+  clickSim(560, 340, 42.0);
+  tl.call(() => pickVidModel('MiniMax H3', '4 💎', 'Camera Master'), null, 42.6);
+
+  // SCENE 9: Penyesuaian Durasi 6s & Kamera Motion (46.0s - 50.8s)
+  clickSim(1110, 240, 46.4);
+  tl.call(() => pickDuration('6s'), null, 47.0);
+  clickSim(1230, 240, 47.8);
+  tl.call(() => cycleCameraMotion(), null, 48.4);
+
+  // Klik Generate Video
+  clickSim(1350, 480, 49.2);
+  tl.call(() => triggerGenerateVideo(), null, 49.8);
+
+  // SCENE 10: Hasil Video Bergerak Hidup & Video Player (51.2s - 56.0s)
+  tl.to(cur, { autoAlpha: 0, duration: 0.4 }, 51.5);
+
+  // SCENE 11: Penutup & Call to Action (56.5s - 61.5s)
+  tl.to('#appWindow', { scale: 0.96, duration: 1.0, ease: 'power2.inOut' }, 56.5);
+  tl.to('#glowA', { scale: 1.4, opacity: 0.8, duration: 2.0 }, 56.5);
+}
+
+// Master Timeline Update & Synchronization
+function onTimelineUpdate() {
+  const t = masterTimeline.time();
+  const d = 61.5;
+
+  // Update slider & timecode
+  const pct = Math.min(100, (t / d) * 100);
+  document.getElementById('masterTimelineFill').style.width = pct + '%';
+  document.getElementById('masterTimeDisplay').textContent = formatTime(t) + ' / ' + formatTime(d);
+
+  // Synchronized Captions
+  updateCaptions(t);
+}
+
+function formatTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+// Caption updater with word-level highlight
+function updateCaptions(t) {
+  const cue = CUES.find(c => t >= c.s && t <= c.e);
+  const capsBox = document.getElementById('capsTextBox');
+  const capsOverlay = document.getElementById('capsOverlay');
+
+  if (!cue) {
+    capsOverlay.style.opacity = 0;
+    return;
+  }
+
+  capsOverlay.style.opacity = 1;
+  const words = cue.text.split(' ');
+  const dur = cue.e - cue.s;
+  const elapsed = t - cue.s;
+  const activeWordIdx = Math.min(words.length - 1, Math.floor((elapsed / dur) * words.length));
+
+  capsBox.innerHTML = words.map((w, idx) => {
+    return `<span class="caps-word ${idx === activeWordIdx ? 'active' : ''}">${w}</span>`;
+  }).join('');
+
+  // Web Speech API Voiceover trigger (if audio not generated yet & actively playing)
+  if (isMasterPlaying && voiceEnabled && !document.body.classList.contains('rec') && speechSynth && !speechSynth.speaking && t >= cue.s && t <= cue.s + 0.3) {
+    speakText(cue.text);
+  }
+}
+
+function speakText(text) {
+  if (!speechSynth || !voiceEnabled) return;
+  speechSynth.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'id-ID';
+  utter.rate = 1.05;
+  activeUtterance = utter;
+  speechSynth.speak(utter);
+}
+
+// Master Play / Pause
+let isMasterPlaying = false;
+function toggleMasterPlay() {
+  if (isMasterPlaying) {
+    masterTimeline.pause();
+    isMasterPlaying = false;
+    if (speechSynth) speechSynth.cancel();
+    document.getElementById('btnMasterPlay').textContent = '▶ Putar Iklan Demo';
+  } else {
+    isInteractive = false;
+    document.getElementById('btnInteractiveMode').classList.remove('active');
+    document.getElementById('btnMasterPlay').classList.add('active');
+    document.getElementById('btnMasterPlay').textContent = '❚❚ Jeda';
+    if (masterTimeline.time() >= 61.4) masterTimeline.seek(0, false);
+    masterTimeline.play();
+    isMasterPlaying = true;
+  }
+}
+
+// Interactive Mode Toggle
+function toggleInteractiveMode() {
+  setInteractiveMode(!isInteractive);
+}
+function setInteractiveMode(val) {
+  isInteractive = val;
+  if (isInteractive) {
+    if (masterTimeline) masterTimeline.pause();
+    isMasterPlaying = false;
+    if (speechSynth) speechSynth.cancel();
+    document.getElementById('btnMasterPlay').classList.remove('active');
+    document.getElementById('btnMasterPlay').textContent = '▶ Putar Iklan Demo';
+    document.getElementById('btnInteractiveMode').classList.add('active');
+    document.getElementById('simCursor').style.opacity = 0;
+    document.getElementById('capsOverlay').style.opacity = 0;
+    document.getElementById('appWindow').style.opacity = 1;
+    document.getElementById('appWindow').style.transform = 'scale(1)';
+  } else {
+    document.getElementById('btnInteractiveMode').classList.remove('active');
+  }
+}
+
+// Seek Timeline
+function seekTimeline(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const clickX = e.clientX - rect.left;
+  const pct = Math.max(0, Math.min(1, clickX / rect.width));
+  const t = pct * 61.5;
+  masterTimeline.seek(t, false);
+}
+
+// Speed Cycler
+const SPEEDS = [1.0, 1.5, 2.0];
+let speedIdx = 0;
+function cycleSpeed() {
+  speedIdx = (speedIdx + 1) % SPEEDS.length;
+  const spd = SPEEDS[speedIdx];
+  masterTimeline.timeScale(spd);
+  document.getElementById('btnSpeed').textContent = spd.toFixed(1) + 'x';
+}
+
+// Captions Toggle
+function toggleCaptions() {
+  document.body.classList.toggle('nocaps');
+  const isOff = document.body.classList.contains('nocaps');
+  document.getElementById('btnCapsToggle').textContent = isOff ? 'CC: Off' : 'CC: On';
+  document.getElementById('btnCapsToggle').classList.toggle('active', !isOff);
+}
+
+// Theme Toggle
+function toggleTheme(forceLight) {
+  if (forceLight !== undefined) {
+    document.body.classList.toggle('light', forceLight);
+  } else {
+    document.body.classList.toggle('light');
+  }
+}
+
+// Voiceover Toggle
+function toggleVoiceover() {
+  voiceEnabled = !voiceEnabled;
+  if (!voiceEnabled && speechSynth) speechSynth.cancel();
+  document.getElementById('btnVoiceToggle').textContent = voiceEnabled ? '🔊 Suara: On' : '🔇 Suara: Off';
+  document.getElementById('btnVoiceToggle').classList.toggle('active', voiceEnabled);
+}
+</script>
+
+</body>
+</html>

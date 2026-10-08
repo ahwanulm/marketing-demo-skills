@@ -1,0 +1,61 @@
+NARASI IKLAN KLIPERS — MOBILE APP + AI IMAGE/VIDEO
+Folder       : marketing/iklan/mobile-app-ai-generate/
+Durasi video : ±42,5 detik (vertikal 1080×1920 — Reels / TikTok / Shorts)
+Bahasa       : Indonesia
+Voice        : ElevenLabs QC3gSHMyKh8m20lGyUNZ (default skrip)
+               atau Edge-TTS en-AU-WilliamMultilingualNeural
+
+=====================================================================
+A. NASKAH UTUH — untuk ditempel langsung ke ElevenLabs / TTS lain
+=====================================================================
+
+Bikin konten viral sekarang cukup dari HP.
+
+Tempel link YouTube, dan AI langsung memotongnya jadi klip vertikal lengkap dengan subtitle.
+
+Mau bikin gambar AI? Tulis idemu, pilih model terbaru seperti Seedream lima titik nol Pro, dan gambarnya langsung jadi.
+
+Lalu hidupkan gambarnya jadi video dengan MiniMax H tiga, Gemini Omni Flash, atau Seedance dua.
+
+Semua ada di satu aplikasi. Download Klipers di Google Play sekarang.
+
+
+=====================================================================
+B. PER KALIMAT — satu file audio per kalimat (supaya sinkron ke animasi)
+   Simpan hasilnya sebagai audio/vo-01.mp3 … audio/vo-05.mp3
+   Kolom "Mulai–Selesai" = jendela waktu di video; usahakan durasi
+   suara tidak melebihi jendelanya.
+=====================================================================
+
+[vo-01.mp3]  Mulai 0,3 dtk – Selesai 3,9 dtk  (±3,6 dtk)  · Scene: Pembuka, HP muncul
+Bikin konten viral sekarang cukup dari HP.
+
+[vo-02.mp3]  Mulai 4,2 dtk – Selesai 11,4 dtk  (±7,2 dtk)  · Scene: Tempel link → Quick Process → klip jadi
+Tempel link YouTube, dan AI langsung memotongnya jadi klip vertikal lengkap dengan sabtaitel.
+
+[vo-03.mp3]  Mulai 11,9 dtk – Selesai 21,5 dtk  (±9,6 dtk)  · Scene: Klipers AI → AI Image (Seedream 5.0 Pro)
+Mau bikin gambar AI? Tulis idemu, pilih model terbaru seperti Seedream lima titik nol Pro, dan gambarnya langsung jadi.
+
+[vo-04.mp3]  Mulai 21,9 dtk – Selesai 31,6 dtk  (±9,7 dtk)  · Scene: AI Video dari gambar (MiniMax H3)
+Lalu hidupkan gambarnya jadi video dengan MiniMax H tiga, Gemini Omni Flash, atau Seedance dua.
+
+[vo-05.mp3]  Mulai 32,0 dtk – Selesai 41,6 dtk  (±9,6 dtk)  · Scene: Penutup + Google Play
+Semua ada di satu aplikasi. Download Klipers di Google Play sekarang.
+
+
+=====================================================================
+CATATAN
+=====================================================================
+- Nama model ditulis sesuai ucapan supaya TTS membacanya benar
+  ("Seedream lima titik nol Pro", "MiniMax H tiga", "Seedance dua");
+  caption di layar tetap "Seedream 5.0 Pro", "MiniMax H3", "Seedance 2".
+- Model yang ditampilkan = yang terdaftar di tabel grok_media_pricing
+  (backend/database.js + backend/scripts/register-*.mjs). Pastikan statusnya
+  aktif (is_enabled) di produksi sebelum iklan tayang.
+- Generate otomatis semua file (skrip membaca kalimat di bagian B file ini):
+    ELEVENLABS_API_KEY=sk_xxx node marketing/tools/generate-voiceover-elevenlabs.mjs marketing/iklan/mobile-app-ai-generate
+  atau (Edge-TTS, gratis):
+    bash marketing/tools/generate-voiceover.sh marketing/iklan/mobile-app-ai-generate
+- Format bagian B dibaca skrip: baris "[vo-NN.mp3] …" lalu baris kalimatnya.
+  Kalau mengubah kalimat di sini, ubah juga array CUES di index.html
+  (teks caption `text`, ejaan TTS `say`, detik mulai/selesai) supaya tetap sama.

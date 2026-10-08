@@ -1,0 +1,28 @@
+{
+  "name": "marketing-ads-skill",
+  "version": "1.0.0",
+  "description": "Standalone agent toolkit for cinematic HTML+GSAP motion graphic video ads",
+  "type": "module",
+  "scripts": {
+    "build:hooks": "node tools/build-hooks.mjs",
+    "voiceover:elevenlabs": "node tools/generate-voiceover-elevenlabs.mjs",
+    "voiceover:edge": "bash tools/generate-voiceover.sh",
+    "render:frames": "node tools/render-frames.cjs",
+    "export:video": "node tools/export-video.mjs"
+  },
+  "keywords": [
+    "motion-graphics",
+    "video-ads",
+    "gsap",
+    "agent-skills",
+    "claude-skills",
+    "html-video",
+    "puppeteer"
+  ],
+  "author": "Klipers",
+  "license": "MIT",
+  "devDependencies": {
+    "playwright": "^1.42.0",
+    "puppeteer": "^22.0.0"
+  }
+}

@@ -1,0 +1,81 @@
+NARASI IKLAN KLIPERS — HOOK PANJANG PORTRAIT
+Folder       : marketing/iklan/hook-panjang-portrait/
+Durasi video : ±57,9 detik
+Format       : portrait 1080×1920 — Reels / TikTok / Shorts / Stories
+Bahasa       : Indonesia
+Voice        : ElevenLabs QC3gSHMyKh8m20lGyUNZ (default skrip)
+               atau Edge-TTS en-AU-WilliamMultilingualNeural
+Catatan      : Narasi versi panjang SAMA untuk portrait & landscape — audio/ bisa disalin antar folder.
+
+=====================================================================
+A. NASKAH UTUH — untuk ditempel langsung ke ElevenLabs / TTS lain
+=====================================================================
+
+Nggak sempat ngedit? Klipers ubah satu video jadi tiga puluh klip viral.
+AI cari momen paling viral, lengkap subtitle dan face tracking.
+Mau kontrol penuh? Pakai atur manual.
+Streamer? Split cam pisahkan gameplay dan facecam.
+Konten tempel: video, judul, dan suara AI.
+Content Creator bikin video dari satu topik.
+Cek analitik viral dan optimasi judul.
+Bikin gambar AI pakai Seedream lima titik nol Pro,
+lalu jadikan video dengan MiniMax H tiga atau Seedance dua.
+Upload otomatis dan terjadwal ke lima platform.
+Dua puluh satu fitur AI dalam satu aplikasi.
+Download Klipers di Google Play, atau buka klipers titik pro.
+
+
+=====================================================================
+B. PER KALIMAT — satu file audio per kalimat (supaya sinkron ke animasi)
+   Simpan hasilnya sebagai audio/vo-01.mp3 … audio/vo-12.mp3
+=====================================================================
+
+[vo-01.mp3]  Mulai 0,15 – Selesai 6,05 dtk  (±5,9)  · Hook — video panjang dipotong jadi klip
+Nggak sempat ngedit? Klipers ubah satu video jadi tiga puluh klip viral.
+
+[vo-02.mp3]  Mulai 6,35 – Selesai 11,55 dtk  (±5,2)  · Analisis AI: klip + subtitle + face tracking
+AI cari momen paling viral, lengkap subtitle dan face tracking.
+
+[vo-03.mp3]  Mulai 11,85 – Selesai 15,55 dtk  (±3,7)  · Atur Manual
+Mau kontrol penuh? Pakai atur manual.
+
+[vo-04.mp3]  Mulai 15,85 – Selesai 20,15 dtk  (±4,3)  · Split Cam
+Streamer? Split cam pisahkan gameplay dan facecam.
+
+[vo-05.mp3]  Mulai 20,45 – Selesai 24,15 dtk  (±3,7)  · Konten Tempel
+Konten tempel: video, judul, dan suara AI.
+
+[vo-06.mp3]  Mulai 24,45 – Selesai 28,35 dtk  (±3,9)  · Content Creator (topik → naskah → video)
+Content Creator bikin video dari satu topik.
+
+[vo-07.mp3]  Mulai 28,65 – Selesai 32,35 dtk  (±3,7)  · Riset viral: analitik + optimasi judul
+Cek analitik viral dan optimasi judul.
+
+[vo-08.mp3]  Mulai 32,65 – Selesai 36,95 dtk  (±4,3)  · Klipers AI: gambar AI
+Bikin gambar AI pakai Seedream lima titik nol Pro,
+
+[vo-09.mp3]  Mulai 37,25 – Selesai 42,25 dtk  (±5,0)  · Klipers AI: video AI
+lalu jadikan video dengan MiniMax H tiga atau Seedance dua.
+
+[vo-10.mp3]  Mulai 42,55 – Selesai 46,65 dtk  (±4,1)  · Auto Upload 5 platform
+Upload otomatis dan terjadwal ke lima platform.
+
+[vo-11.mp3]  Mulai 46,95 – Selesai 50,85 dtk  (±3,9)  · Dinding 21 fitur FeatureGrid
+Dua puluh satu fitur AI dalam satu aplikasi.
+
+[vo-12.mp3]  Mulai 51,15 – Selesai 57,45 dtk  (±6,3)  · Penutup Google Play
+Download Klipers di Google Play, atau buka klipers titik pro.
+
+
+=====================================================================
+CATATAN
+=====================================================================
+- Caption di layar memakai tulisan asli ("30 klip", "Seedream 5.0 Pro", "MiniMax H3", "21 fitur");
+  kalimat di atas memakai ejaan ucapan supaya TTS membacanya benar.
+- File ini & index.html DIHASILKAN oleh marketing/tools/build-hooks.mjs — ubah kalimat/durasi
+  di sana lalu jalankan: node marketing/tools/build-hooks.mjs
+- Generate suara:
+    ELEVENLABS_API_KEY=sk_xxx node marketing/tools/generate-voiceover-elevenlabs.mjs marketing/iklan/hook-panjang-portrait
+  atau:
+    bash marketing/tools/generate-voiceover.sh marketing/iklan/hook-panjang-portrait
+  Kalimat terlalu panjang untuk jendelanya? Tambah SPEED=1.1 (ElevenLabs) / RATE=+12% (Edge).

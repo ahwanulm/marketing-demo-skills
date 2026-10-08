@@ -1,0 +1,84 @@
+NARASI DEMO KLIPERS AI — IMAGE & VIDEO GENERATOR (STUDIO PREVIEW)
+Folder       : marketing/iklan/demo-klipers-ai-landscape/
+Durasi video : ±60 detik (1920×1080)
+Bahasa       : Indonesia
+Voice        : Edge-TTS en-AU-WilliamMultilingualNeural (+4%)
+               atau ElevenLabs QC3gSHMyKh8m20lGyUNZ
+
+=====================================================================
+A. NASKAH UTUH — untuk ditempel langsung ke ElevenLabs / TTS lain
+=====================================================================
+
+Mau bikin gambar dan video AI berkualitas tinggi tanpa ribet prompt engineering?
+
+Buka Klipers AI. Workspace kreatif serba bisa untuk creator Indonesia.
+
+Pertama, AI Image Generator. Pilih model terbaik dunia, seperti Seedream lima titik nol Pro atau Krea dua Turbo.
+
+Atur aspek rasio sinematik enam belas banding sembilan, pilih gaya visual, dan tentukan resolusi hingga dua K.
+
+Tulis idemu. Aktifkan tombol Auto-Enhance agar AI menyempurnakan prompt secara instan.
+
+Klik Generate. Dalam hitungan detik, visual fotorealistik spektakuler langsung tersaji.
+
+Keren kan? Tanpa perlu keluar halaman, klik "Jadikan Video AI".
+
+Gambar tadi langsung masuk ke AI Video Generator. Pilih model MiniMax H tiga atau Seedance dua titik lima.
+
+Tentukan durasi, pergerakan kamera, lalu klik generate.
+
+Videonya jadi! Pergerakan mulus, pencahayaan hidup, dan kualitas sinematik kelas studio.
+
+Klipers AI. Bikin gambar dan video AI semudah ini. Coba gratis sekarang di ai titik klipers titik pro.
+
+
+=====================================================================
+B. PER KALIMAT — satu file audio per kalimat (supaya sinkron ke animasi)
+   Simpan hasilnya sebagai audio/vo-01.mp3 … audio/vo-11.mp3
+   Kolom "Mulai–Selesai" = jendela waktu di video; usahakan durasi
+   suara tidak melebihi jendelanya.
+=====================================================================
+
+[vo-01.mp3]  Mulai 0,3 dtk · Selesai 5,2 dtk · Scene: Hook Ambient Workspace
+Mau bikin gambar dan video AI berkualitas tinggi tanpa ribet prompt engineering?
+
+[vo-02.mp3]  Mulai 5,6 dtk · Selesai 9,8 dtk · Scene: Masuk Studio Klipers AI
+Buka Klipers AI. Workspace kreatif serba bisa untuk creator Indonesia.
+
+[vo-03.mp3]  Mulai 10,2 dtk · Selesai 16,0 dtk · Scene: Pemilihan Model Gambar (Seedream 5.0 Pro)
+Pertama, AI Image Generator. Pilih model terbaik dunia, seperti Seedream lima titik nol Pro atau Krea dua Turbo.
+
+[vo-04.mp3]  Mulai 16,5 dtk · Selesai 22,5 dtk · Scene: Penyesuaian Rasio 16:9, Style Cinematic & Resolusi 2K
+Atur aspek rasio sinematik enam belas banding sembilan, pilih gaya visual, dan tentukan resolusi hingga dua K.
+
+[vo-05.mp3]  Mulai 23,0 dtk · Selesai 28,5 dtk · Scene: Input Prompt & Auto-Enhance Wand2
+Tulis idemu. Aktifkan tombol Auto-Enhance agar AI menyempurnakan prompt secara instan.
+
+[vo-06.mp3]  Mulai 29,0 dtk · Selesai 34,2 dtk · Scene: Klik Generate & Proses Render Latent Diffusion
+Klik Generate. Dalam hitungan detik, visual fotorealistik spektakuler langsung tersaji.
+
+[vo-07.mp3]  Mulai 34,7 dtk · Selesai 39,2 dtk · Scene: Hasil Gambar Jadi & Klik "Jadikan Video AI"
+Keren kan? Tanpa perlu keluar halaman, klik Jadikan Video AI.
+
+[vo-08.mp3]  Mulai 39,6 dtk · Selesai 45,5 dtk · Scene: Masuk AI Video & Pemilihan Model MiniMax H3
+Gambar tadi langsung masuk ke AI Video Generator. Pilih model MiniMax H tiga atau Seedance dua titik lima.
+
+[vo-09.mp3]  Mulai 46,0 dtk · Selesai 50,8 dtk · Scene: Penyesuaian Durasi 6s & Kamera Motion
+Tentukan durasi, pergerakan kamera, lalu klik generate.
+
+[vo-10.mp3]  Mulai 51,2 dtk · Selesai 56,0 dtk · Scene: Hasil Video Bergerak Hidup & Video Player
+Videonya jadi! Pergerakan mulus, pencahayaan hidup, dan kualitas sinematik kelas studio.
+
+[vo-11.mp3]  Mulai 56,5 dtk · Selesai 61,5 dtk · Scene: Penutup Logo + Google Play + ai.klipers.pro
+Klipers AI. Bikin gambar dan video AI semudah ini. Coba gratis sekarang di ai titik klipers titik pro.
+
+
+=====================================================================
+CATATAN
+=====================================================================
+- "lima titik nol Pro", "dua Turbo", "dua K", dan "ai titik klipers titik pro"
+  ditulis fonetik untuk pembacaan TTS yang natural.
+- Generate otomatis voiceover:
+    bash marketing/tools/generate-voiceover.sh marketing/iklan/demo-klipers-ai-generator
+  atau ElevenLabs:
+    ELEVENLABS_API_KEY=sk_xxx node marketing/tools/generate-voiceover-elevenlabs.mjs marketing/iklan/demo-klipers-ai-generator

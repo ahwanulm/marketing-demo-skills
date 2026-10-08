@@ -1,0 +1,106 @@
+NARASI DEMO KLIPERS PRO — AI CONTENT CREATOR (step by step)
+Folder       : marketing/iklan/demo-ai-content-creator-landscape/
+Durasi video : ±87 detik (1920×1080)
+Bahasa       : Indonesia
+Voice        : Edge-TTS en-AU-WilliamMultilingualNeural (+4%)
+               atau ElevenLabs QC3gSHMyKh8m20lGyUNZ
+
+=====================================================================
+A. NASKAH UTUH — untuk ditempel langsung ke ElevenLabs / TTS lain
+=====================================================================
+
+Punya ide konten, tapi malas nulis naskah, cari gambar, dan ngedit?
+
+Buka AI Content Creator di Klipers Pro. Cukup tiga langkah.
+
+Langkah satu: pilih kategori dan gaya. Fokus cerita ikut diatur otomatis.
+
+Klik rekomendasi topik, atau pakai link YouTube, artikel, bahkan PDF.
+
+Langkah dua: AI mengisi genre, sudut pandang, era, dan ending, lengkap dengan struktur cerita.
+
+Langkah tiga: pilih rasio, durasi, dan transisi. Nyalakan judul, subtitle, dan efek suara.
+
+Tambah overlay sinematik, musik latar, dan narasi dalam tujuh bahasa.
+
+Pilih sumber visual, aktifkan review, lalu klik generate.
+
+AI menulis naskah dan membuat storyboard untuk setiap scene.
+
+Cek dulu tiap scene. Edit narasinya, atau regenerate gambar yang kurang pas.
+
+Klik lanjutkan. Tiap scene dijadikan klip video AI, lengkap dengan narasi dan subtitle.
+
+Videonya jadi. Download, pilih cover, atau jadwalkan upload ke lima platform.
+
+Caption untuk YouTube, Instagram, TikTok, dan WhatsApp juga sudah siap.
+
+Klipers Pro. Satu topik, jadi video siap posting. Coba di klipers titik pro, atau download di Google Play.
+
+
+=====================================================================
+B. PER KALIMAT — satu file audio per kalimat (supaya sinkron ke animasi)
+   Simpan hasilnya sebagai audio/vo-01.mp3 … audio/vo-14.mp3
+   Kolom "Mulai–Selesai" = jendela waktu di video; usahakan durasi
+   suara tidak melebihi jendelanya.
+=====================================================================
+
+[vo-01.mp3]  Mulai 0,3 dtk · Scene: Hook (1 topik → 1 video utuh)
+Punya ide konten, tapi malas nulis naskah, cari gambar, dan ngedit?
+
+[vo-02.mp3]  Mulai 5,8 dtk · Scene: Sidebar → AI Content Creator, stepper 3 langkah
+Buka AI Content Creator di Klipers Pro. Cukup tiga langkah.
+
+[vo-03.mp3]  Mulai 11,1 dtk · Scene: Step 1 — Kategori, Gaya, Fokus Cerita
+Langkah satu: pilih kategori dan gaya. Fokus cerita ikut diatur otomatis.
+
+[vo-04.mp3]  Mulai 17,3 dtk · Scene: Step 1 — chip topik + tab Topik/YouTube/Artikel-PDF
+Klik rekomendasi topik, atau pakai link YouTube, artikel, bahkan pe de ef.
+
+[vo-05.mp3]  Mulai 23,2 dtk · Scene: Step 2 — Konfigurasi Storytelling + Story Arc
+Langkah dua: AI mengisi genre, sudut pandang, era, dan ending, lengkap dengan struktur cerita.
+
+[vo-06.mp3]  Mulai 30,5 dtk · Scene: Step 3 — Rasio, Durasi, Transisi, Title/Subtitle/SFX
+Langkah tiga: pilih rasio, durasi, dan transisi. Nyalakan judul, sabtaitel, dan efek suara.
+
+[vo-07.mp3]  Mulai 39,0 dtk · Scene: Step 3 — Overlay, Musik Latar, Bahasa, TTS, Suara
+Tambah overlay sinematik, musik latar, dan narasi dalam tujuh bahasa.
+
+[vo-08.mp3]  Mulai 44,3 dtk · Scene: Step 3 — Opsi Render: Visual = AI Video Full + tombol Generate
+Pilih sumber visual, aktifkan review, lalu klik generate.
+
+[vo-09.mp3]  Mulai 49,0 dtk · Scene: Generating — Menulis Naskah, storyboard (frame awal)
+AI menulis naskah dan membuat storyboard untuk setiap scene.
+
+[vo-10.mp3]  Mulai 52,9 dtk · Scene: Review & Edit Scene (banner Mode AI Video, Prompt Frame Awal)
+Cek dulu tiap scene. Edit narasinya, atau regenerate gambar yang kurang pas.
+
+[vo-11.mp3]  Mulai 59,0 dtk · Scene: Lanjutkan: Buat Klip Video AI → Narasi, klip video AI, Finalisasi
+Klik lanjutkan. Tiap scene dijadikan klip video AI, lengkap dengan narasi dan sabtaitel.
+
+[vo-12.mp3]  Mulai 65,1 dtk · Scene: Hasil — video, Download, Cover, Upload terjadwal
+Videonya jadi. Download, pilih cover, atau jadwalkan upload ke lima platform.
+
+[vo-13.mp3]  Mulai 71,6 dtk · Scene: Viral Posting Kit
+Caption untuk YouTube, Instagram, TikTok, dan WhatsApp juga sudah siap.
+
+[vo-14.mp3]  Mulai 77,0 dtk · Scene: Penutup + Google Play
+Klipers Pro. Satu topik, jadi video siap posting. Coba di klipers titik pro, atau download di Google Play.
+
+
+=====================================================================
+CATATAN
+=====================================================================
+- "sabtaitel", "pe de ef", dan "klipers titik pro" ditulis fonetik untuk input TTS;
+  di caption layar (index.html) tetap tertulis "subtitle", "PDF", dan "klipers.pro".
+- Generate otomatis semua file (skrip membaca kalimat di bagian B file ini):
+    bash marketing/tools/generate-voiceover.sh marketing/iklan/demo-ai-content-creator-landscape
+  atau ElevenLabs:
+    ELEVENLABS_API_KEY=sk_xxx node marketing/tools/generate-voiceover-elevenlabs.mjs marketing/iklan/demo-ai-content-creator-landscape
+- vo-11 dibuat dengan RATE=+10% (Edge-TTS) supaya muat di jendelanya.
+- Mode visual di demo = AI Video Full (25 kredit/menit bawaan, paket Pro ke atas).
+- Kalau mengubah kalimat di sini, ubah juga array CUES di index.html
+  (teks caption + detik mulai) supaya tetap sama.
+- Semua elemen UI di video diambil dari frontend/components/ai-tools/AIContentCreator.tsx
+  (label, urutan, pilihan). Layar "Preview Script" TIDAK ditampilkan karena tidak bisa
+  dicapai dari alur normal (hanya dari tombol Regenerate di layar itu sendiri).

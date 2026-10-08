@@ -1,0 +1,1619 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Demo AI Content Creator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+/*
+  Klipers — DEMO step-by-step AI Content Creator (1920×1080, ±87 dtk)
+  Setiap layar & label meniru frontend/components/ai-tools/AIContentCreator.tsx:
+    wizard 1 Konten → 2 Cerita → 3 Video, layar Generating, Review & Edit Scene,
+    hasil (Download / Upload / Cover / Viral Posting Kit).
+  Palet monokrom (dark/light); aksen warna hanya yang memang ada di UI asli
+  (badge AI biru, Saran AI amber, centang hijau, header Review) + gambar scene.
+  Narasi: narasi.txt → audio/vo-01..14.mp3 via marketing/tools/generate-voiceover*.{sh,mjs}
+
+  URL params:
+    ?t=12          mulai dari detik 12
+    ?theme=light   tema terang (default gelap)
+    ?record=1      tanpa kontrol/overlay; expose window.__seek(t) & window.__duration
+    ?nocaps=1      sembunyikan caption (atau tombol CC / tombol C; tanpa-caption.html)
+*/
+:root{
+  --k:.5; --ps:1.45;
+  /* stage */
+  --stageBg:#050505; --dots:rgba(255,255,255,.06); --glow:rgba(255,255,255,.07);
+  --shadow:0 50px 140px rgba(0,0,0,.7);
+  /* app — dark (#0a0a0a / #111 / #1a1a1a / #2a2a2a seperti Tailwind di AIContentCreator) */
+  --bg:#0a0a0a; --card:#111; --c2:#1a1a1a; --c0:#0f0f0f; --line:#2a2a2a; --line2:#333; --line3:#222;
+  --text:#fff; --text2:#e5e7eb; --t3:#d1d5db; --muted:#9ca3af; --dim:#6b7280; --faint:#4b5563; --ghost:#374151;
+  --inv:#fff; --invText:#111827; --sel:rgba(255,255,255,.07);
+  --side:#050505; --wm:#111;
+}
+body.light{
+  --stageBg:#f3f4f6; --dots:rgba(0,0,0,.07); --glow:rgba(0,0,0,.05); --shadow:0 40px 120px rgba(15,23,42,.18);
+  --bg:#fff; --card:#fff; --c2:#f3f4f6; --c0:#f9fafb; --line:#e5e7eb; --line2:#e5e7eb; --line3:#f3f4f6;
+  --text:#111827; --text2:#1f2937; --t3:#374151; --muted:#6b7280; --dim:#6b7280; --faint:#9ca3af; --ghost:#d1d5db;
+  --inv:#111827; --invText:#fff; --sel:rgba(17,24,39,.05);
+  --side:#f9fafb; --wm:#f3f4f6;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#000;overflow:hidden;font-family:Inter,system-ui,sans-serif;color:var(--text)}
+body.light{background:#e5e7eb}
+#viewport{position:fixed;left:0;right:0;top:0;bottom:56px;display:flex;align-items:center;justify-content:center}
+body.rec #viewport{bottom:0}
+#stageWrap{position:relative;width:calc(1920px * var(--k));height:calc(1080px * var(--k))}
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform:scale(var(--k));transform-origin:0 0;overflow:hidden;background:var(--stageBg)}
+svg{display:block}
+.bg{position:absolute;inset:0;overflow:hidden}
+.bg .dots{position:absolute;inset:0;background-image:radial-gradient(var(--dots) 1.2px,transparent 1.3px);background-size:36px 36px;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 78%)}
+#glowA,#glowB{position:absolute;border-radius:50%;filter:blur(110px)}
+#glowA{width:900px;height:900px;left:120px;top:-300px;background:radial-gradient(circle,var(--glow),transparent 65%)}
+#glowB{width:1000px;height:1000px;right:-260px;bottom:-440px;background:radial-gradient(circle,var(--glow),transparent 65%)}
+.scene{position:absolute;inset:0;visibility:hidden}
+.inv{display:inline-block;background:var(--inv);color:var(--invText);padding:0 .18em;border-radius:.12em}
+.logoTile{display:flex;align-items:center;justify-content:center;background:#fff;border-radius:50%;overflow:hidden;flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.logoTile img{width:92%;height:92%;object-fit:contain;display:block}
+
+/* ================= S1 · HOOK ================= */
+#h1a{position:absolute;left:0;right:0;top:150px;margin:0;text-align:center;font:900 104px/1 Montserrat;letter-spacing:-3.5px;color:var(--text)}
+#h1a .w{display:inline-block}
+#chores{position:absolute;left:0;right:0;top:360px;display:flex;justify-content:center;gap:40px}
+.chore{position:relative;width:400px;height:250px;border-radius:28px;background:var(--card);border:1px solid var(--line2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;box-shadow:0 30px 70px rgba(0,0,0,.35)}
+.chore .ic{font-size:76px;line-height:1}
+.chore b{font:800 38px Inter;letter-spacing:-1px;color:var(--text)}
+.chore small{font:500 21px Inter;color:var(--dim)}
+.chore .strike{position:absolute;left:34px;right:34px;top:50%;height:8px;margin-top:-4px;border-radius:4px;background:var(--text);transform-origin:0 50%;box-shadow:0 0 0 4px var(--bg)}
+#h1b{position:absolute;left:0;right:0;top:700px;margin:0;text-align:center;font:900 76px/1.05 Montserrat;letter-spacing:-2.5px;color:var(--text)}
+#h1b .w{display:inline-block}
+
+/* ================= APP WINDOW ================= */
+#win{position:absolute;left:140px;top:40px;width:1640px;height:900px;border-radius:18px;background:var(--bg);border:1px solid var(--line2);box-shadow:var(--shadow);overflow:hidden;visibility:hidden;transform-origin:0 0}
+.tbar{height:46px;display:flex;align-items:center;padding:0 18px;gap:8px;background:var(--card);border-bottom:1px solid var(--line)}
+.tbar>i{width:12px;height:12px;border-radius:50%;display:block;background:var(--line2)}
+.url{margin:0 auto;transform:translateX(-30px);width:520px;height:28px;border-radius:8px;background:var(--c2);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;gap:8px;font:500 14px Inter;color:var(--muted)}
+.url svg{width:13px;height:13px}
+.wbody{display:grid;grid-template-columns:256px 1fr;height:calc(100% - 46px)}
+.side{background:var(--side);border-right:1px solid var(--line);padding:6px 12px 14px;display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:12px;height:54px;padding:0 8px;font:700 19px Inter;color:var(--text)}
+.plan{margin-top:6px;padding:8px 12px;border-radius:12px;background:var(--c2);border:1px solid var(--line2);display:flex;align-items:center;justify-content:space-between}
+.plan span{font:700 12px Inter;text-transform:uppercase;color:var(--text)}
+.plan b{display:flex;align-items:baseline;gap:3px;padding:2px 9px;border-radius:8px;background:rgba(127,127,127,.15);font:900 15px Inter;color:var(--text)}
+.plan b small{font:500 10px Inter;color:var(--dim)}
+.create{margin:10px 0 4px;height:40px;border-radius:12px;background:var(--inv);color:var(--invText);display:flex;align-items:center;justify-content:center;gap:10px;font:600 15px Inter}
+.create svg{width:17px;height:17px}
+.nav{display:flex;flex-direction:column;gap:2px;margin-top:6px}
+.mi{position:relative;display:flex;align-items:center;gap:12px;height:38px;padding:0 12px;border-radius:12px;font:500 15px Inter;color:var(--dim)}
+.mi svg{width:19px;height:19px;flex:none}
+.mi.on{color:var(--text)}
+.mi .onbg{position:absolute;inset:0;border-radius:12px;background:rgba(127,127,127,.16);opacity:0}
+.mi .bd{margin-left:auto;padding:2px 7px;border-radius:999px;background:rgba(127,127,127,.15);font:700 10px Inter;text-transform:uppercase;color:var(--dim)}
+.mi .chev{margin-left:auto;width:16px;height:16px;color:var(--faint)}
+.sub{display:flex;flex-direction:column;gap:1px;margin:2px 0 4px 22px;padding-left:10px;border-left:1px solid var(--line)}
+.sub .mi{height:34px;font-size:14px;gap:10px}
+.sub .mi svg{width:16px;height:16px}
+.sbot{margin-top:auto;display:flex;flex-direction:column;gap:2px}
+.sbot .mi{color:var(--faint)}
+.main{position:relative;background:var(--bg);overflow:hidden}
+#wm{position:absolute;left:0;right:0;top:250px;text-align:center;font:900 220px/1 system-ui,-apple-system,sans-serif;letter-spacing:-.05em;color:var(--wm);white-space:nowrap}
+#dashHero{position:absolute;left:0;right:0;top:120px;text-align:center;font:700 56px/1.1 Inter;letter-spacing:-2px;color:var(--text)}
+#dashHero small{display:block;margin-top:14px;font:400 20px Inter;letter-spacing:0;color:var(--muted)}
+
+/* ================= PAGE (ukuran asli app, diskalakan --ps) ================= */
+.page{position:absolute;left:0;top:0;width:954px;height:600px;transform:scale(var(--ps));transform-origin:0 0;font-size:14px}
+.pnl{position:absolute;top:18px;visibility:hidden}
+.scr{position:relative}
+.cur{position:absolute;left:0;top:0;width:22px;height:22px;z-index:40;visibility:hidden;filter:drop-shadow(0 3px 6px rgba(0,0,0,.5));pointer-events:none}
+.ring{position:absolute;left:-18px;top:-18px;width:36px;height:36px;border-radius:50%;border:2px solid var(--text);z-index:39;opacity:0;pointer-events:none}
+.hot{position:absolute;border-radius:12px;border:2px solid var(--text);box-shadow:0 0 0 6px rgba(127,127,127,.18);opacity:0;pointer-events:none;z-index:30}
+
+/* stepper */
+.stp{display:flex;align-items:center;gap:8px;padding:8px 0 12px}
+.sb{position:relative;display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;font:600 12px Inter;background:var(--c0);color:var(--dim)}
+.sb.act{background:var(--inv);color:var(--invText);box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.sb.done{background:var(--c2);color:var(--t3)}
+.sb .n{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 10px Inter;background:var(--line3);color:var(--dim)}
+.sb.act .n{background:rgba(127,127,127,.28);color:var(--invText)}
+.sb.done .n{background:rgba(16,185,129,.2);color:#34d399}
+body.light .sb.done .n{background:#d1fae5;color:#047857}
+.sline{flex:1;height:1px;background:var(--line3)}
+.sline.done{background:rgba(16,185,129,.45)}
+
+.lab{display:block;font:700 10px Inter;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+body:not(.light) .lab{color:var(--dim)}
+.sel{position:relative;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--card);font:400 14px Inter;color:var(--text2);white-space:nowrap;overflow:hidden}
+.sel svg{width:16px;height:16px;color:var(--muted);flex:none}
+.sel.sm{padding:8px 12px;border-radius:8px;font:500 12px Inter;background:var(--c2);border-color:var(--line2)}
+.fld{position:relative;min-width:0}
+.dd{position:absolute;left:0;right:0;top:100%;margin-top:4px;border-radius:10px;background:var(--card);border:1px solid var(--line2);box-shadow:0 18px 44px rgba(0,0,0,.45);z-index:25;display:none;overflow:hidden;text-align:left}
+.dd.open{display:block}
+#ddKat{max-height:330px}
+.ddIn{position:relative}
+.dd .og{padding:6px 12px 3px;font:700 11px Inter;color:var(--dim)}
+.dd .it{display:flex;align-items:center;gap:8px;padding:6px 12px 6px 20px;font:400 13px Inter;color:var(--text2);white-space:nowrap}
+.dd .it.top{padding-left:12px}
+.dd .it.hi{background:#2563eb;color:#fff}
+.dd .it .ck{margin-left:auto;font-size:11px;opacity:.7}
+.dd .it.dis{color:var(--faint)}
+.hint{margin:4px 0 0;font:400 10px/1.35 Inter;color:var(--muted)}
+body:not(.light) .hint{color:var(--muted)}
+
+/* ================= PH1 ================= */
+.titleblk{position:relative;text-align:center;margin:10px 0 18px}
+.titleblk h1{margin:0 0 8px;font:700 30px/1.2 Inter;letter-spacing:-.6px;color:var(--text)}
+.titleblk p{margin:0;font:400 14px Inter;color:var(--muted)}
+.bvb{position:absolute;top:0;right:0;display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;border:1px solid var(--line2);background:var(--c2);font:600 10px Inter;color:var(--muted)}
+.row2{display:flex;gap:8px;align-items:flex-end}
+.row2 .fld{flex:1}
+.xbtn{flex:none;width:42px;height:42px;border-radius:12px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--muted);visibility:hidden}
+.xbtn svg{width:16px;height:16px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding-top:4px;min-height:30px;opacity:0}
+.chip{padding:4px 10px;border-radius:8px;border:1px solid var(--line);background:var(--c2);font:400 11px Inter;color:var(--muted)}
+.chip.on{background:rgba(99,102,241,.14);border-color:rgba(99,102,241,.55);color:#818cf8;font-weight:600}
+body.light .chip.on{background:#eef2ff;border-color:#a5b4fc;color:#4f46e5}
+.icard{margin-top:22px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.tabs{display:flex;gap:4px;margin-bottom:12px;padding:4px;border-radius:12px;background:var(--c0)}
+body:not(.light) .tabs{background:#0f0f0f}
+.tab{flex:1;text-align:center;padding:6px 8px;border-radius:8px;font:600 12px Inter;color:var(--dim)}
+.tab.on{background:var(--line);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.25)}
+body.light .tab.on{background:#fff}
+.tabc{display:none}
+.tabc.show{display:block}
+.ta{min-height:60px;font:400 18px/1.4 Inter;color:var(--text)}
+.ta .ph{color:var(--dim)}
+.caret{display:inline-block;width:2px;height:21px;margin-left:1px;vertical-align:-4px;background:var(--text);opacity:0}
+.ytrow{display:flex;align-items:center;gap:8px;font:400 14px Inter;color:var(--dim);min-height:24px}
+.ytrow svg{width:18px;height:18px}
+.ytnote{margin-top:8px;font:italic 400 10px Inter;color:var(--dim)}
+.art .l{display:block;font:600 12px Inter;color:var(--muted);margin-bottom:6px}
+.art .inp{padding:8px 12px;border-radius:12px;border:1px solid var(--line2);background:var(--c0);font:400 14px Inter;color:var(--dim)}
+.art .or{display:flex;align-items:center;gap:12px;margin:12px 0;font:400 12px Inter;color:var(--muted)}
+.art .or i{flex:1;height:1px;background:var(--line2)}
+.art .drop{border:2px dashed var(--line2);border-radius:12px;padding:14px;text-align:center;font:400 14px Inter;color:var(--muted)}
+.art .drop .e{font-size:24px;margin-bottom:4px}
+.art .drop small{display:block;margin-top:4px;font-size:12px}
+.divi{margin-top:12px;border-top:1px solid var(--line3)}
+.divi.hide{display:none}
+.brow{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
+.ghostb{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;font:500 14px Inter;color:var(--dim)}
+.ghostb svg{width:16px;height:16px}
+.lanjut{display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;font:600 14px Inter;background:var(--line);color:var(--dim)}
+body.light .lanjut{background:#e5e7eb;color:#9ca3af}
+.lanjut.en{background:var(--inv);color:var(--invText)}
+.lanjut svg{width:16px;height:16px}
+
+/* ================= PH2 ================= */
+.sumc{display:flex;align-items:center;justify-content:space-between;padding:16px;border-radius:16px;background:var(--c2);border:1px solid var(--line2);margin-bottom:16px}
+.sumc .k{font:600 10px Inter;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.sumc .v{font:500 14px Inter;color:var(--text)}
+.sumc .ed{padding:6px 12px;border-radius:8px;background:var(--line2);font:500 12px Inter;color:var(--text)}
+.cfg{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+.cfgh{display:flex;align-items:center;gap:8px;margin-bottom:12px;font:600 12px Inter;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.cfgh .e{font-size:16px;letter-spacing:0}
+.ban{position:relative;margin-bottom:12px;padding:10px;border-radius:8px;border:1px solid;font:400 11px/1.4 Inter;display:flex;gap:8px;align-items:flex-start}
+.ban b{display:block;font-weight:600}
+.ban small{display:block;font-size:10px;opacity:.75}
+.ban.load{background:rgba(30,58,138,.2);border-color:#1e40af;color:#bfdbfe}
+.ban.ok{background:#07231b;border-color:#065f46;color:#a7f3d0}
+body.light .ban.load{background:#eff6ff;border-color:#bfdbfe;color:#1e40af}
+body.light .ban.ok{background:#ecfdf5;border-color:#a7f3d0;color:#065f46}
+.ban .spin{width:14px;height:14px;flex:none;margin-top:1px;border-radius:50%;border:2px solid #93c5fd;border-top-color:#1d4ed8}
+.ban svg{width:14px;height:14px;flex:none;margin-top:1px}
+.banw{position:relative}
+.banw .ban.ok{position:absolute;inset:0;margin:0;opacity:0}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.lab2{display:block;font:600 10px Inter;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.aib{display:inline-block;margin-left:4px;padding:1px 4px;border-radius:4px;font:700 8px Inter;background:rgba(30,58,138,.45);color:#93c5fd;vertical-align:1px;opacity:0}
+body.light .aib{background:#dbeafe;color:#1d4ed8}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pl{padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--c2);font:500 11px Inter;color:var(--muted)}
+.pl.on{background:var(--inv);border-color:var(--inv);color:var(--invText);font-weight:600}
+.sbox{margin-top:12px;border-radius:12px;border:1px solid var(--line3);background:rgba(127,127,127,.04);padding:12px}
+.sbox .h{display:flex;align-items:center;gap:6px;font:600 11px Inter;color:var(--t3);margin-bottom:8px}
+.sbox .inp{padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);font:400 14px Inter;color:var(--faint)}
+.sbox .it{margin-top:4px;font:italic 400 10px Inter;color:var(--dim)}
+.seg2{display:flex;gap:4px;padding:2px;border-radius:999px;background:var(--line3)}
+.seg2 span{padding:4px 12px;border-radius:999px;font:600 10px Inter;color:var(--dim)}
+.seg2 span.on{background:var(--line);color:var(--text)}
+body.light .seg2 span.on{background:#fff}
+.arcAi{font:italic 400 10px/1.45 Inter;color:var(--dim)}
+.arcMan{display:none}
+.manualOn .arcAi{display:none}
+.manualOn .arcMan{display:block}
+.arcMan .d{font:400 10px Inter;color:var(--dim);margin-bottom:8px}
+.arcMan .f{margin-bottom:8px}
+.arcMan .f label{display:block;font:600 10px Inter;color:var(--muted);margin-bottom:4px}
+.arcMan .f div{height:44px;padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);font:400 12px/1.4 Inter;color:var(--faint)}
+.navr{display:flex;justify-content:space-between;gap:12px;margin-top:16px}
+.btn2{display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:12px;font:600 12px Inter;background:var(--c2);color:var(--t3)}
+.btn1{display:flex;align-items:center;gap:6px;padding:10px 20px;border-radius:12px;font:600 12px Inter;background:var(--inv);color:var(--invText)}
+.btn1 svg,.btn2 svg{width:14px;height:14px}
+
+/* ================= PH3 ================= */
+.card3{background:var(--card);border:1px solid var(--line3);border-radius:16px;padding:12px}
+body:not(.light) .card3{border-color:#1e1e1e}
+.ch{display:flex;align-items:center;gap:8px;margin-bottom:8px;font:600 10px Inter;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ch svg{width:14px;height:14px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px}
+.arb{display:flex;gap:6px}
+.arb span{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 0;border-radius:8px;border:1px solid var(--line);background:var(--c2);font:500 12px Inter;color:var(--muted)}
+.arb span.on{background:var(--inv);border-color:var(--inv);color:var(--invText)}
+.arb svg{width:14px;height:14px}
+.durl{display:flex;justify-content:space-between;align-items:center;font:600 10px Inter;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.durl b{font-weight:900;text-transform:none;color:var(--text);margin-left:4px}
+.durl em{font-style:normal;font-weight:400;margin-left:4px}
+.rng{position:relative;height:16px}
+.rng .tr{position:absolute;left:0;right:0;top:6px;height:4px;border-radius:2px;background:var(--line2)}
+.rng .fi{position:absolute;left:0;top:6px;height:4px;border-radius:2px;background:var(--inv)}
+.rng .th{position:absolute;top:0;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:var(--inv);box-shadow:0 0 0 3px var(--card)}
+.rngl{display:flex;justify-content:space-between;margin-top:4px;font:400 9px Inter;color:var(--muted)}
+.trow{display:flex;align-items:center;gap:8px}
+.trow .k{font:600 10px Inter;text-transform:uppercase;color:var(--muted)}
+.tp{padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--c2);font:500 11px Inter;color:var(--muted)}
+.tp.on{background:var(--inv);border-color:var(--inv);color:var(--invText)}
+.sug{display:none;margin-top:8px;align-items:center;gap:8px;padding:4px 4px 4px 8px;border-radius:6px;border-left:2px solid #f59e0b;background:rgba(245,158,11,.08);font:400 10.5px Inter;color:var(--t3)}
+.sug.show{display:flex}
+.sug b{color:#fcd34d}
+body.light .sug b{color:#b45309}
+.sug .ap{margin-left:auto;font:700 10px Inter;color:#fcd34d}
+body.light .sug .ap{color:#b45309}
+.sug .x{width:18px;height:18px;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.sug .x svg{width:11px;height:11px}
+.opts{margin-top:8px;padding-top:8px;border-top:1px solid var(--line3);display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.tg{display:flex;align-items:flex-start;gap:10px;padding:8px 12px;border-radius:12px;border:1px solid var(--line)}
+.tg .bx{flex:none;width:16px;height:16px;margin-top:1px;border-radius:4px;border:1.5px solid var(--faint);display:flex;align-items:center;justify-content:center;color:var(--invText)}
+.tg .bx svg{width:11px;height:11px;opacity:0}
+.tg .tx{flex:1;min-width:0}
+.tg .tx b{display:flex;align-items:center;gap:6px;font:600 12px Inter;color:var(--text2)}
+.tg .tx small{display:block;margin-top:2px;font:400 10px/1.3 Inter;color:var(--dim)}
+.tg .bg2{padding:1px 5px;border-radius:4px;background:var(--line2);font:700 8px Inter;color:var(--t3);display:none}
+.tg .pa{margin-left:auto;padding:2px 6px;border-radius:6px;border:1px solid var(--line2);font:800 8px Inter;letter-spacing:.06em;color:var(--t3);display:none}
+.tg.on{border-color:var(--inv);background:rgba(127,127,127,.07)}
+.tg.on .bx{background:var(--inv);border-color:var(--inv)}
+.tg.on .bx svg{opacity:1}
+.tg.on .bg2,.tg.on .pa{display:inline-block}
+.tg.cp{padding:6px 10px}
+.gcol{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;align-items:start}
+.stk{display:flex;flex-direction:column;gap:8px}
+.l3{display:block;font:600 10px Inter;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.intn{display:none;margin-top:8px}
+.intn.show{display:block}
+.intn .r{display:flex;justify-content:space-between;font:600 10px Inter;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.hr{height:1px;background:var(--line3);margin:12px 0}
+.segm{display:flex;gap:8px;padding:4px;border-radius:8px;background:var(--c2);margin-bottom:10px}
+.segm span{flex:1;text-align:center;padding:4px 0;border-radius:6px;font:700 11px Inter;color:var(--dim)}
+.segm span.on{background:var(--line2);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.2)}
+body.light .segm span.on{background:#fff}
+.bgmx{display:none}
+.bgmx.show{display:block}
+.vol .r{display:flex;justify-content:space-between;font:700 10px Inter;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.vol .r span:last-child{color:var(--t3)}
+.arow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.arow .k{width:56px;flex:none;font:600 10px Inter;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lp{padding:2px 7px;border-radius:6px;border:1px solid var(--line);background:var(--c2);font:500 10.5px Inter;color:var(--muted)}
+.lp.on{background:var(--inv);border-color:var(--inv);color:var(--invText)}
+.tts{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.tts span{text-align:center;padding:5px 0;border-radius:6px;border:1px solid var(--line);background:var(--c2);font:600 10.5px Inter;color:var(--muted)}
+.tts span.on{background:var(--inv);border-color:var(--inv);color:var(--invText)}
+.vdd .row{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;font:400 11px Inter;color:var(--text2)}
+.vdd .srch{margin:6px;padding:6px 8px;border-radius:6px;border:1px solid var(--line2);font:400 11px Inter;color:var(--dim)}
+.vdd .grp{padding:4px 10px;font:700 9px Inter;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.vdd .row.hi{background:var(--sel)}
+.vdd .row .pv{width:18px;height:18px;border-radius:50%;background:var(--line2);display:flex;align-items:center;justify-content:center}
+.vdd .row .pv svg{width:8px;height:8px}
+.vhint{margin-top:6px;font:400 10px Inter;color:var(--dim)}
+.tprs{margin-top:10px;padding-top:10px;border-top:1px solid var(--line3);display:flex;align-items:center;gap:6px;font:500 11px Inter;color:var(--muted)}
+.tprs svg{width:14px;height:14px}
+.subm{margin-top:8px;display:flex;align-items:center;justify-content:center;gap:10px;padding:14px;border-radius:16px;background:var(--inv);color:var(--invText);font:700 14px Inter;box-shadow:0 10px 24px rgba(0,0,0,.35)}
+.subm svg{width:18px;height:18px}
+.subm small{font:400 9px Inter;opacity:.55}
+.subm .sp{display:none;width:16px;height:16px;border-radius:50%;border:2px solid rgba(127,127,127,.4);border-top-color:var(--invText)}
+.subm.busy .sp{display:block}
+.subm.busy .nb{display:none}
+.subm .bs{display:none}
+.subm.busy .bs{display:inline}
+
+/* ================= GENERATING ================= */
+.gen{width:448px;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.gen .hd{padding:20px 20px 16px;text-align:center}
+.ringp{position:relative;width:56px;height:56px;margin:0 auto 16px}
+.ringp svg{position:absolute;inset:0;width:56px;height:56px}
+.ringp b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:900 14px Inter;color:var(--text)}
+.gen h2{margin:0 0 2px;font:700 16px Inter;color:var(--text)}
+.gen .sm{font:400 12px Inter;color:var(--muted)}
+.gbar{margin:0 20px 16px;height:6px;border-radius:3px;background:var(--c2);overflow:hidden}
+.gbar i{display:block;height:100%;width:0;border-radius:3px;background:linear-gradient(90deg,var(--t3),var(--dim))}
+.gsteps{padding:0 12px 16px}
+.gs{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;font:500 12px Inter;color:var(--ghost)}
+.gs .ic{flex:none;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--c2);color:var(--ghost)}
+.gs .ic svg{width:16px;height:16px}
+.gs .ic .okk{display:none;width:14px;height:14px}
+.gs .spn{display:none;margin-left:auto;width:14px;height:14px;border-radius:50%;border:2px solid var(--line2);border-top-color:var(--text)}
+.gs.act{background:rgba(127,127,127,.08);color:var(--text)}
+.gs.act .ic{background:rgba(127,127,127,.16);color:var(--t3)}
+.gs.act .spn{display:block}
+.gs.done{color:var(--dim)}
+.gs.done .ic{background:rgba(34,197,94,.18);color:#4ade80}
+body.light .gs.done .ic{background:#dcfce7;color:#16a34a}
+.gs.done .ic .okk{display:block}
+.gs.done .ic .ico{display:none}
+.gen .ft{padding:6px 20px 16px;border-top:1px solid var(--line3);text-align:center;font:400 10px Inter;color:var(--muted)}
+
+/* ================= REVIEW ================= */
+.rv{width:896px}
+.rvc{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.rvh{padding:12px 16px;background:linear-gradient(90deg,#1e3a8a,#3730a3);display:flex;align-items:center;gap:10px;color:#fff}
+.rvh svg{width:16px;height:16px}
+.rvh h3{margin:0;display:flex;align-items:center;gap:6px;font:700 14px Inter}
+.rvh small{font:400 10px Inter;opacity:.7}
+.rvt{padding:12px 16px 4px}
+.rvt .k{font:700 9px Inter;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.rvt .v{font:700 14px Inter;color:var(--text);padding-bottom:6px;border-bottom:1px dashed var(--line2)}
+.sfx{margin:0 12px;padding:12px;border-radius:12px;background:var(--c0);border:1px solid var(--line)}
+.sfx .t{display:flex;justify-content:space-between;align-items:flex-start}
+.sfx .t b{display:flex;align-items:center;gap:6px;font:700 12px Inter;color:var(--text)}
+.sfx .t b i{font-style:normal;padding:1px 5px;border-radius:4px;background:rgba(245,158,11,.14);border:1px solid rgba(245,158,11,.35);font:500 9px Inter;color:#fbbf24}
+.sfx .t small{display:block;margin-top:2px;font:400 10px Inter;color:var(--muted)}
+.sfx .t .c{text-align:right;font:700 12px Inter;color:var(--text)}
+.sfx .t .c small{font:700 11px Inter;color:var(--t3)}
+.sfx .ln{display:flex;gap:8px;margin:8px 0;font:500 10px Inter;color:var(--muted)}
+.sfx .ln u{text-decoration:underline}
+.sfx .r{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:8px;background:var(--card);margin-top:4px}
+.sfx .r .bx{width:14px;height:14px;border-radius:3px;background:var(--inv);display:flex;align-items:center;justify-content:center;color:var(--invText)}
+.sfx .r .bx svg{width:10px;height:10px}
+.sfx .r b{font:600 11px Inter;color:var(--text)}
+.sfx .r span{font:400 10px Inter;color:var(--muted)}
+.scl{padding:10px 12px;display:flex;flex-direction:column;gap:12px}
+.sc{border-radius:12px;background:rgba(127,127,127,.05);border:1px solid var(--line3);padding:12px;display:flex;gap:16px}
+.sc .lf{width:128px;flex:none;display:flex;flex-direction:column;align-items:center;gap:8px}
+.thm{position:relative;width:96px;height:160px;border-radius:8px;overflow:hidden;border:1px solid var(--line2);background:var(--c2)}
+.thm svg,.thm .artv{position:absolute;inset:0;width:100%;height:100%}
+.thm .gl{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#fff;font:700 8px Inter;opacity:0}
+.thm .gl i{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.3);border-top-color:#fff}
+.thm .flash{position:absolute;inset:0;background:#fff;opacity:0}
+.rgb{display:flex;align-items:center;gap:4px;padding:5px 8px;border-radius:8px;border:1px solid var(--line2);background:var(--card);font:600 10px Inter;color:var(--t3);white-space:nowrap}
+.rgb svg{width:11px;height:11px}
+.sc .rt{flex:1;min-width:0;display:flex;flex-direction:column}
+.sc .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.arcb{padding:2px 6px;border-radius:999px;border:1px solid;font:700 9px Inter}
+.a-hook{background:rgba(30,58,138,.4);color:#93c5fd;border-color:#1e40af}
+.a-intro{background:rgba(88,28,135,.4);color:#d8b4fe;border-color:#6b21a8}
+.a-rising{background:rgba(124,45,18,.4);color:#fdba74;border-color:#9a3412}
+.a-climax{background:rgba(127,29,29,.4);color:#fca5a5;border-color:#991b1b}
+.a-falling{background:rgba(113,63,18,.4);color:#fde047;border-color:#854d0e}
+.a-resolution{background:rgba(20,83,45,.4);color:#86efac;border-color:#166534}
+body.light .a-hook{background:#dbeafe;color:#1d4ed8;border-color:#bfdbfe}
+body.light .a-intro{background:#f3e8ff;color:#7e22ce;border-color:#e9d5ff}
+body.light .a-rising{background:#ffedd5;color:#c2410c;border-color:#fed7aa}
+body.light .a-climax{background:#fee2e2;color:#b91c1c;border-color:#fecaca}
+body.light .a-falling{background:#fef9c3;color:#a16207;border-color:#fef08a}
+body.light .a-resolution{background:#dcfce7;color:#15803d;border-color:#bbf7d0}
+.sc .du{display:flex;align-items:center;gap:4px;font:400 9px Inter;color:var(--muted)}
+.sc .du span{width:30px;padding:2px 4px;border-radius:4px;border:1px solid var(--line2);text-align:center;font:600 10px Inter;color:var(--t3)}
+.sc .lh{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font:700 9px Inter;text-transform:uppercase;color:var(--muted)}
+.sc .lh svg{width:11px;height:11px}
+.sc .nar{position:relative;min-height:52px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);font:400 11.5px/1.45 Inter;color:var(--text2);margin-bottom:8px}
+.sc .nar.foc{border-color:var(--muted)}
+.sc .pr{padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);font:400 10.5px/1.45 ui-monospace,Menlo,monospace;color:var(--muted);height:48px;overflow:hidden}
+.sc .pf{display:flex;justify-content:space-between;margin-top:4px;font:400 9px Inter;color:var(--dim)}
+.rvo{margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px}
+.rvo .r{display:flex;align-items:center;gap:6px;font:700 10px Inter;color:var(--t3)}
+.rvo .r .bx{width:14px;height:14px;border-radius:3px;background:var(--inv);display:flex;align-items:center;justify-content:center;color:var(--invText)}
+.rvo .r .bx svg{width:10px;height:10px}
+.rvo .r .pa{padding:1px 6px;border-radius:6px;border:1px solid var(--line2);font:800 8px Inter}
+.rvo .inp{margin-top:6px;padding:6px 10px;border-radius:8px;border:1px solid var(--line2);background:var(--c0);font:400 11px Inter;color:var(--text)}
+.lnj{margin-top:12px;display:flex;align-items:center;justify-content:center;gap:10px;padding:13px;border-radius:12px;background:var(--inv);color:var(--invText);font:700 14px Inter}
+.lnj svg{width:16px;height:16px}
+.lnj small{padding:2px 8px;border-radius:999px;background:rgba(127,127,127,.2);font:700 11px Inter}
+.lnj .sp{display:none;width:16px;height:16px;border-radius:50%;border:2px solid rgba(127,127,127,.4);border-top-color:var(--invText)}
+.lnj.busy .sp{display:block}
+.lnj.busy .nb{display:none}
+.lnj .bs{display:none}
+.lnj.busy .bs{display:inline}
+.lnjn{margin-top:6px;text-align:center;font:400 10px Inter;color:var(--muted)}
+
+.aivb{margin-bottom:12px;padding:12px 14px;border-radius:12px;border:1px solid #1e3a8a;background:rgba(23,37,84,.35);font:400 12px/1.55 Inter;color:#dbeafe}
+body.light .aivb{border-color:#bfdbfe;background:#eff6ff;color:#1e3a8a}
+.sbd{padding:16px}
+.sbsheet{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--line2);background:#0b0b0c;padding:8px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.sbp{position:relative;aspect-ratio:9/16;border-radius:6px;overflow:hidden}
+.sbp svg{position:absolute;inset:0;width:100%;height:100%}
+.sbp b{position:absolute;left:4px;top:4px;padding:1px 5px;border-radius:4px;background:rgba(0,0,0,.7);font:700 9px Inter;color:#fff}
+.sbp small{position:absolute;left:0;right:0;bottom:0;padding:10px 4px 3px;background:linear-gradient(transparent,rgba(0,0,0,.8));font:600 8px Inter;color:#e5e7eb;text-align:center}
+.sbsheet .un2{position:absolute;right:14px;bottom:14px;padding:6px 12px;border-radius:8px;background:rgba(255,255,255,.95);font:600 11px Inter;color:#0f172a}
+/* ================= RESULT ================= */
+.res{width:512px}
+.rcard{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.rtb{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line3)}
+.rtb .ok{width:32px;height:32px;border-radius:50%;background:rgba(34,197,94,.18);display:flex;align-items:center;justify-content:center;color:#4ade80}
+body.light .rtb .ok{background:#dcfce7;color:#16a34a}
+.rtb .ok svg{width:16px;height:16px}
+.rtb b{display:block;font:700 14px Inter;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rtb small{font:400 10px Inter;color:var(--muted)}
+.player{background:#000;display:flex;justify-content:center}
+.pv9{position:relative;width:236px;height:420px;overflow:hidden;background:#020b16}
+.pv9 .frm{position:absolute;inset:-6%;opacity:0}
+.pv9 .frm svg{width:100%;height:100%}
+.pv9 .vig{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,.65));pointer-events:none}
+.pv9 .ttl{position:absolute;left:10px;right:10px;top:26px;text-align:center;font:900 17px/1.15 Montserrat;color:#fff;text-shadow:0 2px 0 #000,0 0 10px rgba(0,0,0,.8);letter-spacing:-.3px}
+.pv9 .sub{position:absolute;left:12px;right:12px;bottom:74px;text-align:center;font:800 14px/1.3 Montserrat;color:#fff;text-shadow:0 2px 3px #000,0 0 2px #000}
+.pctl{position:absolute;left:0;right:0;bottom:0;height:34px;background:linear-gradient(transparent,rgba(0,0,0,.75));display:flex;align-items:center;gap:8px;padding:0 10px;color:#fff;font:500 9px Inter}
+.pctl svg{width:12px;height:12px}
+.pctl .bar{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.3);overflow:hidden}
+.pctl .bar i{display:block;height:100%;width:0;background:#fff}
+.stats{display:grid;grid-template-columns:repeat(3,1fr)}
+.stats div{padding:12px 0;text-align:center;border-left:1px solid var(--line3)}
+.stats div:first-child{border-left:0}
+.stats svg{width:14px;height:14px;margin:0 auto 2px;color:var(--muted)}
+.stats b{display:block;font:700 14px Inter;color:var(--text)}
+.stats small{font:400 10px Inter;color:var(--muted)}
+.racts{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line3)}
+.racts span{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;border-radius:12px;font:600 14px Inter}
+.racts svg{width:16px;height:16px}
+.racts .dl{flex:1;background:var(--inv);color:var(--invText)}
+.racts .up{background:var(--c2);border:1px solid var(--line2);color:var(--t3)}
+.racts .pl2{padding:10px 12px;border:1px solid var(--line2);color:var(--muted)}
+.sdet{margin-top:16px;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-radius:16px;background:var(--card);border:1px solid var(--line);font:600 12px Inter;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.sdet svg{width:16px;height:16px}
+.kit{margin-top:24px;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.kith{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line3)}
+.kith .ic{width:36px;height:36px;border-radius:8px;background:var(--c2);display:flex;align-items:center;justify-content:center;color:var(--t3)}
+.kith .ic svg{width:18px;height:18px}
+.kith b{display:block;font:700 14px Inter;color:var(--text)}
+.kith small{font:400 11px Inter;color:var(--muted)}
+.kith .bt{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:8px;background:var(--c2);border:1px solid var(--line2);font:600 12px Inter;color:var(--t3);white-space:nowrap}
+.kith .bt svg{width:13px;height:13px}
+.covg{padding:20px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:start}
+.cov{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--line2);aspect-ratio:9/16}
+.cov.w{aspect-ratio:16/9}
+.cov svg{position:absolute;inset:0;width:100%;height:100%}
+.cov .r{position:absolute;top:6px;left:6px;padding:1px 6px;border-radius:4px;background:rgba(0,0,0,.7);font:600 10px Inter;color:#fff}
+.cov .ct{position:absolute;left:6px;right:6px;bottom:10px;text-align:center;font:900 11px/1.1 Montserrat;color:#fff;text-shadow:0 2px 0 #000}
+.cov .un{position:absolute;left:8px;right:8px;bottom:8px;padding:6px 0;border-radius:8px;background:rgba(255,255,255,.95);text-align:center;font:600 11px Inter;color:#0f172a;opacity:0}
+.cov .sel2{position:absolute;inset:0;border:3px solid #fff;border-radius:12px;opacity:0}
+.kgrid{padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.kc{position:relative;border-radius:12px;background:var(--c0);border:1px solid var(--line3);padding:14px;display:flex;flex-direction:column}
+.kc .h{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.kc .h .pi{width:24px;height:24px;border-radius:6px;overflow:hidden}
+.kc .h .pi svg{width:24px;height:24px}
+.kc .h b{font:700 12px Inter;color:var(--text2)}
+.kc .h small{margin-left:auto;font:600 9px Inter;text-transform:uppercase;color:var(--muted)}
+.kc .tx{flex:1;padding:10px;border-radius:8px;background:var(--card);border:1px solid var(--line3);font:400 11.5px/1.5 Inter;color:var(--t3);white-space:pre-line;margin-bottom:10px;min-height:92px}
+.kc .tx .cnt{display:block;text-align:right;font-size:10px;color:var(--muted);margin-top:4px}
+.kc .cp{display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 0;border-radius:8px;background:var(--card);border:1px solid var(--line2);font:600 12px Inter;color:var(--t3)}
+.kc .cp svg{width:13px;height:13px}
+.kc .cp .ok{display:none}
+.kc .cp.done{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.4);color:#4ade80}
+.kc .cp.done .ok{display:inline}
+.kc .cp.done .no{display:none}
+.kc .glow{position:absolute;inset:-1px;border-radius:12px;border:2px solid var(--text);opacity:0}
+/* modal jadwal upload — ui/ScheduleUploadModal.tsx */
+.mdl{position:absolute;inset:0;z-index:35;display:flex;align-items:flex-start;justify-content:center;padding-top:24px;background:rgba(0,0,0,.6);opacity:0;visibility:hidden}
+.mbox{width:470px;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.mbox .mh{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line3)}
+.mbox .mh b{display:block;font:700 16px Inter;color:var(--text)}
+.mbox .mh small{font:400 11px Inter;color:var(--muted)}
+.mbox .mh svg{width:18px;height:18px;color:var(--muted)}
+.mbox .mb{padding:14px 18px}
+.mbox .l{display:block;font:700 12px Inter;color:var(--t3);margin-bottom:6px}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.pgrid div{position:relative;display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:12px;border:1px solid var(--line2);font:600 12px Inter;color:var(--text)}
+.pgrid div svg{width:22px;height:22px;flex:none}
+.pgrid div.on{border-color:var(--text);background:rgba(127,127,127,.08)}
+.pgrid div .hl{position:absolute;inset:-1px;border-radius:12px;border:2px solid var(--text);opacity:0}
+.mbox .f{padding:8px 10px;border-radius:10px;border:1px solid var(--line2);background:var(--c0);font:400 12px Inter;color:var(--text2);margin-bottom:10px}
+.mbox .f2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mbox .go{margin-top:4px;padding:11px 0;border-radius:12px;background:var(--inv);color:var(--invText);text-align:center;font:700 13px Inter}
+
+/* ================= S14 · CTA ================= */
+#logoBig{position:absolute;left:870px;top:96px;width:180px;height:180px;box-shadow:0 30px 80px rgba(0,0,0,.35),0 0 0 6px rgba(127,127,127,.18)}
+#wordmark{position:absolute;left:0;right:0;top:306px;margin:0;text-align:center;font:900 112px/1 Inter;letter-spacing:-5px;color:var(--text)}
+#tagline{position:absolute;left:0;right:0;top:438px;margin:0;text-align:center;font:600 36px Inter;color:var(--muted);letter-spacing:-.6px}
+#tagline b{color:var(--text)}
+#ctaPill{position:absolute;left:50%;top:516px;transform:translateX(-50%);display:flex;align-items:center;gap:22px;height:80px;padding:0 9px 0 32px;border-radius:999px;background:var(--card);border:1px solid var(--line2);overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+#ctaPill>span{font:700 29px Inter;color:var(--text)}
+#ctaPill>b{height:62px;padding:0 30px;border-radius:999px;background:var(--inv);color:var(--invText);display:flex;align-items:center;font:800 24px Inter}
+#ctaPill .shine{position:absolute;top:0;bottom:0;left:0;width:120px;background:linear-gradient(100deg,transparent,rgba(127,127,127,.35),transparent);transform:translateX(-160px)}
+#play{position:absolute;left:50%;top:650px;transform:translateX(-50%);display:flex;align-items:center;gap:26px;padding:20px 22px 20px 20px;border-radius:26px;background:var(--card);border:1px solid var(--line2);box-shadow:0 20px 60px rgba(0,0,0,.25)}
+#play .appIcon{width:92px;height:92px;border-radius:22px}
+.appTxt small{display:block;font:600 16px Inter;color:var(--dim);letter-spacing:.4px}
+.appTxt b{display:block;font:800 30px Inter;color:var(--text);letter-spacing:-.6px;margin:4px 0 2px}
+.appTxt span{font:500 16px Inter;color:var(--muted)}
+.gp{display:flex;align-items:center;gap:12px;height:70px;padding:0 22px 0 16px;border-radius:14px;background:#000;border:1.5px solid #a6a6a6;color:#fff}
+.gp svg{width:38px;height:38px}
+.gp small{display:block;font:600 12px Inter;letter-spacing:.8px}
+.gp b{display:block;font:600 27px Inter;letter-spacing:-.4px;line-height:1}
+#flow{position:absolute;left:0;right:0;top:860px;display:flex;justify-content:center;align-items:center;gap:14px;font:600 22px Inter;color:var(--muted)}
+#flow span{padding:10px 18px;border-radius:999px;border:1px solid var(--line2);background:var(--card);color:var(--text2)}
+#flow i{font-style:normal;color:var(--faint)}
+
+/* ================= kursor jendela & caption ================= */
+#cursorW{position:absolute;left:0;top:0;width:34px;height:34px;z-index:50;visibility:hidden;filter:drop-shadow(0 4px 10px rgba(0,0,0,.5))}
+#ringW{position:absolute;left:-26px;top:-26px;width:52px;height:52px;border-radius:50%;border:3px solid var(--text);z-index:49;opacity:0}
+#caps{position:absolute;left:0;right:0;bottom:34px;text-align:center;z-index:60;opacity:0;pointer-events:none}
+#caps .ln{display:inline-block;padding:10px 24px;border-radius:16px;background:rgba(0,0,0,.6);backdrop-filter:blur(6px)}
+#caps .cw{display:inline-block;margin:0 7px;font:800 42px/1.2 Montserrat;color:#fff;-webkit-text-stroke:6px #000;paint-order:stroke fill}
+#caps .cw.on{color:#000;-webkit-text-stroke:0;background:#fff;border-radius:8px;padding:0 8px;margin:0 2px}
+body.nocaps #caps{display:none}
+#chap{position:absolute;left:36px;bottom:40px;z-index:55;display:flex;align-items:center;gap:10px;padding:8px 16px 8px 8px;border-radius:999px;background:rgba(0,0,0,.72);border:1px solid rgba(255,255,255,.14);font:700 20px Inter;color:#fff;opacity:0;backdrop-filter:blur(6px)}
+#chap b{width:34px;height:34px;border-radius:50%;background:#fff;color:#000;display:flex;align-items:center;justify-content:center;font:900 17px Inter}
+
+/* ================= controls ================= */
+#controls{position:fixed;left:0;right:0;bottom:0;height:56px;display:flex;align-items:center;gap:12px;padding:0 18px;background:#0b0b0c;border-top:1px solid #1f1f22;font:600 13px Inter;color:#a1a1aa}
+#controls button{height:34px;min-width:34px;padding:0 12px;border-radius:8px;border:1px solid #2a2a2e;background:#151517;color:#fff;font:600 13px Inter;cursor:pointer}
+#controls button:hover{background:#1d1d20}
+#controls button.off{color:#71717a;text-decoration:line-through}
+#scrub{flex:1;accent-color:#fff}
+#tlabel{font-variant-numeric:tabular-nums;min-width:96px;text-align:right}
+#audioNote{color:#fbbf24;display:none}
+body.rec #controls,body.rec #startOverlay{display:none}
+#startOverlay{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(0,0,0,.6);z-index:100;cursor:pointer;backdrop-filter:blur(3px)}
+#startOverlay div{width:110px;height:110px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 20px 60px rgba(255,255,255,.2)}
+#startOverlay div::after{content:'';border-left:34px solid #000;border-top:21px solid transparent;border-bottom:21px solid transparent;margin-left:10px}
+#startOverlay p{margin:0;font:700 18px Inter;color:#fff}
+#startOverlay small{font:500 14px Inter;color:#a1a1aa}
+.spinA{animation:sp 0.9s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+body.rec .spinA{animation:none}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stageWrap"><div id="stage">
+
+  <div class="bg"><div id="glowA"></div><div id="glowB"></div><div class="dots"></div></div>
+
+  <!-- S1 · HOOK -->
+  <section class="scene" id="s1">
+    <h1 id="h1a"><span class="w">Punya</span> <span class="w">ide</span> <span class="w">konten?</span></h1>
+    <div id="chores">
+      <div class="chore"><div class="ic">✍️</div><b>Nulis naskah</b><small>berjam-jam</small><i class="strike"></i></div>
+      <div class="chore"><div class="ic">🖼️</div><b>Cari gambar</b><small>satu per satu</small><i class="strike"></i></div>
+      <div class="chore"><div class="ic">🎬</div><b>Ngedit video</b><small>narasi + subtitle</small><i class="strike"></i></div>
+    </div>
+    <h2 id="h1b"><span class="w">Semua</span> <span class="w">dikerjakan</span> <span class="w"><span class="inv">AI.</span></span></h2>
+  </section>
+
+  <!-- S2–S13 · APP WINDOW -->
+  <div id="win">
+    <div class="tbar"><i></i><i></i><i></i>
+      <div class="url"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span id="urlTxt">klipers.pro/dashboard</span></div>
+    </div>
+    <div class="wbody">
+      <aside class="side">
+        <div class="brand"><span class="logoTile" style="width:34px;height:34px"><img class="klLogo" alt="Klipers" src="data:image/png;base64,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"></span>Klipers</div>
+        <div class="plan"><span>Pro</span><b>240 <small>cr</small></b></div>
+        <div class="create"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 4.5v15m7.5-7.5h-15"/></svg>Buat Video</div>
+        <nav class="nav">
+          <div class="mi" id="miHome"><i class="onbg"></i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Home</div>
+          <div class="mi"><i class="onbg"></i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5v5l4-2.5z"/></svg>Video Saya</div>
+          <div class="mi"><i class="onbg"></i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V11M10 19V5M16 19v-6M22 19H2"/></svg>Alat SEO<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></div>
+          <div class="mi"><i class="onbg"></i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></svg>Alat AI<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 15l7-7 7 7"/></svg></div>
+          <div class="sub">
+            <div class="mi" id="miCC"><i class="onbg"></i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1z"/></svg>AI Content Creator<span class="bd">New</span></div>
+            <div class="mi"><i class="onbg"></i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 6.3v13M12 6.3C10.8 5.5 9.2 5 7.5 5S4.2 5.5 3 6.3v13C4.2 18.5 5.8 18 7.5 18s3.3.5 4.5 1.3m0-13C13.2 5.5 14.8 5 16.5 5s3.3.5 4.5 1.3v13c-1.2-.8-2.8-1.3-4.5-1.3s-3.3.5-4.5 1.3"/></svg>Buat Cerita<span class="bd">New</span></div>
+            <div class="mi"><i class="onbg"></i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>Generate Prompt</div>
+            <div class="mi"><i class="onbg"></i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Music Generator</div>
+            <div class="mi"><i class="onbg"></i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 11a7 7 0 0 1-14 0M12 18v4M12 14a3 3 0 0 1-3-3V5a3 3 0 1 1 6 0v6a3 3 0 0 1-3 3z"/></svg>Text To Speech</div>
+            <div class="mi"><i class="onbg"></i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 11a7 7 0 0 1-14 0M12 18v4M12 14a3 3 0 0 1-3-3V5a3 3 0 1 1 6 0v6a3 3 0 0 1-3 3z"/></svg>Clone Suara<span class="bd">New</span></div>
+            <div class="mi"><i class="onbg"></i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 10l4.5-2.3A1 1 0 0 1 21 8.6v6.8a1 1 0 0 1-1.5.9L15 14M5 18h8a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg>WA Story HD<span class="bd">New</span></div>
+          </div>
+          <div class="mi"><i class="onbg"></i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 17l6-6 4 4 8-8"/></svg>Analytics</div>
+          <div class="mi"><i class="onbg"></i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>Auto Upload<span class="bd">Dev</span></div>
+        </nav>
+        <div class="sbot">
+          <div class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 6.3v13M12 6.3C10.8 5.5 9.2 5 7.5 5S4.2 5.5 3 6.3v13C4.2 18.5 5.8 18 7.5 18s3.3.5 4.5 1.3m0-13C13.2 5.5 14.8 5 16.5 5s3.3.5 4.5 1.3v13c-1.2-.8-2.8-1.3-4.5-1.3s-3.3.5-4.5 1.3"/></svg>Tutorial</div>
+        </div>
+      </aside>
+
+      <div class="main" id="main">
+        <div id="dash"><div id="wm">Klipers Pro</div><div id="dashHero">Buat video viral hari ini.<small>Pilih alat di sidebar untuk mulai.</small></div></div>
+        <div class="page" id="page"></div>
+      </div>
+    </div>
+    <svg id="cursorW" viewBox="0 0 24 24"><path d="M3 2l17 9.5-7.4 1.7L9.2 21z" fill="#fff" stroke="#000" stroke-width="1.4" stroke-linejoin="round"/></svg>
+    <div id="ringW"></div>
+  </div>
+
+  <!-- S14 · CTA -->
+  <section class="scene" id="s14">
+    <div id="logoBig" class="logoTile"><img class="klLogo" alt="Klipers" src="data:image/png;base64,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"></div>
+    <h1 id="wordmark">Klipers Pro</h1>
+    <p id="tagline"><b>AI Content Creator</b> · 1 topik, jadi video siap posting.</p>
+    <div id="ctaPill"><span>klipers.pro</span><b>Coba Sekarang →</b><i class="shine"></i></div>
+    <div id="play">
+      <div class="appIcon logoTile"><img class="klLogo" alt="Klipers" src="data:image/png;base64,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"></div>
+      <div class="appTxt"><small>TERSEDIA DI PLAY STORE</small><b>Klipers - Ai Video Clipping</b><span>Buat konten langsung dari HP</span></div>
+      <div class="gp"><svg viewBox="0 0 24 24"><path d="M4 2.5 13.5 12 4 21.5c-.4-.2-.6-.6-.6-1.1V3.6c0-.5.2-.9.6-1.1z" fill="#2196F3"/><path d="M4 2.5c.4-.2.9-.2 1.3.1L16.6 9l-3.1 3z" fill="#4CAF50"/><path d="M4 21.5 13.5 12l3.1 3-11.3 6.4c-.4.3-.9.3-1.3.1z" fill="#F44336"/><path d="M16.6 9l3.6 2c.8.5.8 1.5 0 2l-3.6 2-3.1-3z" fill="#FFC107"/></svg><div><small>TERSEDIA DI</small><b>Google Play</b></div></div>
+    </div>
+    <div id="flow"><span>📝 Topik</span><i>→</i><span>✍️ Naskah</span><i>→</i><span>🖼️ Gambar</span><i>→</i><span>🎙️ Narasi</span><i>→</i><span>🎬 Video</span><i>→</i><span>📤 Upload</span></div>
+  </section>
+
+  <div id="chap"><b>1</b><span id="chapTxt">Langkah 1 · Konten</span></div>
+  <div id="caps"></div>
+</div></div></div>
+
+<div id="controls">
+  <button id="bPlay">▶</button><button id="bRestart">↺</button>
+  <input id="scrub" type="range" min="0" max="87" step="0.01" value="0">
+  <span id="tlabel">0.0 / 87s</span>
+  <span id="audioNote"></span>
+  <button id="bCaps">CC Caption: On</button>
+  <button id="bTheme">☀ Terang</button>
+  <button id="bMute">🔊 Suara</button>
+</div>
+<div id="startOverlay"><div></div><p>Putar demo</p><small>Narasi: audio/vo-*.mp3 (Edge-TTS / ElevenLabs) · atau suara bawaan browser</small></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(() => {
+const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const Q = new URLSearchParams(location.search);
+const REC = Q.has('record');
+if (REC) document.body.classList.add('rec');
+if (Q.has('nocaps')) document.body.classList.add('nocaps');
+if (Q.get('theme') === 'light') document.body.classList.add('light');
+const stage = $('#stage');
+const D = 87;
+const PS = 1.45;                       // skala halaman app di dalam jendela
+const WIN = { x: 140, y: 40, w: 1640, h: 900 };
+
+function fit() {
+  const k = Math.min(innerWidth / 1920, (innerHeight - (REC ? 0 : 56)) / 1080);
+  document.documentElement.style.setProperty('--k', k);
+}
+fit(); addEventListener('resize', fit);
+
+// Logo asli Klipers (marketing/_shared/logo-klipers.png) — ditanam base64, selalu di atas tile putih
+// Logo ditanam langsung di atribut src <img> (tidak bergantung JS)
+
+/* ================= IKON ================= */
+const CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M19 9l-7 7-7-7"/></svg>';
+const CHK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>';
+const ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>';
+const COPY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>';
+const REGEN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.6m15.4 2A8 8 0 0 0 4.6 9m0 0H9m11 11v-5h-.6m0 0a8 8 0 0 1-15.4-2m15.4 2H15"/></svg>';
+const PLAT = {
+  youtube: '<svg viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#18181b"/><rect x="10" y="17" width="44" height="30" rx="9" fill="#FF0000"/><path d="M28 25l11 7-11 7z" fill="#fff"/></svg>',
+  tiktok: '<svg viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#000"/><g transform="translate(14 13) scale(1.5)"><path d="M16.6 5.8a4.3 4.3 0 0 1-1-2.8h-3.1v12.4a2.6 2.6 0 1 1-2.6-2.6c.3 0 .5 0 .8.1V9.7a5.8 5.8 0 1 0 5 5.7V9.1a7.4 7.4 0 0 0 4.3 1.4V7.4a4.3 4.3 0 0 1-3.4-1.6z" fill="#25F4EE" transform="translate(-.8 -.6)"/><path d="M16.6 5.8a4.3 4.3 0 0 1-1-2.8h-3.1v12.4a2.6 2.6 0 1 1-2.6-2.6c.3 0 .5 0 .8.1V9.7a5.8 5.8 0 1 0 5 5.7V9.1a7.4 7.4 0 0 0 4.3 1.4V7.4a4.3 4.3 0 0 1-3.4-1.6z" fill="#FE2C55" transform="translate(.8 .6)"/><path d="M16.6 5.8a4.3 4.3 0 0 1-1-2.8h-3.1v12.4a2.6 2.6 0 1 1-2.6-2.6c.3 0 .5 0 .8.1V9.7a5.8 5.8 0 1 0 5 5.7V9.1a7.4 7.4 0 0 0 4.3 1.4V7.4a4.3 4.3 0 0 1-3.4-1.6z" fill="#fff"/></g></svg>',
+  instagram: '<svg viewBox="0 0 64 64"><defs><radialGradient id="igg" cx=".3" cy="1" r="1.2"><stop offset="0" stop-color="#FFD600"/><stop offset=".35" stop-color="#FF7A00"/><stop offset=".6" stop-color="#FF0069"/><stop offset=".85" stop-color="#D300C5"/><stop offset="1" stop-color="#7638FA"/></radialGradient></defs><rect width="64" height="64" rx="16" fill="url(#igg)"/><rect x="15" y="15" width="34" height="34" rx="10" fill="none" stroke="#fff" stroke-width="4"/><circle cx="32" cy="32" r="8" fill="none" stroke="#fff" stroke-width="4"/><circle cx="42.5" cy="21.5" r="2.6" fill="#fff"/></svg>',
+  facebook: '<svg viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#0866FF"/><path d="M35.5 52V35h5.8l.9-6.8h-6.7v-4.3c0-2 .6-3.3 3.4-3.3h3.6v-6A48 48 0 0 0 37.3 14c-5.2 0-8.7 3.2-8.7 9v5.2h-5.8V35h5.8v17z" fill="#fff"/></svg>',
+  threads: '<svg viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#000"/><path d="M40.6 30.4c-.2-.1-.4-.2-.6-.3-.4-6.6-4-10.4-10-10.4-3.6 0-6.6 1.5-8.4 4.3l3.3 2.3c1.4-2.1 3.5-2.5 5.1-2.5 2 0 3.5.6 4.4 1.8.7.8 1.1 2 1.3 3.4-1.7-.3-3.5-.4-5.4-.3-5.4.3-8.9 3.5-8.7 7.9.1 2.2 1.2 4.2 3.1 5.4 1.6 1.1 3.7 1.6 5.8 1.5 2.8-.2 5-1.2 6.6-3.2 1.2-1.5 1.9-3.4 2.3-5.8 1.3.8 2.3 1.9 2.8 3.2.9 2.2 1 5.8-2 8.7-2.6 2.6-5.7 3.7-10.4 3.7-5.2 0-9.2-1.7-11.8-5-2.4-3.1-3.7-7.6-3.7-13.3s1.3-10.2 3.7-13.3c2.6-3.3 6.5-5 11.8-5 5.3 0 9.3 1.7 12 5.1 1.3 1.6 2.3 3.7 2.9 6.1l3.9-1c-.8-3-2-5.6-3.7-7.7-3.5-4.3-8.5-6.5-15.1-6.5-6.5 0-11.5 2.2-14.9 6.5C11.6 21.3 10 26.5 10 32.8v.1c0 6.3 1.6 11.5 4.8 15.4 3.4 4.3 8.4 6.5 14.9 6.5 5.8 0 9.8-1.5 13.2-4.9 4.4-4.4 4.2-9.9 2.8-13.2-1-2.4-3-4.4-5.1-5.3zm-9.5 9c-2.4.1-4.8-.9-4.9-3.1-.1-1.6 1.1-3.4 4.9-3.6h1.3c1.4 0 2.7.1 3.9.4-.5 5.6-3.2 6.2-5.2 6.3z" fill="#fff"/></svg>',
+  whatsapp: '<svg viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#25D366"/><path d="M32 14a17.6 17.6 0 0 0-15.2 26.5L14.4 50l9.8-2.4A17.6 17.6 0 1 0 32 14zm0 32.2c-2.7 0-5.3-.7-7.6-2.1l-.5-.3-5.8 1.4 1.5-5.6-.4-.6A14.5 14.5 0 1 1 32 46.2zm8-10.9c-.4-.2-2.6-1.3-3-1.4-.4-.2-.7-.2-1 .2l-1.4 1.7c-.3.3-.5.3-.9.1a11.9 11.9 0 0 1-5.9-5.2c-.4-.8.4-.7 1.2-2.3.1-.3.1-.5 0-.7l-1.3-3.2c-.4-.9-.7-.7-1-.8h-.9c-.3 0-.8.1-1.2.6-.4.4-1.6 1.5-1.6 3.8s1.6 4.4 1.9 4.7c.2.3 3.2 4.9 7.7 6.8 2.9 1.2 4 1.3 5.4 1.1.9-.1 2.6-1.1 3-2.1.4-1 .4-1.9.3-2.1-.1-.2-.4-.3-.8-.5z" fill="#fff"/></svg>',
+};
+
+/* ================= GAMBAR SCENE (tiruan hasil AI, 9:16) ================= */
+function art(i, v = 0, plain = false) {
+  const W = 90, H = 160;
+  const bgs = ['#0b4a6f,#03172b', '#0e5a7e,#041a2e', '#062a45,#01070f', '#020a14,#000', '#140a33,#03030f', '#04121f,#000'];
+  const [c1, c2] = bgs[i].split(',');
+  let g = '';
+  const specks = n => Array.from({ length: n }, (_, k) => `<circle cx="${(k * 37) % 88 + 1}" cy="${(k * 53) % 156 + 2}" r="${(k % 3) * .25 + .35}" fill="#cfe9ff" opacity="${.15 + (k % 4) * .08}"/>`).join('');
+  if (i === 0) g = `<g opacity=".55">${[10, 30, 50, 70].map((x, k) => `<path d="M${x} 0 L${x + 14} 0 L${x + 30 - k * 4} 160 L${x - 6 - k * 3} 160Z" fill="url(#ray${i})"/>`).join('')}</g>
+    <path d="M0 18 Q22 12 45 18 T90 18 V0 H0Z" fill="#7dd3fc" opacity=".35"/>${specks(26)}
+    ${plain ? '' : `<text x="45" y="118" text-anchor="middle" font-family="Montserrat" font-weight="900" font-size="15" fill="#e0f2fe" opacity=".9">10.994 m</text>
+    <path d="M18 128 H72" stroke="#7dd3fc" stroke-width=".6" opacity=".6"/>`}`;
+  if (i === 1) g = `<path d="M0 22 Q22 18 45 22 T90 22 V0 H0Z" fill="#38bdf8" opacity=".45"/>
+    <path d="M30 20 L60 20 L56 26 L34 26Z" fill="#e5e7eb"/><rect x="42" y="12" width="7" height="8" fill="#f97316"/><path d="M45 26 V60" stroke="#e5e7eb" stroke-width=".5" stroke-dasharray="2 2"/>
+    ${[18, 30, 42, 54].map(r => `<path d="M${45 - r} ${34 + r * .6} Q45 ${46 + r * 1.2} ${45 + r} ${34 + r * .6}" fill="none" stroke="#67e8f9" stroke-width=".7" opacity="${.9 - r / 70}"/>`).join('')}
+    <path d="M0 160 L0 120 Q15 118 25 132 Q35 150 45 152 Q55 150 65 132 Q75 118 90 120 L90 160Z" fill="#021019"/>${specks(14)}`;
+  if (i === 2) {
+    const sub = v ? `<g transform="translate(46 70) rotate(-8)"><ellipse cx="0" cy="0" rx="17" ry="10" fill="#f43f5e"/><rect x="-5" y="-15" width="10" height="7" rx="2" fill="#fb7185"/><circle cx="-8" cy="0" r="4" fill="#bae6fd" stroke="#fff" stroke-width="1"/><path d="M-26 -1 L-40 -5 L-40 3Z" fill="#fda4af"/></g><path d="M34 76 L-10 128 L30 150Z" fill="url(#beam${i})"/>`
+      : `<g transform="translate(40 58)"><ellipse cx="0" cy="0" rx="16" ry="11" fill="#facc15"/><rect x="-5" y="-16" width="10" height="7" rx="2" fill="#fde047"/><circle cx="6" cy="1" r="4.5" fill="#bae6fd" stroke="#fff" stroke-width="1"/><path d="M-18 -2 L-26 -6 L-26 4Z" fill="#eab308"/></g><path d="M48 62 L92 118 L60 150Z" fill="url(#beam${i})"/>`;
+    g = `${specks(34)}${sub}`;
+  }
+  if (i === 3) g = `${specks(10)}<circle cx="58" cy="54" r="10" fill="url(#lure${i})"/><circle cx="58" cy="54" r="2.2" fill="#e0fdff"/>
+    <path d="M58 56 Q50 70 44 78" stroke="#1e293b" stroke-width="1.4" fill="none"/>
+    <path d="M10 104 Q24 72 50 80 Q74 88 72 108 Q70 124 46 126 Q22 128 10 104Z" fill="#111827"/>
+    <path d="M52 108 L60 104 L58 112 L66 108 L62 116 L70 114" stroke="#e5e7eb" stroke-width="1" fill="none"/>
+    <circle cx="44" cy="94" r="3" fill="#a5f3fc"/><circle cx="44" cy="94" r="1.2" fill="#000"/>
+    <path d="M10 104 L0 92 L2 116Z" fill="#111827"/>`;
+  if (i === 4) g = `${specks(22)}${[[30, 50, 1], [62, 86, .7], [40, 120, .55]].map(([x, y, s]) => `<g transform="translate(${x} ${y}) scale(${s})"><path d="M-14 0 Q-14 -14 0 -14 Q14 -14 14 0Z" fill="url(#jel${i})" opacity=".9"/>${[-10, -5, 0, 5, 10].map(d => `<path d="M${d} 0 Q${d + 3} 10 ${d} 20 Q${d - 3} 28 ${d} 34" stroke="#f0abfc" stroke-width=".8" fill="none" opacity=".75"/>`).join('')}</g>`).join('')}`;
+  if (i === 5) g = `${specks(16)}<path d="M0 160 L0 118 L14 110 L26 122 L38 106 L52 118 L66 104 L78 114 L90 108 L90 160Z" fill="#0b1220"/>
+    <path d="M0 160 L0 132 L20 128 L40 138 L60 130 L90 136 L90 160Z" fill="#020617"/>
+    <circle cx="62" cy="92" r="3" fill="#fde68a"/><path d="M62 95 L40 132 L84 132Z" fill="url(#beam${i})"/>
+    ${plain ? '' : `<text x="45" y="40" text-anchor="middle" font-family="Montserrat" font-weight="900" font-size="9" fill="#e0f2fe" opacity=".85">CHALLENGER</text>
+    <text x="45" y="51" text-anchor="middle" font-family="Montserrat" font-weight="900" font-size="9" fill="#e0f2fe" opacity=".85">DEEP</text>`}`;
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice"><defs>
+    <linearGradient id="bg${i}${v}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient>
+    <linearGradient id="ray${i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e0f2fe" stop-opacity=".55"/><stop offset="1" stop-color="#e0f2fe" stop-opacity="0"/></linearGradient>
+    <linearGradient id="beam${i}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fef9c3" stop-opacity=".55"/><stop offset="1" stop-color="#fef9c3" stop-opacity="0"/></linearGradient>
+    <radialGradient id="lure${i}"><stop offset="0" stop-color="#67e8f9" stop-opacity=".95"/><stop offset="1" stop-color="#67e8f9" stop-opacity="0"/></radialGradient>
+    <radialGradient id="jel${i}" cx=".5" cy=".8"><stop offset="0" stop-color="#f0abfc"/><stop offset="1" stop-color="#a855f7"/></radialGradient>
+  </defs><rect width="${W}" height="${H}" fill="url(#bg${i}${v})"/>${g}</svg>`;
+}
+
+/* ================= DATA ================= */
+const TOPIC = 'Misteri Palung Mariana';
+const VIDEO_TITLE = 'Palung Mariana: Everest Pun Bisa Tenggelam di Sini';
+const SCENES = [
+  { arc: 'hook', label: '🎯 Hook', dur: 8, nar: 'Ada satu tempat di Bumi yang lebih sulit dicapai daripada Bulan. Dan tempat itu ada di bawah laut.', pr: 'Sunlight rays fading into a deep blue ocean abyss, depth marker 10,994 m, cinematic, 9:16' },
+  { arc: 'intro', label: '🌍 Intro', dur: 10, nar: 'Namanya Palung Mariana, di Samudra Pasifik. Titik terdalamnya, Challenger Deep, mencapai hampir sebelas ribu meter.', pr: 'Research vessel on the Pacific surface, sonar waves mapping a massive trench below, 9:16' },
+  { arc: 'rising', label: '📈 Rising', dur: 10, nar: 'Di kedalaman itu, tekanan air lebih dari seribu kali tekanan di permukaan. Cahaya matahari tidak pernah sampai.', pr: 'Deep-sea submersible descending into pitch-black water, headlight beam through marine snow, 9:16' },
+  { arc: 'climax', label: '⚡ Climax', dur: 10, nar: 'Tapi di kegelapan total itu, justru ada kehidupan. Makhluk bercahaya yang belum semua diberi nama.', pr: 'Anglerfish with glowing cyan lure in total darkness, bioluminescence, macro, 9:16' },
+  { arc: 'falling', label: '📉 Falling', dur: 10, nar: 'Baru segelintir manusia yang pernah turun ke dasarnya. Lebih sedikit dari orang yang pernah ke luar angkasa.', pr: 'Glowing purple jellyfish drifting in the midnight zone, soft bokeh particles, 9:16' },
+  { arc: 'resolution', label: '🌅 Resolution', dur: 10, nar: 'Jadi, apa lagi yang masih bersembunyi di bawah sana?', pr: 'Seafloor of Challenger Deep, jagged rocks, a small lamp glowing, mysterious mood, 9:16' },
+];
+const EDIT_ADD = ' Gunung Everest pun bisa tenggelam di sini.';
+const SUBS = ['Ada satu tempat di Bumi', 'lebih sulit dicapai daripada Bulan.', 'Namanya Palung Mariana.', 'Hampir sebelas ribu meter.', 'Cahaya matahari tidak pernah sampai.', 'Tapi di sana justru ada kehidupan.', 'Makhluk bercahaya', 'yang belum semua diberi nama.', 'Lebih sedikit dari orang', 'yang pernah ke luar angkasa.', 'Jadi, apa lagi', 'yang bersembunyi di bawah sana?'];
+const KIT = [
+  { k: 'youtube', name: 'YouTube Shorts', tag: 'Title', txt: 'Everest Pun Bisa Tenggelam di Palung Mariana 🤯 #shorts', cnt: true },
+  { k: 'instagram', name: 'Instagram', tag: 'Caption', txt: 'Lebih sulit dicapai daripada Bulan 🌊\nIni rahasia titik terdalam di Bumi.\n#faktaunik #palungmariana #lautdalam' },
+  { k: 'tiktok', name: 'TikTok', tag: 'Caption', txt: 'Tempat ini lebih sepi dari luar angkasa 😳 Tonton sampai habis!\n#faktaunik #fyp #palungmariana' },
+  { k: 'whatsapp', name: 'FB / WhatsApp', tag: 'Post', txt: 'Tahukah kamu? Lebih banyak orang pernah ke luar angkasa daripada ke dasar Palung Mariana. 👇' },
+];
+
+/* ================= BANGUN DOM HALAMAN ================= */
+const CUR = '<svg class="cur" viewBox="0 0 24 24"><path d="M3 2l17 9.5-7.4 1.7L9.2 21z" fill="#fff" stroke="#000" stroke-width="1.4" stroke-linejoin="round"/></svg><div class="ring"></div>';
+function stepper(active) {
+  const S = [['Konten'], ['Cerita'], ['Video']];
+  return '<div class="stp">' + S.map(([l], i) => {
+    const n = i + 1, cls = n === active ? 'act' : n < active ? 'done' : '';
+    return `<div class="sb ${cls}" data-s="${n}"><span class="n">${n < active ? '✓' : n}</span>${l}</div>` + (n < 3 ? `<div class="sline ${n < active ? 'done' : ''}"></div>` : '');
+  }).join('') + '</div>';
+}
+const sumCard = `<div class="sumc"><div><div class="k">Topik Konten</div><div class="v">📖 ${TOPIC}</div></div><span class="ed">Edit</span></div>`;
+const KAT_GROUPS = [
+  ['Gaya Konten (Umum)', ['📖 Storytelling Umum', '👻 Misteri & Horror', '💥 Gaya Komik', '📰 Berita & Info', '🎈 Anak-anak', '⚖️ Opini & Debat', '🔥 Roasting']],
+  ['Religi & Sejarah', ['🕌 Sejarah Nabi', '🌙 Kisah Sahabat', '📜 Sejarah', '👤 Biografi']],
+  ['Edukasi & Sains', ['💻 Sains & Tekno', '🧘 Mental Health', '🧐 Mitos vs Fakta', '💰 Keuangan Pribadi', '💡 Fakta Unik', '🍎 Kesehatan', '🚀 Luar Angkasa']],
+  ['Hiburan & Cerita', ['🏮 Cerita Rakyat', '🩸 True Crime', '🎬 Review Film']],
+];
+const page = $('#page');
+page.innerHTML = `
+<!-- PH1 · Konten -->
+<div class="pnl" id="ph1" style="left:93px;width:768px"><div class="scr">
+  ${stepper(1)}
+  <div class="titleblk"><h1>Apa konten yang ingin dibuat?</h1><p>AI akan generate script, gambar, narasi, dan video secara otomatis</p><span class="bvb">🎙️ Brand Voice</span></div>
+  <div class="row2">
+    <div class="fld"><span class="lab">Kategori</span><div class="sel" id="selKat"><span id="katTxt">— Semua Kategori —</span>${CHEV}</div>
+      <div class="dd" id="ddKat"><div class="ddIn" id="ddKatIn">
+        <div class="it top">— Semua Kategori —</div>
+        ${KAT_GROUPS.map(([g, items]) => `<div class="og">${g}</div>` + items.map(x => `<div class="it" data-v="${x}">${x}</div>`).join('')).join('')}
+      </div></div></div>
+    <div class="fld"><span class="lab">Gaya</span><div class="sel" id="selGaya"><span id="gayaTxt">📖 Storytelling</span>${CHEV}</div>
+      <div class="dd" id="ddGaya">${['📖 Storytelling', '🤯 Fakta Viral', '📰 Berita', '👻 Misteri', '💥 Komik'].map((x, i) => `<div class="it top" data-v="${i}">${x}${i === 0 ? '<span class="ck">✓</span>' : ''}</div>`).join('')}</div></div>
+    <div class="xbtn" id="katX"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg></div>
+  </div>
+  <div class="fld" style="margin-top:8px"><span class="lab">Fokus Cerita</span><div class="sel" id="selFok"><span>✨ Otomatis</span>${CHEV}</div>
+    <div class="dd" id="ddFok">${['✨ Otomatis', '🔍 Fokus Topik', '🧑 Fokus Tokoh'].map((x, i) => `<div class="it top" data-v="${i}">${x}${i === 0 ? '<span class="ck">✓</span>' : ''}</div>`).join('')}</div>
+    <p class="hint" id="fokHint">Otomatis: Fokus Tokoh. Cerita digerakkan tokoh: AI memperkenalkan nama, umur, dan latar belakangnya di awal.</p></div>
+  <div class="chips" id="chips">${['Fakta Unik Hewan Purba', TOPIC, 'Tahukah Kamu Tentang Tubuh Kita', 'Fakta Unik Negara Islandia'].map(c => `<span class="chip" data-c="${c}">${c}</span>`).join('')}</div>
+  <div class="icard" id="icard">
+    <div class="tabs"><span class="tab" id="tbTopik">✏️ Topik</span><span class="tab" id="tbYt">▶ YouTube</span><span class="tab" id="tbArt">📄 Artikel/PDF</span></div>
+    <div class="tabc" id="tcTopik"><div class="ta"><span class="ph" id="topicPh">Tulis topik konten video...</span><span id="topicTxt"></span><i class="caret" id="topicCaret"></i></div></div>
+    <div class="tabc" id="tcYt"><div class="ytrow"><span style="color:#ef4444"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6z"/></svg></span>Paste URL VIDEO YouTube (bukan channel)...</div><div class="ytnote">ℹ️ Pastikan video punya subtitle/CC. Video tanpa subtitle tidak bisa diproses.</div></div>
+    <div class="tabc art" id="tcArt"><span class="l">URL Artikel / Blog</span><div class="inp">https://detik.com/artikel-tentang-topik...</div><div class="or"><i></i>atau<i></i></div><span class="l">Upload File PDF / TXT</span><div class="drop" id="dropPdf"><div class="e">📂</div>Klik untuk pilih PDF atau TXT<small>Maks. 5MB</small></div></div>
+    <div class="divi" id="divi"></div>
+    <div class="brow"><span class="ghostb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>Riwayat</span><span class="lanjut" id="btnLanjut">Lanjut${ARROW}</span></div>
+  </div>
+  ${CUR}
+</div></div>
+
+<!-- PH2 · Cerita -->
+<div class="pnl" id="ph2" style="left:93px;width:768px"><div class="scr">
+  ${stepper(2)}
+  ${sumCard}
+  <div class="cfg" id="cfgStory">
+    <div class="cfgh"><span class="e">📖</span>Konfigurasi Storytelling</div>
+    <div class="banw">
+      <div class="ban load"><i class="spin spinA"></i><div><b>Menganalisis topik konten...</b><small>Mendeteksi genre, sudut pandang, era, dan gaya konten terbaik oleh AI.</small></div></div>
+      <div class="ban ok" id="banOk"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm3.7-9.3a1 1 0 0 0-1.4-1.4L9 10.6 7.7 9.3a1 1 0 0 0-1.4 1.4l2 2a1 1 0 0 0 1.4 0z" clip-rule="evenodd"/></svg><div><b>4 field terisi otomatis dari topik AI</b><small>Periksa dan koreksi kalau ada yang kurang pas. Field bertanda <b style="display:inline">AI</b> bisa kamu edit kapan saja.</small></div></div>
+    </div>
+    <div class="g3" id="g3">
+      <div><span class="lab2">🎭 Genre<span class="aib" id="aib1">AI</span></span><div class="sel sm" id="fGenre"><span id="genreTxt">🎬 Drama</span>${CHEV}</div></div>
+      <div><span class="lab2">👁️ Sudut Pandang<span class="aib" id="aib2">AI</span></span><div class="sel sm" id="fPov"><span id="povTxt">👤 Orang Ketiga (Dia)</span>${CHEV}</div></div>
+      <div><span class="lab2">🕰️ Setting / Era<span class="aib" id="aib3">AI</span></span><div class="sel sm" id="fEra"><span>📱 Modern (Masa Kini)</span>${CHEV}</div></div>
+    </div>
+    <span class="lab2">🎬 Gaya Ending<span class="aib" id="aib4">AI</span></span>
+    <div class="pills" id="endPills"><span class="pl" id="enHappy">😊 Happy End</span><span class="pl">😢 Sad End</span><span class="pl" id="enOpen">🤔 Open / Ambigu</span><span class="pl">🔄 Plot Twist</span></div>
+    <div class="sbox"><div class="h"><span>👤</span>Karakter Utama (opsional)</div><div class="inp">Nama karakter (contoh: Rina, Mas Budi, Pak Hendra)</div><div class="it">Kosongkan jika ingin AI merancang karakter sendiri.</div></div>
+    <div class="sbox" id="arcBox">
+      <div class="h" style="justify-content:space-between"><span style="display:flex;gap:6px"><span>🎭</span>Struktur Cerita (Story Arc)</span><span class="seg2"><span class="on" id="arcAiBtn">✨ AI Otomatis</span><span id="arcManBtn">✍️ Manual</span></span></div>
+      <div class="arcAi">AI akan merancang struktur 6 babak (Hook → Intro → Rising → Climax → Falling → Resolution) secara otomatis sesuai genre dan tema.</div>
+      <div class="arcMan"><div class="d">Isi tiap babak dengan arahan singkat. Kosongkan babak yang ingin dibiarkan AI tentukan sendiri.</div>
+        ${[['🎯', 'Hook (Scene 1)', 'Opening yang memikat — buat penonton tidak bisa berhenti menonton.'], ['🌍', 'Intro / World Building', 'Perkenalkan karakter dan dunia. Bangun empati.'], ['📈', 'Rising Action', 'Konflik memuncak. Hambatan bertambah. Taruhan semakin tinggi.'], ['⚡', 'Climax', 'Titik puncak ketegangan. Konfrontasi atau keputusan terbesar.'], ['📉', 'Falling / Aftermath', 'Akibat dari climax. Karakter berubah. Resolusi mulai terbentuk.'], ['🌅', 'Resolution / Ending', 'Penutup yang satisfying sesuai gaya ending yang dipilih.']].map(([e, l, p]) => `<div class="f"><label>${e} ${l}</label><div>${p}</div></div>`).join('')}
+      </div>
+    </div>
+  </div>
+  <div class="navr"><span class="btn2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M15 19l-7-7 7-7"/></svg>Kembali</span><span class="btn1" id="btnStep3">Lanjut ke Pengaturan Video${ARROW}</span></div>
+  ${CUR}
+</div></div>
+
+<!-- PH3 · Video -->
+<div class="pnl" id="ph3" style="left:93px;width:768px"><div class="scr">
+  ${stepper(3)}
+  ${sumCard}
+  <div class="card3" id="cardVid">
+    <div class="ch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Pengaturan Video</div>
+    <div class="g2">
+      <div><span class="lab2">Rasio</span><div class="arb"><span class="on" id="ar916"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="3" width="10" height="18" rx="2"/></svg>9:16</span><span id="ar169"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="10" rx="2"/></svg>16:9</span></div></div>
+      <div><div class="durl"><div>Estimasi Durasi<b id="durTxt">~2m 0s</b><em id="scnTxt">• 12 scene</em></div><span style="font-size:11px">ⓘ</span></div>
+        <div class="rng" id="durRng"><i class="tr"></i><i class="fi" id="durFill"></i><i class="th" id="durThumb"></i></div><div class="rngl"><span>30s</span><span>3m</span></div></div>
+    </div>
+    <div class="trow"><span class="k">Transisi:</span>${['—', 'Fade', 'Slide', 'Smooth', 'Mix'].map(t => `<span class="tp${t === 'Mix' ? ' on' : ''}" data-t="${t}">${t}</span>`).join('')}</div>
+    <div class="sug" id="sugDur"><span>✨</span><span>Saran AI: durasi <b>60s</b> · 6 scene</span><span class="ap" id="sugAp">Terapkan</span><span class="x"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 18L18 6M6 6l12 12"/></svg></span></div>
+    <div class="opts">
+      <div class="tg" id="tgTitle"><span class="bx">${CHK}</span><span class="tx"><b>Title Overlay<span class="pa">EDIT</span></b><small>Judul teks menempel di atas video.</small></span></div>
+      <div class="tg" id="tgSub"><span class="bx">${CHK}</span><span class="tx"><b>Auto Subtitle<span class="bg2">No Anim</span><span class="pa">EDIT</span></b><small>Subtitle otomatis dari narasi.</small></span></div>
+      <div class="tg" id="tgSfx"><span class="bx">${CHK}</span><span class="tx"><b>Auto SFX</b><small>Efek suara per scene lewat ElevenLabs.</small></span></div>
+    </div>
+  </div>
+  <div class="gcol">
+    <div class="card3" id="cardLeft">
+      <span class="l3">Overlay</span>
+      <div class="fld"><div class="sel sm" id="selOv"><span id="ovTxt">☀️ Off</span>${CHEV}</div>
+        <div class="dd" id="ddOv"><div class="it top">☀️ Off</div><div class="og">Filter Warna</div>${['🌑 Vignette', '⬛ Dark Tint', '🎬 Cinematic', '🎞️ Film Grain', '🌅 Light Leak', '🔥 Film Burn', '🌈 Chromatic', '✨ Dreamy Glow'].map(x => `<div class="it" data-v="${x}">${x}</div>`).join('')}<div class="og">Efek Percikan &amp; Petir</div><div class="it">🖋️ Percikan Tinta (tiap ganti scene)</div><div class="it">⚡ Petir Hitam</div></div></div>
+      <div class="intn" id="intn"><div class="r"><span>Intensitas ⓘ</span><span>70%</span></div><div class="rng"><i class="tr"></i><i class="fi" style="width:70%"></i><i class="th" style="left:70%"></i></div></div>
+      <div class="hr"></div>
+      <span class="l3">Musik Latar</span>
+      <div class="segm"><span class="on" id="bgOff">Off</span><span id="bgAuto">Auto</span><span>Upload</span><span>Library</span></div>
+      <div class="bgmx" id="bgmx">
+        <div class="sug show" style="margin:0 0 8px"><span>✨</span><span>Saran AI: BGM <b>Misterius</b> · lambat</span><span class="ap">Terapkan</span></div>
+        <div class="vol"><div class="r"><span>Volume</span><span>15% Max</span></div><div class="rng"><i class="tr"></i><i class="fi" style="width:50%"></i><i class="th" style="left:50%"></i></div></div>
+      </div>
+    </div>
+    <div class="stk">
+      <div class="card3" id="cardAudio">
+        <div class="arow"><span class="k">Bahasa</span><div class="pills" style="gap:4px" id="langs">${['🇮🇩 ID', '🇺🇸 EN', '🇲🇾 MY', '🇯🇵 JP', '🇰🇷 KR', '🇪🇸 ES', '🇫🇷 FR'].map((l, i) => `<span class="lp${i ? '' : ' on'}">${l}</span>`).join('')}</div></div>
+        <div class="arow"><span class="k">TTS</span><div class="tts"><span class="on">🆓 Klipers</span><span>✨ Fish</span><span>🎭 ElevenLabs</span></div></div>
+        <div class="arow" style="margin:0"><span class="k">Suara</span><div class="fld" style="flex:1"><div class="sel sm" id="selVoice"><span id="voiceTxt">— Pilih suara —</span>${CHEV}</div>
+          <div class="dd vdd" id="ddVoice"><div class="srch">🔍 Cari suara...</div><div class="grp">Indonesian</div><div class="row" id="vArdi"><span>Ardi • Indonesian ♂</span><span class="pv"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></div><div class="row"><span>Gadis • Indonesian ♀</span><span class="pv"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></div><div class="grp">English</div><div class="row"><span>William • English ★</span><span class="pv"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></div></div></div></div>
+      </div>
+      <div class="card3" id="cardRender">
+        <div class="ch" style="margin-bottom:8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>Opsi Render</div>
+        <div class="arow" style="margin-bottom:4px"><span class="k">Visual</span><div class="fld" style="flex:1"><div class="sel sm" id="selVis"><span id="visTxt">Campur AI + Video Stock</span>${CHEV}</div>
+          <div class="dd" id="ddVis"><div class="it top" id="visMix">Campur AI + Video Stock</div><div class="it top" id="visAi">Gambar AI saja</div><div class="it top" id="visVid">AI Video Full</div></div></div></div>
+        <div class="vhint" id="visHint" style="margin:0 0 8px 64px">Tiap scene ke-3 diselingi klip footage yang relevan.</div>
+        <div class="opts" style="grid-template-columns:1fr 1fr;border:0;padding:0;margin:0">
+          <div class="tg cp" id="tgRev"><span class="bx">${CHK}</span><span class="tx"><b>Review Script &amp; Gambar</b><small>Berhenti dulu supaya naskah &amp; gambar bisa dicek dan diedit.</small></span></div>
+          <div class="tg cp" id="tgWeb"><span class="bx">${CHK}</span><span class="tx"><b>Web Scraping</b><small id="webHint">Ambil gambar asli dari web.</small></span></div>
+        </div>
+        <div class="tprs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 1 1 0-4h14a2 2 0 1 1 0 4M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8m-9 4h4"/></svg>Template Preset</div>
+      </div>
+    </div>
+  </div>
+  <div class="subm" id="btnGen"><i class="sp spinA"></i><span class="nb" style="display:contents"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16 2.3 6.9L21 12l-5.7 2.1L13 21l-2.3-6.9L5 12l5.7-2.1z"/></svg></span><span class="bs" style="font-size:12px">Memproses...</span><span class="nb" id="genLbl">Buat Video</span><small class="nb" id="genCost">8 kredit • 4/min</small></div>
+  ${CUR}
+</div></div>
+
+<!-- GENERATING -->
+<div class="pnl" id="pgGen" style="left:253px;top:40px"><div class="scr">
+  <div class="gen">
+    <div class="hd">
+      <div class="ringp"><svg viewBox="0 0 56 56" fill="none"><circle cx="28" cy="28" r="24" stroke="var(--c2)" stroke-width="4"/></svg><svg viewBox="0 0 56 56" fill="none" style="transform:rotate(-90deg)"><circle id="genArc" cx="28" cy="28" r="24" stroke="var(--text)" stroke-width="4" stroke-linecap="round" stroke-dasharray="0 151"/></svg><b id="genPct">0%</b></div>
+      <h2>Membuat Visual</h2><div class="sm" id="genMsg">Memulai proses...</div>
+    </div>
+    <div class="gbar"><i id="genBar"></i></div>
+    <div class="gsteps">${[
+      ['Menulis Naskah', '<path d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5m-1.4-9.4a2 2 0 1 1 2.8 2.8L11.8 15H9v-2.8z"/>'],
+      ['Membuat Visual', '<path d="M4 16l4.6-4.6a2 2 0 0 1 2.8 0L16 16m-2-2 1.6-1.6a2 2 0 0 1 2.8 0L20 14m-6-6h.01M6 20h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z"/>'],
+      ['Merekam Narasi', '<path d="M19 11a7 7 0 0 1-14 0M12 18v4M12 14a3 3 0 0 1-3-3V5a3 3 0 1 1 6 0v6a3 3 0 0 1-3 3z"/>'],
+      ['Mengedit Video', '<path d="M15 10l4.5-2.3A1 1 0 0 1 21 8.6v6.8a1 1 0 0 1-1.5.9L15 14M5 18h8a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/>'],
+      ['Finalisasi', '<path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>'],
+    ].map(([l, p], i) => `<div class="gs" id="gs${i}"><span class="ic"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${p}</svg><svg class="okk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg></span>${l}<i class="spn spinA"></i></div>`).join('')}</div>
+    <div class="ft">Estimasi waktu: 1-5 menit tergantung jumlah scene</div>
+  </div>
+</div></div>
+
+<!-- REVIEW & EDIT SCENE -->
+<div class="pnl rv" id="pgRev" style="left:29px"><div class="scr">
+  <div class="aivb"><b>Mode AI Video.</b> Gambar di bawah adalah frame awal (storyboard) tiap scene, belum videonya. Setelah Lanjutkan, narasi direkam lalu tiap scene dijadikan klip video AI yang dimulai dari gambar itu. Ganti gambar yang kurang pas sebelum lanjut.</div>
+  <div class="rvc">
+    <div class="rvh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 19l-7-7 7-7"/></svg><div><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/><path d="M2.5 12C3.7 7.9 7.5 5 12 5s8.3 2.9 9.5 7c-1.2 4.1-5 7-9.5 7s-8.3-2.9-9.5-7z"/></svg>Review &amp; Edit Scene</h3><small>6 scenes siap diproses</small></div></div>
+    <div class="rvt"><div class="k">Judul Video</div><div class="v">${VIDEO_TITLE}</div></div>
+    <div class="sfx"><div class="t"><div><b>🔊 Sound Effects <i>ElevenLabs</i></b><small>Efek suara per scene, dipilih AI sesuai naskah.</small></div><div class="c">6 / 6 SFX<small>+6 kredit</small></div></div>
+      <div class="ln"><u>Centang semua</u><span>•</span><u>Hapus semua</u></div>
+      ${['Deep underwater rumble', 'Sonar ping echo'].map((s, i) => `<div class="r"><span class="bx">${CHK}</span><b>Scene ${i + 1}</b><span>${s}</span></div>`).join('')}
+    </div>
+    <div class="scl" id="scl">${SCENES.map((s, i) => `
+      <div class="sc" id="sc${i}">
+        <div class="lf"><div class="thm" id="thm${i}">${art(i)}${i === 2 ? `<div class="artv" id="thmNew" style="opacity:0">${art(2, 1)}</div><div class="flash" id="thmFlash"></div><div class="gl" id="thmGen"><i class="spinA"></i>Generating...</div>` : ''}</div>
+          <span class="rgb" id="rg${i}">${REGEN}Regenerate (2 cr)</span></div>
+        <div class="rt">
+          <div class="top"><span class="arcb a-${s.arc}">${s.label}</span><span class="du"><span>${s.dur}</span>s</span></div>
+          <div class="lh"><span>Narasi</span>${COPY}</div>
+          <div class="nar" id="nar${i}"><span>${s.nar}</span>${i === 1 ? '<span id="narAdd"></span><i class="caret" id="narCaret" style="height:13px;vertical-align:-2px"></i>' : ''}</div>
+          <div class="lh"><span>Prompt Frame Awal</span></div>
+          <div class="pr">${s.pr}</div>
+          <div class="pf"><span>Prompt untuk gambar scene ini</span><span>${s.pr.length} karakter</span></div>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>
+  <div class="rvo"><div class="r"><span class="bx">${CHK}</span>Title Overlay<span class="pa">EDIT</span></div><div class="inp">${TOPIC}</div></div>
+  <div class="lnj" id="btnLnj"><i class="sp spinA"></i><span class="bs" style="font-size:13px">Melanjutkan...</span><span class="nb">Lanjutkan: Buat Klip Video AI</span><small class="nb">31 kredit</small></div>
+  <p class="lnjn">Kredit sudah ditahan saat masuk Review. Regenerate gambar 2 kredit per gambar.</p>
+  ${CUR}
+</div></div>
+
+<!-- HASIL -->
+<div class="pnl res" id="pgRes" style="left:221px"><div class="scr">
+  <div class="rcard">
+    <div class="rtb"><span class="ok">${CHK}</span><div style="min-width:0"><b>${VIDEO_TITLE}</b><small>Konten berhasil dibuat</small></div></div>
+    <div class="player"><div class="pv9" id="pv9">${SCENES.map((s, i) => `<div class="frm" id="frm${i}">${art(i, 0, true)}</div>`).join('')}<div class="vig"></div><div class="ttl">${TOPIC.toUpperCase()}</div><div class="sub" id="pvSub"></div>
+      <div class="pctl"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg><span id="pvT">0:00</span><div class="bar"><i id="pvBar"></i></div><span>1:02</span></div></div></div>
+    <div class="stats">
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg><b>1:02</b><small>Durasi</small></div>
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1z"/></svg><b>6</b><small>Scene</small></div>
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.6a1 1 0 0 1 .7.3l5.4 5.4a1 1 0 0 1 .3.7V19a2 2 0 0 1-2 2z"/></svg><b>14.8MB</b><small>Ukuran</small></div>
+    </div>
+    <div class="racts"><span class="dl" id="btnDl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 16v1a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-1m-4-4-4 4m0 0-4-4m4 4V4"/></svg>Download</span><span class="up" id="btnUp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16a4 4 0 0 1-.9-7.9A5 5 0 1 1 15.9 6H16a5 5 0 0 1 1 9.9M15 13l-3-3m0 0-3 3m3-3v12"/></svg>Upload</span><span class="pl2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v16m8-8H4"/></svg></span></div>
+  </div>
+  <div class="sdet"><span>Script Detail &amp; Transkrip</span>${CHEV}</div>
+  <div class="kit" id="sbCard"><div class="kith"><div><b>Storyboard</b><small>Semua adegan beserta waktu narasinya. Tiap panel jadi frame awal klip scene-nya.</small></div></div><div class="sbd"><div class="sbsheet"><div class="sbp">${art(0, 0, true)}<b>1</b><small>0:00 · Hook</small></div><div class="sbp">${art(1, 0, true)}<b>2</b><small>0:08 · Intro</small></div><div class="sbp">${art(2, 0, true)}<b>3</b><small>0:18 · Rising</small></div><div class="sbp">${art(3, 0, true)}<b>4</b><small>0:28 · Climax</small></div><div class="sbp">${art(4, 0, true)}<b>5</b><small>0:38 · Falling</small></div><div class="sbp">${art(5, 0, true)}<b>6</b><small>0:48 · Resolution</small></div><span class="un2">Unduh</span></div></div></div>
+  <div class="kit" id="covCard">
+    <div class="kith"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 16l4.6-4.6a2 2 0 0 1 2.8 0L16 16m-2-2 1.6-1.6a2 2 0 0 1 2.8 0L20 14m-6-6h.01M6 20h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z"/></svg></span><div><b>Cover / Thumbnail</b><small>Pilih salah satu untuk dipakai saat upload. Gratis, tidak memotong kredit.</small></div></div>
+    <div class="covg">${[[0, '9:16'], [3, '9:16'], [5, '16:9'], [2, '16:9']].map(([a, r], i) => `<div class="cov${r === '16:9' ? ' w' : ''}" id="cov${i}">${art(a)}<span class="r">${r}</span><span class="ct">PALUNG MARIANA</span><span class="un">Unduh</span><i class="sel2"></i></div>`).join('')}</div>
+  </div>
+  <div class="kit" id="kitCard">
+    <div class="kith"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 7h8m0 0v8m0-8-8 8-4-4-6 6"/></svg></span><div style="flex:1"><b>Viral Posting Kit</b><small>Copy-paste caption untuk setiap platform.</small></div><span class="bt">${REGEN}Regenerate</span><span class="bt">✨ A/B Variants</span></div>
+    <div class="kgrid">${KIT.map((c, i) => `<div class="kc" id="kc${i}"><div class="h"><span class="pi">${PLAT[c.k]}</span><b>${c.name}</b><small>${c.tag}</small></div><div class="tx">${c.txt}${c.cnt ? `<span class="cnt">${c.txt.length}/100</span>` : ''}</div><span class="cp" id="cp${i}"><span class="no" style="display:contents">${COPY} Copy</span><span class="ok">✓ Copied</span></span><i class="glow"></i></div>`).join('')}</div>
+  </div>
+  <div style="height:40px"></div>
+  <div class="mdl" id="mdlUp"><div class="mbox">
+    <div class="mh"><div><b>Pengaturan Jadwal</b><small>Jadwalkan upload ke social media</small></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg></div>
+    <div class="mb"><span class="l">Pilih Platform *</span>
+      <div class="pgrid">${[['youtube', 'YouTube'], ['tiktok', 'TikTok'], ['facebook', 'Facebook'], ['instagram', 'Instagram'], ['threads', 'Threads']].map(([k, n], i) => `<div class="${i ? '' : 'on'}" id="mp${i}">${PLAT[k]}${n}<i class="hl"></i></div>`).join('')}</div>
+      <span class="l">Judul</span><div class="f">${VIDEO_TITLE}</div>
+      <div class="f2"><div><span class="l">Tanggal</span><div class="f">Sab, 3 Okt 2026</div></div><div><span class="l">Jam</span><div class="f">19:00 WIB</div></div></div>
+      <div class="go">Jadwalkan ke YouTube</div>
+    </div>
+  </div></div>
+  ${CUR}
+</div></div>
+`;
+
+/* ================= NARASI / CAPTION ================= */
+// Satu cue per scene. `text` = caption layar; `say` (opsional) = ejaan untuk TTS browser.
+const CUES = [
+  { s: 0.3, e: 5.4, file: 'audio/vo-01.mp3', text: 'Punya ide konten, tapi malas nulis naskah, cari gambar, dan ngedit?' },
+  { s: 5.8, e: 10.7, file: 'audio/vo-02.mp3', text: 'Buka AI Content Creator di Klipers Pro. Cukup tiga langkah.' },
+  { s: 11.1, e: 17.0, file: 'audio/vo-03.mp3', text: 'Langkah satu: pilih kategori dan gaya. Fokus cerita ikut diatur otomatis.' },
+  { s: 17.3, e: 22.85, file: 'audio/vo-04.mp3', text: 'Klik rekomendasi topik, atau pakai link YouTube, artikel, bahkan PDF.', say: 'Klik rekomendasi topik, atau pakai link YouTube, artikel, bahkan pe de ef.' },
+  { s: 23.2, e: 30.2, file: 'audio/vo-05.mp3', text: 'Langkah dua: AI mengisi genre, sudut pandang, era, dan ending, lengkap dengan struktur cerita.' },
+  { s: 30.5, e: 38.7, file: 'audio/vo-06.mp3', text: 'Langkah tiga: pilih rasio, durasi, dan transisi. Nyalakan judul, subtitle, dan efek suara.', say: 'Langkah tiga: pilih rasio, durasi, dan transisi. Nyalakan judul, sabtaitel, dan efek suara.' },
+  { s: 39.0, e: 44.0, file: 'audio/vo-07.mp3', text: 'Tambah overlay sinematik, musik latar, dan narasi dalam tujuh bahasa.' },
+  { s: 44.3, e: 48.65, file: 'audio/vo-08.mp3', text: 'Pilih sumber visual, aktifkan review, lalu klik generate.' },
+  { s: 49.0, e: 52.8, file: 'audio/vo-09.mp3', text: 'AI menulis naskah dan membuat storyboard untuk setiap scene.' },
+  { s: 52.9, e: 58.7, file: 'audio/vo-10.mp3', text: 'Cek dulu tiap scene. Edit narasinya, atau regenerate gambar yang kurang pas.' },
+  { s: 59.0, e: 64.95, file: 'audio/vo-11.mp3', text: 'Klik lanjutkan. Tiap scene dijadikan klip video AI, lengkap dengan narasi dan subtitle.', say: 'Klik lanjutkan. Tiap scene dijadikan klip video AI, lengkap dengan narasi dan sabtaitel.' },
+  { s: 65.1, e: 71.25, file: 'audio/vo-12.mp3', text: 'Videonya jadi. Download, pilih cover, atau jadwalkan upload ke lima platform.' },
+  { s: 71.6, e: 76.65, file: 'audio/vo-13.mp3', text: 'Caption untuk YouTube, Instagram, TikTok, dan WhatsApp juga sudah siap.' },
+  { s: 77.0, e: 85.2, file: 'audio/vo-14.mp3', text: 'Klipers Pro. Satu topik, jadi video siap posting. Coba di klipers.pro, atau download di Google Play.', say: 'Klipers Pro. Satu topik, jadi video siap posting. Coba di klipers titik pro, atau download di Google Play.' },
+];
+CUES.forEach(c => {
+  const words = c.text.split(' ');
+  const wt = words.map(w => w.length + 2 + (/[.,?:!]$/.test(w) ? 4 : 0));
+  const total = wt.reduce((a, b) => a + b, 0);
+  const span = (c.e - c.s) - 0.4;
+  let acc = 0;
+  c.words = words.map((w, i) => { const st = c.s + span * acc / total; acc += wt[i]; return { w, st }; });
+  c.chunks = []; let cur = [];
+  c.words.forEach((w, i) => {
+    cur.push(i);
+    if (cur.length >= 6 || (/[.,?:!]$/.test(w.w) && cur.length >= 3)) { c.chunks.push(cur); cur = []; }
+  });
+  if (cur.length) c.chunks.push(cur);
+});
+const capsEl = $('#caps');
+let capKey = null;
+function renderCaps(t) {
+  const ci = CUES.findIndex(c => t >= c.s && t <= c.e);
+  if (ci < 0) { capsEl.style.opacity = 0; capKey = null; return; }
+  const c = CUES[ci];
+  let wi = 0; c.words.forEach((w, i) => { if (t >= w.st) wi = i; });
+  const chunk = c.chunks.find(ch => ch.includes(wi));
+  const key = ci + ':' + chunk[0];
+  if (key !== capKey) {
+    capsEl.innerHTML = '<span class="ln">' + chunk.map(i => `<span class="cw" data-i="${i}">${c.words[i].w}</span>`).join('') + '</span>';
+    capKey = key;
+  }
+  capsEl.querySelectorAll('.cw').forEach(el => el.classList.toggle('on', +el.dataset.i === wi));
+  capsEl.style.opacity = 1;
+}
+
+/* ================= AUDIO ================= */
+const AUD = CUES.map(c => {
+  const a = new Audio(); a.preload = 'auto';
+  a.onerror = () => { c.missing = true; updateVoiceNote(); };
+  a.src = c.file; return a;
+});
+const SS = window.speechSynthesis;
+let ttsVoice = null;
+function pickVoice() {
+  if (!SS) return;
+  const vs = SS.getVoices(); if (!vs.length) return;
+  const want = (Q.get('voice') || '').toLowerCase();
+  const by = f => vs.find(f);
+  ttsVoice = (want && by(v => v.name.toLowerCase().includes(want)))
+    || by(v => /william/i.test(v.name) && /multilingual/i.test(v.name))
+    || by(v => /^id/i.test(v.lang) && /ardi/i.test(v.name))
+    || by(v => /^id/i.test(v.lang) && /online|natural/i.test(v.name))
+    || by(v => /^id/i.test(v.lang)) || null;
+  updateVoiceNote();
+}
+function updateVoiceNote() {
+  if (!CUES.some(c => c.missing)) return;
+  const n = $('#audioNote');
+  n.style.display = 'inline';
+  n.textContent = ttsVoice ? 'Suara: ' + ttsVoice.name.replace(/\s*-\s*.*$/, '') + ' (browser)'
+    : SS ? 'Tidak ada voice Indonesia di browser ini — buka di Microsoft Edge' : 'Browser tidak mendukung TTS';
+}
+if (SS) { pickVoice(); SS.onvoiceschanged = pickVoice; }
+let muted = false, playing = false;
+function stopAudio() { AUD.forEach(a => a.pause()); if (SS) SS.cancel(); CUES.forEach(c => { c.started = false; }); }
+function speakCue(c, t) {
+  if (!SS || t - c.s > 0.6) return;
+  SS.cancel();
+  const u = new SpeechSynthesisUtterance(c.say || c.text);
+  u.lang = ttsVoice ? ttsVoice.lang : 'id-ID';
+  try { if (ttsVoice) u.voice = ttsVoice; } catch (e) {}
+  u.rate = 1.05; SS.speak(u);
+}
+function syncAudio(t) {
+  if (!playing || muted) return;
+  CUES.forEach((c, i) => {
+    if (c.started) return;
+    const a = AUD[i];
+    const len = !c.missing && isFinite(a.duration) ? a.duration : (c.e - c.s);
+    if (t >= c.s && t < c.s + len) {
+      c.started = true;
+      if (c.missing) { speakCue(c, t); return; }
+      try { a.currentTime = Math.max(0, t - c.s); } catch (e) {}
+      a.play().catch(() => {});
+    }
+  });
+}
+
+/* ================= STATE DISKRET (seek-safe) =================
+   flag(t0, t1, el, cls): class aktif selama t0 ≤ t < t1.
+   say(t, el, teks): teks elemen berganti mulai t (kembali ke teks awal sebelum t). */
+const FLAGS = [], TEXTS = new Map();
+const EL = x => typeof x === 'string' ? $(x) : x;
+function flag(t0, t1, el, cls) { FLAGS.push({ t0, t1: t1 ?? 1e9, el: EL(el), cls }); }
+function say(t, el, txt) {
+  el = EL(el);
+  if (!TEXTS.has(el)) TEXTS.set(el, { init: el.textContent, list: [] });
+  TEXTS.get(el).list.push({ t, txt });
+}
+function applyState(t) {
+  const want = new Map();
+  FLAGS.forEach(f => {
+    const k = f.el; if (!want.has(k)) want.set(k, {});
+    const on = t >= f.t0 && t < f.t1;
+    want.get(k)[f.cls] = want.get(k)[f.cls] || on;
+  });
+  want.forEach((m, el) => Object.entries(m).forEach(([c, on]) => el.classList.toggle(c, on)));
+  TEXTS.forEach((v, el) => {
+    let cur = v.init; v.list.forEach(x => { if (t >= x.t) cur = x.txt; });
+    if (el.textContent !== cur) el.textContent = cur;
+  });
+}
+
+/* ================= TIMELINE ================= */
+const P = { topic: 0, dur: 120, gen: 0, add: 0, pv: 0 };
+let tl;
+
+function sync() {
+  const t = tl.time();
+  applyState(t);
+  const n = Math.round(P.topic);
+  $('#topicTxt').textContent = TOPIC.slice(0, n);
+  $('#topicPh').style.display = n > 0 ? 'none' : '';
+  // durasi (slider 30..180 dtk)
+  const d = Math.round(P.dur / 10) * 10, pct = (P.dur - 30) / 150 * 100;
+  $('#durFill').style.width = pct + '%'; $('#durThumb').style.left = pct + '%';
+  $('#durTxt').textContent = '~' + (Math.floor(d / 60) ? Math.floor(d / 60) + 'm ' : '') + (d % 60) + 's';
+  $('#scnTxt').textContent = '• ' + Math.max(3, Math.min(20, Math.round(d / 10))) + ' scene';
+  // progress generating
+  const g = Math.round(P.gen);
+  $('#genPct').textContent = g + '%';
+  $('#genBar').style.width = g + '%';
+  $('#genArc').setAttribute('stroke-dasharray', (g * 1.508) + ' 151');
+  [[0, 20], [20, 60], [60, 80], [80, 95], [95, 100]].forEach(([a, b], i) => {
+    const el = $('#gs' + i);
+    el.classList.toggle('act', g >= a && g < b && g < 100);
+    el.classList.toggle('done', g >= b || (g >= 100));
+  });
+  $('#genMsg').textContent = g < 3 ? 'Memulai proses...' : g < 20 ? 'Menulis naskah 6 scene...' : g < 60 ? `Membuat storyboard scene ${Math.min(6, 1 + Math.floor((g - 20) / 6.7))}/6...`
+    : g < 80 ? `Merekam narasi scene ${Math.min(6, 1 + Math.floor((g - 60) / 3.4))}/6...` : g < 95 ? `Membuat klip video AI scene ${Math.min(6, 1 + Math.floor((g - 80) / 2.5))}/6...` : g < 100 ? 'Finalisasi...' : 'Selesai!';
+  // ketikan edit narasi
+  $('#narAdd').textContent = EDIT_ADD.slice(0, Math.round(P.add));
+  // pemutar video hasil (loop 6 scene)
+  const pv = P.pv;
+  const si = Math.floor(pv / 1.7) % 6;
+  SCENES.forEach((s, i) => { $('#frm' + i).style.opacity = i === si ? 1 : 0; $('#frm' + i).style.transform = `scale(${1 + ((pv % 1.7) / 1.7) * .08})`; });
+  $('#pvSub').textContent = pv > 0 ? SUBS[Math.floor(pv / 0.85) % SUBS.length] : '';
+  $('#pvBar').style.width = Math.min(100, pv / 62 * 100 * 4) + '%';
+  const sec = Math.floor(pv * 4) % 62;
+  $('#pvT').textContent = '0:' + String(sec).padStart(2, '0');
+  renderCaps(t);
+  syncAudio(t);
+  if (!scrubbing) $('#scrub').value = t;
+  $('#tlabel').textContent = t.toFixed(1) + ' / ' + D + 's';
+}
+
+// posisi elemen relatif .scr panelnya (satuan px app) — untuk kursor per panel
+function pp(el) {
+  el = EL(el);
+  const scr = el.closest('.scr'), s = scr.getBoundingClientRect(), r = el.getBoundingClientRect();
+  const k = stage.getBoundingClientRect().width / 1920 * PS;
+  return { x: (r.left - s.left + r.width / 2) / k, y: (r.top - s.top + r.height / 2) / k, l: (r.left - s.left) / k, t: (r.top - s.top) / k, w: r.width / k, h: r.height / k };
+}
+// posisi elemen relatif jendela (px stage, jendela tanpa transform, scroll 0) — untuk kamera
+function wp(el) {
+  el = EL(el);
+  const w = $('#win').getBoundingClientRect(), r = el.getBoundingClientRect();
+  const k = stage.getBoundingClientRect().width / 1920;
+  return { x: (r.left - w.left + r.width / 2) / k, y: (r.top - w.top + r.height / 2) / k };
+}
+// ukur dengan state sementara (class diterapkan sebentar lalu dilepas)
+function measureWith(pairs, fn) {
+  pairs.forEach(([el, c, on]) => EL(el).classList.toggle(c, on !== false));
+  const r = fn();
+  pairs.forEach(([el, c, on]) => EL(el).classList.toggle(c, on === false));
+  return r;
+}
+
+function build() {
+  const win = $('#win');
+  gsap.set(win, { x: 0, y: 0, scale: 1 });
+  // state awal DOM yang dipakai untuk pengukuran
+  $('#tbTopik').classList.add('on'); $('#tcTopik').classList.add('show');
+
+  /* ---------- ukur target ---------- */
+  const M = {};
+  M.miCC = wp('#miCC');
+  const miCCw = (() => { const w = win.getBoundingClientRect(), r = $('#miCC').getBoundingClientRect(), k = stage.getBoundingClientRect().width / 1920; return { x: (r.left - w.left + 60) / k, y: (r.top - w.top + r.height / 2) / k }; })();
+  // PH1
+  M.kat = pp('#selKat'); M.gaya = pp('#selGaya'); M.fok = pp('#selFok');
+  measureWith([['#ddKat', 'open'], ['#ddGaya', 'open'], ['#ddFok', 'open']], () => {
+    M.katFU = pp('#ddKat .it[data-v="💡 Fakta Unik"]');
+    M.ddKatTop = pp('#ddKat').t;
+    M.katItems = $$('#ddKat .it').map(e => pp(e));
+    M.gaya0 = pp('#ddGaya .it[data-v="0"]');
+    M.fok0 = pp('#ddFok .it[data-v="0"]');
+  });
+  M.chip = pp(`#chips .chip[data-c="${TOPIC}"]`);
+  M.tbYt = pp('#tbYt'); M.tbArt = pp('#tbArt'); M.tbTopik = pp('#tbTopik');
+  M.lanjut = pp('#btnLanjut');
+  M.drop = measureWith([['#tcTopik', 'show', false], ['#tcArt', 'show']], () => pp('#dropPdf'));
+  M.lanjutArt = measureWith([['#tcTopik', 'show', false], ['#tcArt', 'show'], ['#divi', 'hide']], () => pp('#btnLanjut'));
+  M.w_lanjutArt = measureWith([['#tcTopik', 'show', false], ['#tcArt', 'show'], ['#divi', 'hide']], () => wp('#btnLanjut'));
+  M.w_kat = wp('#selKat'); M.w_icard = wp('#icard'); M.w_chips = wp('#chips'); M.w_stp = wp('#ph1 .stp');
+  // PH2
+  M.w_cfg = wp('#cfgStory'); M.w_g3 = wp('#g3');
+  M.arcMan = pp('#arcManBtn');
+  M.step3 = measureWith([['#arcBox', 'manualOn']], () => pp('#btnStep3'));
+  M.w_arc = wp('#arcBox');
+  // PH3
+  M.ar916 = pp('#ar916');
+  M.sugAp = measureWith([['#sugDur', 'show']], () => pp('#sugAp'));
+  M.trSmooth = pp('#ph3 .tp[data-t="Smooth"]');
+  M.tgTitle = pp('#tgTitle'); M.tgSub = pp('#tgSub'); M.tgSfx = pp('#tgSfx');
+  M.w_cardVid = wp('#cardVid');
+  M.selOv = pp('#selOv');
+  M.ovCin = measureWith([['#ddOv', 'open']], () => pp('#ddOv .it[data-v="🎬 Cinematic"]'));
+  M.bgAuto = pp('#bgAuto');
+  M.langs = $$('#langs .lp').map(e => pp(e));
+  M.selVoice = pp('#selVoice');
+  M.vArdi = measureWith([['#ddVoice', 'open']], () => pp('#vArdi'));
+  M.selVis = pp('#selVis');
+  M.visVid = measureWith([['#ddVis', 'open']], () => pp('#visVid'));
+  const fin3 = [['#intn', 'show'], ['#bgmx', 'show']];
+  M.tgRev = measureWith(fin3, () => pp('#tgRev'));
+  M.btnGen = measureWith(fin3, () => pp('#btnGen'));
+  M.w_left = measureWith(fin3, () => wp('#cardLeft'));
+  M.w_audio = measureWith(fin3, () => wp('#cardAudio'));
+  M.w_render = measureWith(fin3, () => wp('#cardRender'));
+  M.w_gen = measureWith(fin3, () => wp('#btnGen'));
+  // REVIEW
+  M.nar1 = pp('#nar1'); M.rg2 = pp('#rg2'); M.lnj = pp('#btnLnj');
+  M.w_scl = wp('#scl'); M.sc1 = pp('#sc1'); M.sc2 = pp('#sc2');
+  // HASIL
+  M.dl = pp('#btnDl'); M.up = pp('#btnUp'); M.cov1 = pp('#cov1');
+  M.covTop = pp('#covCard').t; M.kitTop = pp('#kitCard').t;
+  M.cp2 = pp('#cp2'); M.mp = [0, 1, 2, 3, 4].map(i => pp('#mp' + i));
+  M.w_res = wp('#pgRes .rcard');
+
+  tl = gsap.timeline({ paused: true, onUpdate: sync, onComplete: () => { playing = false; $('#bPlay').textContent = '↻'; } });
+  tl.set({}, {}, D);
+
+  /* ---------- helper animasi ---------- */
+  const VIS_H = 854 / PS;                               // tinggi area halaman yang terlihat (px app)
+  function cam(t, dur, s, fx, fy, ease = 'power2.inOut') {
+    // fx,fy = titik (koordinat jendela) yang ditaruh di tengah layar
+    let x = 960 - WIN.x - s * fx, y = 540 - WIN.y - s * fy;
+    if (s * WIN.w >= 1920) x = Math.min(-WIN.x, Math.max(1920 - WIN.x - s * WIN.w, x)); else x = (1920 - s * WIN.w) / 2 - WIN.x;
+    if (s * WIN.h >= 1080) y = Math.min(-WIN.y, Math.max(1080 - WIN.y - s * WIN.h, y)); else y = (1080 - s * WIN.h) / 2 - WIN.y;
+    tl.to(win, { x, y, scale: s, duration: dur, ease }, t);
+  }
+  const camEl = (t, dur, s, w, scrollApp = 0, dx = 0, dy = 0) => cam(t, dur, s, w.x + dx, w.y - scrollApp * PS + dy);
+  const scroll = (t, dur, pnl, yApp, ease = 'power2.inOut') => tl.to(`#${pnl} .scr`, { y: -yApp, duration: dur, ease }, t);
+  const panelIn = (t, id, d = 0.35) => tl.fromTo('#' + id, { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: d, ease: 'power2.out', immediateRender: false }, t);
+  const panelOut = (t, id, d = 0.25) => tl.to('#' + id, { autoAlpha: 0, duration: d, ease: 'power1.in' }, t);
+  const curOf = id => $(`#${id} .cur`), ringOf = id => $(`#${id} .ring`);
+  function mv(id, t, p, dur = 0.55, dx = 0, dy = 0) {
+    tl.to(curOf(id), { x: p.x + dx - 4, y: p.y + dy - 3, duration: dur, ease: 'power3.inOut' }, t);
+  }
+  function click(id, t, p, dx = 0, dy = 0) {
+    tl.set(ringOf(id), { x: p.x + dx, y: p.y + dy }, t);
+    tl.fromTo(ringOf(id), { scale: .35, opacity: .95 }, { scale: 1.5, opacity: 0, duration: .45, ease: 'power2.out', immediateRender: false }, t);
+    tl.to(curOf(id), { scale: .82, duration: .08, yoyo: true, repeat: 1, transformOrigin: '20% 15%' }, t);
+  }
+  const curShow = (id, t, p) => { tl.set(curOf(id), { x: p.x, y: p.y }, t); tl.to(curOf(id), { autoAlpha: 1, duration: .2 }, t); };
+  const curHide = (id, t) => tl.to(curOf(id), { autoAlpha: 0, duration: .15 }, t);
+  const pulse = (t, el, s = 1.06) => tl.to(EL(el), { scale: s, duration: .16, yoyo: true, repeat: 1, ease: 'power1.inOut' }, t);
+  const chap = (t, n, txt) => { say(t, '#chap b', String(n)); say(t, '#chapTxt', 'Langkah ' + n + ' · ' + txt); };
+
+  /* ---------- state awal ---------- */
+  gsap.set('#s1', { autoAlpha: 1 });
+  gsap.set('#h1a .w', { autoAlpha: 0, y: 40 });
+  gsap.set('.chore', { autoAlpha: 0, y: 50, scale: .92 });
+  gsap.set('.chore .strike', { scaleX: 0 });
+  gsap.set('#h1b .w', { autoAlpha: 0, y: 30 });
+  gsap.set('#win', { autoAlpha: 0 });
+  gsap.set('.pnl', { autoAlpha: 0 });
+  gsap.set('.cur', { autoAlpha: 0, x: 380, y: 200 });
+  gsap.set('#cursorW', { autoAlpha: 0, x: 900, y: 620 });
+  gsap.set('#chap', { autoAlpha: 0, y: 10 });
+  gsap.set(['#logoBig', '#wordmark', '#tagline', '#ctaPill', '#play', '#flow span', '#flow i'], { autoAlpha: 0 });
+  gsap.set('#logoBig', { scale: .4, rotation: -20 });
+  gsap.set(['#wordmark', '#tagline'], { y: 30 });
+  gsap.set('#ctaPill', { scale: .85 }); gsap.set('#play', { y: 30 });
+
+  /* ================= S1 · HOOK (0 – 5.7) ================= */
+  tl.to('#h1a .w', { autoAlpha: 1, y: 0, duration: .5, stagger: .12, ease: 'back.out(1.8)' }, 0.2);
+  tl.to('.chore', { autoAlpha: 1, y: 0, scale: 1, duration: .55, stagger: .22, ease: 'back.out(1.5)' }, 1.0);
+  [2.35, 3.35, 4.3].forEach((t, i) => {
+    tl.to(`.chore:nth-child(${i + 1}) .strike`, { scaleX: 1, duration: .3, ease: 'power3.out' }, t);
+    tl.to(`.chore:nth-child(${i + 1})`, { opacity: .4, scale: .96, duration: .3 }, t + .1);
+  });
+  tl.to('#h1b .w', { autoAlpha: 1, y: 0, duration: .45, stagger: .1, ease: 'back.out(2)' }, 4.55);
+  tl.to('#s1', { autoAlpha: 0, scale: 1.04, duration: .4, ease: 'power2.in' }, 5.45);
+
+  /* ================= S2 · SIDEBAR → AI CONTENT CREATOR (5.7 – 11.0) ================= */
+  tl.fromTo('#win', { autoAlpha: 0, scale: .9, x: 82, y: 45 }, { autoAlpha: 1, scale: 1, x: 0, y: 0, duration: .7, ease: 'power3.out', immediateRender: false }, 5.7);
+  tl.to('#cursorW', { autoAlpha: 1, duration: .2 }, 6.3);
+  tl.to('#cursorW', { x: miCCw.x, y: miCCw.y, duration: .75, ease: 'power3.inOut' }, 6.35);
+  tl.set('#ringW', { x: miCCw.x, y: miCCw.y }, 7.15);
+  tl.fromTo('#ringW', { scale: .35, opacity: 1 }, { scale: 1.5, opacity: 0, duration: .45, immediateRender: false }, 7.15);
+  tl.to('#miCC .onbg', { opacity: 1, duration: .2 }, 7.15);
+  flag(7.15, null, '#miCC', 'on');
+  say(7.2, '#urlTxt', 'klipers.pro/ai-content-creator');
+  tl.to('#dash', { autoAlpha: 0, duration: .25 }, 7.25);
+  panelIn(7.35, 'ph1');
+  tl.to('#cursorW', { autoAlpha: 0, duration: .2 }, 7.9);
+  chap(7.6, 1, 'Konten');
+  // "Cukup tiga langkah" → sorot stepper 1-2-3
+  camEl(8.3, .8, 1.3, M.w_stp);
+  ['1', '2', '3'].forEach((n, i) => pulse(9.35 + i * .38, `#ph1 .sb[data-s="${n}"]`, 1.12));
+  tl.to('#chap', { autoAlpha: 1, y: 0, duration: .3 }, 10.6);
+
+  /* ================= S3 · STEP 1 — KATEGORI, GAYA, FOKUS (11.0 – 17.2) ================= */
+  camEl(10.9, .8, 1.32, M.w_kat, 0, 150, 60);
+  curShow('ph1', 11.0, { x: M.kat.x + 120, y: M.kat.y + 160 });
+  mv('ph1', 11.1, M.kat, .6);
+  click('ph1', 11.75, M.kat);
+  flag(11.8, 13.45, '#ddKat', 'open');
+  // hover turun ke "Fakta Unik"
+  const iFU = M.katItems.findIndex(p => p.y === M.katFU.y);
+  const KS = Math.max(0, M.katFU.y - (M.ddKatTop + 150));      // geser isi list agar "Fakta Unik" terlihat
+  tl.to('#ddKatIn', { y: -KS, duration: .8, ease: 'power2.inOut' }, 12.2);
+  [3, 8, 12, 14, 15].forEach((ix, k) => flag(12.05 + k * .22, 12.05 + (k + 1) * .22, $$('#ddKat .it')[ix], 'hi'));
+  flag(13.15, 13.45, $$('#ddKat .it')[iFU], 'hi');
+  mv('ph1', 12.05, { x: M.katFU.x - 60, y: M.katFU.y - KS }, 1.0);
+  M.katFU = { x: M.katFU.x - 60, y: M.katFU.y - KS };
+  click('ph1', 13.4, M.katFU);
+  say(13.45, '#katTxt', '💡 Fakta Unik');
+  flag(13.45, null, '#katX', 'vis');
+  tl.set('#katX', { visibility: 'visible' }, 13.45);
+  pulse(13.5, '#selGaya', 1.05);
+  tl.to('#chips', { opacity: 1, duration: .35 }, 13.6);
+  say(13.6, '#topicPh', 'Tulis topik spesifik tentang Fakta Unik...');
+  say(13.6, '#fokHint', 'Otomatis: Fokus Topik. Topik jadi subjek utama. AI tidak akan mengarang tokoh bernama; orang hanya disebut kalau nyata.');
+  // Gaya
+  mv('ph1', 13.9, M.gaya, .45);
+  click('ph1', 14.4, M.gaya);
+  flag(14.45, 15.3, '#ddGaya', 'open');
+  flag(14.45, 15.3, $('#ddGaya .it[data-v="0"]'), 'hi');
+  mv('ph1', 14.6, M.gaya0, .45);
+  click('ph1', 15.2, M.gaya0);
+  // Fokus Cerita
+  mv('ph1', 15.35, M.fok, .45);
+  click('ph1', 15.85, M.fok);
+  flag(15.9, 16.6, '#ddFok', 'open');
+  flag(15.9, 16.6, $('#ddFok .it[data-v="0"]'), 'hi');
+  mv('ph1', 16.0, M.fok0, .4);
+  click('ph1', 16.5, M.fok0);
+  tl.fromTo('#fokHint', { backgroundColor: 'rgba(127,127,127,0)' }, { backgroundColor: 'rgba(127,127,127,.22)', duration: .25, yoyo: true, repeat: 1, immediateRender: false }, 16.65);
+
+  /* ================= S4 · CHIP TOPIK + SUMBER INPUT (17.2 – 23.1) ================= */
+  camEl(17.0, .8, 1.25, M.w_icard, 0, 0, -40);
+  mv('ph1', 17.2, M.chip, .55);
+  click('ph1', 17.8, M.chip);
+  flag(17.85, null, `#chips .chip[data-c="${TOPIC}"]`, 'on');
+  tl.to(P, { topic: TOPIC.length, duration: .45, ease: 'none' }, 17.9);
+  flag(17.9, 18.95, '#topicCaret', 'x'); tl.set('#topicCaret', { opacity: 1 }, 17.9); tl.set('#topicCaret', { opacity: 0 }, 18.95);
+  flag(18.3, null, '#btnLanjut', 'en');
+  // tab YouTube → Artikel/PDF → kembali Topik
+  // tab mengikuti kata di narasi: "YouTube" ±20,0 dtk, "artikel" ±20,7, "PDF" ±21,9
+  mv('ph1', 19.2, M.tbYt, .45);
+  click('ph1', 19.75, M.tbYt);
+  flag(0, 19.8, '#tbTopik', 'on'); flag(0, 19.8, '#tcTopik', 'show');
+  flag(19.8, 20.65, '#tbYt', 'on'); flag(19.8, 20.65, '#tcYt', 'show');
+  mv('ph1', 20.1, M.tbArt, .4);
+  click('ph1', 20.6, M.tbArt);
+  flag(20.65, null, '#tbArt', 'on'); flag(20.65, null, '#tcArt', 'show'); flag(20.65, null, '#divi', 'hide');
+  camEl(20.7, .6, 1.25, M.w_icard, 0, 0, 110);
+  mv('ph1', 20.95, M.drop, .5, 0, -8);
+  tl.fromTo('#dropPdf', { borderColor: 'var(--line2)' }, { borderColor: '#818cf8', duration: .3, yoyo: true, repeat: 1, immediateRender: false }, 21.7);
+  // Lanjut tetap aktif dari tab Artikel/PDF karena topik sudah terisi (sama seperti kode asli)
+  camEl(21.95, .55, 1.25, M.w_lanjutArt, 0, 0, -170);
+  mv('ph1', 22.0, M.lanjutArt, .5);
+  click('ph1', 22.55, M.lanjutArt);
+  panelOut(22.75, 'ph1');
+
+  /* ================= S5 · STEP 2 — CERITA (23.1 – 30.4) ================= */
+  panelIn(22.95, 'ph2');
+  chap(22.95, 2, 'Cerita');
+  camEl(22.9, .7, 1.22, M.w_cfg, 0, 0, -120);
+  tl.to('#g3, #endPills', { opacity: .55, duration: .01 }, 22.95);
+  tl.to('#banOk', { opacity: 1, duration: .3 }, 24.9);
+  tl.to('#cfgStory .ban.load', { opacity: 0, duration: .2 }, 24.9);
+  tl.to('#g3, #endPills', { opacity: 1, duration: .3 }, 24.9);
+  // isian AI muncul mengikuti narasi: genre, sudut pandang, era, ending
+  const aiFill = (t, sel, badge, txtSel, txt) => {
+    if (txtSel) say(t, txtSel, txt);
+    tl.to(badge, { opacity: 1, duration: .2 }, t);
+    tl.fromTo(sel, { boxShadow: '0 0 0 0 rgba(59,130,246,0)' }, { boxShadow: '0 0 0 3px rgba(59,130,246,.55)', duration: .25, yoyo: true, repeat: 1, immediateRender: false }, t);
+  };
+  aiFill(25.3, '#fGenre', '#aib1', '#genreTxt', '🔪 Thriller / Suspense');
+  aiFill(25.95, '#fPov', '#aib2', '#povTxt', '🌐 Maha Tahu');
+  aiFill(26.7, '#fEra', '#aib3');
+  tl.to('#aib4', { opacity: 1, duration: .2 }, 27.3);
+  flag(27.3, null, '#enOpen', 'on');
+  pulse(27.3, '#enOpen', 1.12);
+  // Story Arc: AI Otomatis → intip Manual (6 babak)
+  scroll(27.6, .7, 'ph2', 150);
+  camEl(27.6, .7, 1.22, M.w_arc, 150, 0, 20);
+  curShow('ph2', 27.7, { x: M.arcMan.x - 160, y: M.arcMan.y + 90 });
+  mv('ph2', 27.75, M.arcMan, .5);
+  click('ph2', 28.3, M.arcMan);
+  flag(28.35, null, '#arcBox', 'manualOn');
+  flag(28.35, null, '#arcManBtn', 'on'); flag(0, 28.35, '#arcAiBtn', 'on');
+  scroll(28.5, .9, 'ph2', M.step3.y - VIS_H + 150);
+  camEl(28.5, .9, 1.12, M.w_arc, M.step3.y - VIS_H + 150, 0, 170);
+  mv('ph2', 29.1, M.step3, .55);
+  click('ph2', 29.75, M.step3);
+  panelOut(30.0, 'ph2');
+
+  /* ================= S6 · STEP 3 — RASIO, DURASI, TRANSISI, TOGGLE (30.4 – 38.9) ================= */
+  panelIn(30.15, 'ph3');
+  chap(30.15, 3, 'Video');
+  camEl(30.1, .7, 1.3, M.w_cardVid, 0, 0, -10);
+  curShow('ph3', 30.4, { x: M.ar916.x + 120, y: M.ar916.y + 120 });
+  mv('ph3', 30.5, M.ar916, .6);
+  click('ph3', 31.3, M.ar916);
+  pulse(31.3, '#ar916', 1.08);
+  flag(31.9, 33.05, '#sugDur', 'show');
+  mv('ph3', 32.0, M.sugAp, .55);
+  click('ph3', 32.8, M.sugAp);
+  tl.to(P, { dur: 60, duration: .5, ease: 'power2.out' }, 32.9);
+  mv('ph3', 33.2, M.trSmooth, .5);
+  click('ph3', 33.8, M.trSmooth);
+  flag(0, 33.85, '#ph3 .tp[data-t="Mix"]', 'on'); flag(33.85, null, '#ph3 .tp[data-t="Smooth"]', 'on');
+  mv('ph3', 34.4, M.tgTitle, .55, -60);
+  click('ph3', 35.1, M.tgTitle, -60);
+  flag(35.15, null, '#tgTitle', 'on');
+  mv('ph3', 35.45, M.tgSub, .5, -60);
+  click('ph3', 36.05, M.tgSub, -60);
+  flag(36.1, null, '#tgSub', 'on');
+  mv('ph3', 36.4, M.tgSfx, .5, -60);
+  click('ph3', 37.0, M.tgSfx, -60);
+  flag(37.05, null, '#tgSfx', 'on');
+
+  /* ================= S7 · OVERLAY, MUSIK, BAHASA, SUARA (38.9 – 44.2) ================= */
+  const S7 = 250;
+  scroll(37.9, .9, 'ph3', S7);
+  camEl(37.9, .9, 1.28, M.w_left, S7, 0, -20);
+  mv('ph3', 38.6, M.selOv, .6);
+  click('ph3', 39.3, M.selOv);
+  flag(39.35, 40.25, '#ddOv', 'open');
+  flag(39.9, 40.25, $('#ddOv .it[data-v="🎬 Cinematic"]'), 'hi');
+  mv('ph3', 39.5, M.ovCin, .4);
+  click('ph3', 40.2, M.ovCin);
+  say(40.25, '#ovTxt', '🎬 Cinematic');
+  flag(40.25, null, '#intn', 'show');
+  const bgAutoY = measureWith([['#intn', 'show']], () => pp('#bgAuto'));
+  mv('ph3', 40.4, bgAutoY, .5);
+  click('ph3', 40.95, bgAutoY);
+  flag(0, 41.0, '#bgOff', 'on'); flag(41.0, null, '#bgAuto', 'on'); flag(41.0, null, '#bgmx', 'show');
+  camEl(41.4, .7, 1.28, M.w_audio, S7, 0, 0);
+  mv('ph3', 41.5, M.langs[0], .5);
+  M.langs.forEach((p, i) => { tl.to(`#langs .lp:nth-child(${i + 1})`, { scale: 1.18, duration: .1, yoyo: true, repeat: 1 }, 42.1 + i * .12); });
+  mv('ph3', 42.1, M.langs[6], .85);
+  mv('ph3', 43.0, M.selVoice, .4);
+  click('ph3', 43.4, M.selVoice);
+  flag(43.45, 44.05, '#ddVoice', 'open');
+  flag(43.7, 44.05, '#vArdi', 'hi');
+  mv('ph3', 43.5, M.vArdi, .35, -40);
+  click('ph3', 44.0, M.vArdi, -40);
+  say(44.05, '#voiceTxt', 'Ardi • Indonesian ♂');
+
+  /* ================= S8 · OPSI RENDER + GENERATE (44.2 – 48.9) ================= */
+  camEl(44.1, .6, 1.28, M.w_render, S7, 0, 0);
+  mv('ph3', 44.3, M.selVis, .5);
+  click('ph3', 44.85, M.selVis);
+  flag(44.9, 45.6, '#ddVis', 'open');
+  flag(45.25, 45.6, '#visVid', 'hi');
+  mv('ph3', 45.0, M.visVid, .4);
+  click('ph3', 45.55, M.visVid);
+  say(45.6, '#visTxt', 'AI Video Full');
+  say(45.6, '#genCost', '25 kredit • 25/min');
+  say(45.6, '#visHint', 'Tiap scene jadi klip video AI, bayar per durasi.');
+  flag(45.6, null, '#tgWeb', 'dis'); tl.to('#tgWeb', { opacity: .5, duration: .2 }, 45.6);
+  say(45.6, '#webHint', 'Hanya untuk mode Campur AI + Video Stock.');
+  mv('ph3', 45.75, M.tgRev, .5, -70);
+  click('ph3', 46.35, M.tgRev, -70);
+  flag(46.4, null, '#tgRev', 'on');
+  say(46.4, '#genLbl', 'Generate untuk Review');
+  say(33.4, '#genCost', '4 kredit • 4/min');
+  say(46.4, '#genCost', '≈25 kredit • biaya final di Review');
+  const S8 = Math.max(S7, M.btnGen.y - VIS_H + 140);
+  scroll(46.6, .7, 'ph3', S8);
+  camEl(46.6, .7, 1.15, M.w_gen, S8, 0, -120);
+  mv('ph3', 47.0, M.btnGen, .5);
+  click('ph3', 47.6, M.btnGen);
+  flag(47.65, null, '#btnGen', 'busy');
+  panelOut(48.6, 'ph3');
+  tl.to('#chap', { autoAlpha: 0, duration: .25 }, 48.6);
+
+  /* ================= S9 · GENERATING: NASKAH + VISUAL (48.9 – 52.8) ================= */
+  cam(48.6, .6, 1.15, 256 + 954 * PS / 2, 46 + 330 * PS / 2 + 25);
+  panelIn(48.85, 'pgGen');
+  tl.to(P, { gen: 20, duration: 1.4, ease: 'power1.inOut' }, 49.0);
+  tl.to(P, { gen: 60, duration: 2.5, ease: 'power1.inOut' }, 50.4);
+  panelOut(52.65, 'pgGen', .2);
+
+  /* ================= S10 · REVIEW & EDIT SCENE (52.8 – 58.9) ================= */
+  panelIn(52.8, 'pgRev');
+  cam(52.7, .6, 1.0, 0, 0);
+  const R1 = M.sc1.t - 10;
+  scroll(53.6, 1.0, 'pgRev', R1);
+  camEl(53.6, 1.0, 1.22, M.w_scl, 0, 0, M.sc1.t * PS - 60 - R1 * PS - (M.w_scl.y - 46 - 18 * PS) + 40);
+  curShow('pgRev', 54.3, { x: M.nar1.x + 60, y: M.nar1.y + 80 });
+  mv('pgRev', 54.35, M.nar1, .55, 120, 12);
+  click('pgRev', 55.0, M.nar1, 120, 12);
+  flag(55.05, 57.2, '#nar1', 'foc');
+  tl.set('#narCaret', { opacity: 1 }, 55.05); tl.set('#narCaret', { opacity: 0 }, 57.2);
+  tl.to(P, { add: EDIT_ADD.length, duration: 1.3, ease: 'none' }, 55.2);
+  // regenerate gambar scene 3
+  const R2 = M.sc2.t - 10;
+  scroll(56.35, .6, 'pgRev', R2);
+  mv('pgRev', 56.35, { x: M.rg2.x, y: M.rg2.y - (R2 - R1) }, .01);
+  mv('pgRev', 56.4, M.rg2, .5);
+  click('pgRev', 56.95, M.rg2);
+  tl.to('#thmGen', { opacity: 1, duration: .15 }, 57.0);
+  tl.to('#thmGen', { opacity: 0, duration: .15 }, 57.9);
+  tl.to('#thmNew', { opacity: 1, duration: .01 }, 57.95);
+  tl.fromTo('#thmFlash', { opacity: .8 }, { opacity: 0, duration: .45, immediateRender: false }, 57.95);
+  pulse(57.95, '#thm2', 1.06);
+  // turun ke tombol Lanjutkan
+  const R3 = M.lnj.y - VIS_H + 170;
+  scroll(58.3, .75, 'pgRev', R3);
+  camEl(58.3, .75, 1.15, wp('#btnLnj'), R3, 0, -140);
+
+  /* ================= S11 · LANJUTKAN → NARASI, EDIT, FINAL (58.9 – 65.0) ================= */
+  mv('pgRev', 58.7, M.lnj, .6);
+  click('pgRev', 59.5, M.lnj);
+  flag(59.55, null, '#btnLnj', 'busy');
+  panelOut(60.0, 'pgRev');
+  cam(59.9, .6, 1.15, 256 + 954 * PS / 2, 46 + 330 * PS / 2 + 25);
+  panelIn(60.15, 'pgGen');
+  tl.to(P, { gen: 80, duration: 1.7, ease: 'power1.inOut' }, 60.3);
+  tl.to(P, { gen: 95, duration: 1.6, ease: 'power1.inOut' }, 62.0);
+  tl.to(P, { gen: 100, duration: .7, ease: 'power1.out' }, 63.7);
+  panelOut(64.7, 'pgGen', .25);
+
+  /* ================= S12 · HASIL: DOWNLOAD, COVER, UPLOAD (65.0 – 71.5) ================= */
+  panelIn(64.9, 'pgRes');
+  cam(64.8, .6, 1.12, M.w_res.x, M.w_res.y - 30);
+  tl.to(P, { pv: 22, duration: 22, ease: 'none' }, 65.0);
+  const RD = Math.max(0, M.dl.y - 420);
+  scroll(65.5, .7, 'pgRes', RD);
+  curShow('pgRes', 65.8, { x: M.dl.x + 40, y: M.dl.y - 150 });
+  mv('pgRes', 65.85, M.dl, .6);
+  click('pgRes', 66.6, M.dl);
+  pulse(66.6, '#btnDl', 1.04);
+  // cover
+  const RC = M.covTop - 20;
+  scroll(67.0, .8, 'pgRes', RC);
+  cam(67.0, .8, 1.12, M.w_res.x, M.w_res.y);
+  mv('pgRes', 67.3, M.cov1, .5);
+  tl.to('#cov1 .un', { opacity: 1, duration: .2 }, 67.8);
+  tl.to('#cov1 .sel2', { opacity: 1, duration: .2 }, 68.0);
+  click('pgRes', 68.0, M.cov1, 0, 40);
+  // upload terjadwal
+  scroll(68.5, .7, 'pgRes', 0);
+  mv('pgRes', 68.6, M.up, .6);
+  click('pgRes', 69.25, M.up);
+  tl.to('#mdlUp', { autoAlpha: 1, duration: .25 }, 69.35);
+  M.mp.forEach((p, i) => tl.fromTo(`#mp${i} .hl`, { opacity: 0 }, { opacity: 1, duration: .15, yoyo: true, repeat: 1, immediateRender: false }, 69.7 + i * .28));
+  mv('pgRes', 69.6, M.mp[4], 1.3);
+  tl.to('#mdlUp', { autoAlpha: 0, duration: .25 }, 71.2);
+
+  /* ================= S13 · VIRAL POSTING KIT (71.5 – 76.9) ================= */
+  const RK = M.kitTop - 10;
+  scroll(71.3, .8, 'pgRes', RK);
+  cam(71.3, .8, 1.18, M.w_res.x, M.w_res.y + 10);
+  [72.2, 73.0, 73.7, 74.6].forEach((t, i) => tl.fromTo(`#kc${i} .glow`, { opacity: 0 }, { opacity: 1, duration: .2, yoyo: true, repeat: 1, repeatDelay: .35, immediateRender: false }, t));
+  mv('pgRes', 71.9, { x: M.cp2.x, y: M.cp2.y - 60 }, .6);
+  mv('pgRes', 75.0, M.cp2, .45);
+  click('pgRes', 75.55, M.cp2);
+  flag(75.6, null, '#cp2', 'done');
+  tl.to('#win', { autoAlpha: 0, scale: '-=0.06', duration: .45, ease: 'power2.in' }, 76.5);
+
+  /* ================= S14 · CTA (76.9 – 87) ================= */
+  tl.to('#s14', { autoAlpha: 1, duration: .2 }, 76.9);
+  tl.to('#logoBig', { autoAlpha: 1, scale: 1, rotation: 0, duration: .9, ease: 'back.out(1.6)' }, 76.95);
+  tl.to('#wordmark', { autoAlpha: 1, y: 0, duration: .7, ease: 'power4.out' }, 77.3);
+  tl.to('#tagline', { autoAlpha: 1, y: 0, duration: .6, ease: 'power3.out' }, 77.9);
+  tl.to('#play', { autoAlpha: 1, y: 0, duration: .5, ease: 'power3.out' }, 78.2);
+  tl.to('#ctaPill', { autoAlpha: 1, scale: 1, duration: .6, ease: 'back.out(1.8)' }, 78.6);
+  tl.to('#flow span, #flow i', { autoAlpha: 1, duration: .3, stagger: .08 }, 79.2);
+  tl.fromTo('#ctaPill .shine', { x: -160 }, { x: 620, duration: .9, ease: 'power2.inOut', immediateRender: false }, 81.4);
+  tl.to('#play .gp', { scale: 1.06, duration: .25, yoyo: true, repeat: 1 }, 83.6);
+  tl.fromTo('#ctaPill .shine', { x: -160 }, { x: 620, duration: .9, ease: 'power2.inOut', immediateRender: false }, 85.0);
+  tl.to('#logoBig', { y: -8, duration: 3, ease: 'sine.inOut' }, 80.5);
+
+  window.__tl = tl;
+  window.__duration = D;
+  window.__seek = t => { tl.seek(t, false); sync(); };
+  window.__ready = true;
+  const t0 = parseFloat(Q.get('t'));
+  tl.seek(isFinite(t0) ? t0 : 0, false);
+  sync();
+}
+
+/* ================= CONTROLS ================= */
+let scrubbing = false;
+function play() { if (tl.progress() >= 1) tl.seek(0, false); stopAudio(); playing = true; tl.play(); $('#bPlay').textContent = '❚❚'; }
+function pause() { playing = false; tl.pause(); stopAudio(); $('#bPlay').textContent = '▶'; }
+$('#bPlay').onclick = () => (playing ? pause() : play());
+$('#bRestart').onclick = () => { stopAudio(); tl.seek(0, false); sync(); play(); };
+$('#bMute').onclick = () => { muted = !muted; $('#bMute').textContent = muted ? '🔇 Bisu' : '🔊 Suara'; if (muted) stopAudio(); };
+$('#bTheme').onclick = () => {
+  const light = document.body.classList.toggle('light');
+  const u = new URL(location.href); light ? u.searchParams.set('theme', 'light') : u.searchParams.delete('theme');
+  u.searchParams.set('t', tl.time().toFixed(2)); location.replace(u.toString());
+};
+if (document.body.classList.contains('light')) $('#bTheme').textContent = '☾ Gelap';
+function paintCapsBtn() {
+  const off = document.body.classList.contains('nocaps');
+  $('#bCaps').textContent = 'CC Caption: ' + (off ? 'Off' : 'On');
+  $('#bCaps').classList.toggle('off', off);
+}
+$('#bCaps').onclick = () => {
+  document.body.classList.toggle('nocaps'); paintCapsBtn();
+  const u = new URL(location.href);
+  document.body.classList.contains('nocaps') ? u.searchParams.set('nocaps', '1') : u.searchParams.delete('nocaps');
+  history.replaceState(null, '', u.toString());
+};
+paintCapsBtn();
+addEventListener('keydown', e => { if (e.key === 'c' || e.key === 'C') $('#bCaps').click(); });
+const scrub = $('#scrub');
+scrub.addEventListener('input', () => { scrubbing = true; if (playing) pause(); tl.seek(+scrub.value, false); sync(); });
+scrub.addEventListener('change', () => { scrubbing = false; });
+addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); playing ? pause() : play(); } });
+$('#startOverlay').onclick = () => { $('#startOverlay').style.display = 'none'; play(); };
+
+document.fonts.ready.then(() => requestAnimationFrame(build));
+})();
+</script>
+</body>
+</html>

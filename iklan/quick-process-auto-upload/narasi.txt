@@ -1,0 +1,62 @@
+NARASI IKLAN KLIPERS PRO — QUICK PROCESS + AUTO UPLOAD
+Folder       : marketing/iklan/quick-process-auto-upload/
+Durasi video : ±37,5 detik (1920×1080)
+Bahasa       : Indonesia
+Voice        : ElevenLabs QC3gSHMyKh8m20lGyUNZ (default skrip)
+               atau Edge-TTS en-AU-WilliamMultilingualNeural
+
+=====================================================================
+A. NASKAH UTUH — untuk ditempel langsung ke ElevenLabs / TTS lain
+=====================================================================
+
+Punya video panjang, tapi nggak sempat ngedit jadi Shorts?
+
+Cukup tempel link YouTube kamu di Klipers Pro.
+
+Pilih gaya subtitle, atur jumlah klip, lalu klik Buat Clips.
+
+AI mencari momen paling viral, memotongnya jadi vertikal, lengkap dengan subtitle otomatis dan face tracking.
+
+Lalu upload otomatis ke YouTube, TikTok, Instagram, Facebook, dan Google Drive.
+
+Klipers Pro. Satu link, puluhan klip viral. Coba sekarang di klipers titik pro, atau download Klipers di Google Play.
+
+
+=====================================================================
+B. PER KALIMAT — satu file audio per kalimat (supaya sinkron ke animasi)
+   Simpan hasilnya sebagai audio/vo-01.mp3 … audio/vo-06.mp3
+   Kolom "Mulai–Selesai" = jendela waktu di video; usahakan durasi
+   suara tidak melebihi jendelanya.
+=====================================================================
+
+[vo-01.mp3]  Mulai 0,3 dtk – Selesai 4,2 dtk  (±3,9 dtk)  · Scene: Pembuka
+Punya video panjang, tapi nggak sempat ngedit jadi Shorts?
+
+[vo-02.mp3]  Mulai 4,5 dtk – Selesai 9,1 dtk  (±4,6 dtk)  · Scene: Tempel link di dashboard
+Cukup tempel link YouTube kamu di Klipers Pro.
+
+[vo-03.mp3]  Mulai 9,5 dtk – Selesai 15,0 dtk  (±5,5 dtk)  · Scene: Opsi Quick Process
+Pilih gaya sabtaitel, atur jumlah klip, lalu klik Buat Clips.
+
+[vo-04.mp3]  Mulai 15,4 dtk – Selesai 21,7 dtk  (±6,3 dtk)  · Scene: Proses AI + hasil klip
+AI mencari momen paling viral, memotongnya jadi vertikal, lengkap dengan sabtaitel otomatis dan face tracking.
+
+[vo-05.mp3]  Mulai 22,2 dtk – Selesai 28,0 dtk  (±5,8 dtk)  · Scene: Upload otomatis 5 platform
+Lalu upload otomatis ke YouTube, TikTok, Instagram, Facebook, dan Google Drive.
+
+[vo-06.mp3]  Mulai 28,6 dtk – Selesai 37,2 dtk  (±8,6 dtk)  · Scene: Penutup + Play Store
+Klipers Pro. Satu link, puluhan klip viral. Coba sekarang di Klipers dot pro, atau download Klipers di Google Play.
+
+
+=====================================================================
+CATATAN
+=====================================================================
+- "sabtaitel" dan "Klipers dot pro" ditulis secara fonetik untuk input TTS agar
+  pelafalan natural; di caption layar (index.html) tetap tertulis "subtitle" dan "klipers.pro".
+- Generate otomatis semua file (skrip membaca kalimat di bagian B file ini):
+    ELEVENLABS_API_KEY=sk_xxx node marketing/tools/generate-voiceover-elevenlabs.mjs marketing/iklan/quick-process-auto-upload
+  atau (Edge-TTS, gratis):
+    bash marketing/tools/generate-voiceover.sh marketing/iklan/quick-process-auto-upload
+- Format bagian B dibaca skrip: baris "[vo-NN.mp3] …" lalu baris kalimatnya.
+  Kalau mengubah kalimat di sini, ubah juga array CUES di index.html
+  (teks caption + detik mulai/selesai) supaya tetap sama.

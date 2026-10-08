@@ -1,0 +1,60 @@
+NARASI DEMO KLIPERS — QUICK PROCESS MODE GAMING (Versi HP Portrait 9:16)
+Folder       : marketing/iklan/demo-gaming-quickprocess-portrait/
+Durasi video : ±46 detik (1080×1920, klipers-mobile-app, tema terang)
+Bahasa       : Indonesia
+Voice        : ElevenLabs "Janu - Calm Narrator" (speed 1.0, stability 50, similarity 75), satu
+               rekaman naskah A dipotong per kalimat di jeda heningnya.
+               Cadangan Edge-TTS: en-AU-WilliamMultilingualNeural (+4%)
+
+=====================================================================
+A. NASKAH UTUH — untuk ditempel langsung ke ElevenLabs / TTS lain
+=====================================================================
+
+Stop crop manual facecam! Satu stream tiga jam, jadi klip vertikal siap upload.
+
+Buka Quick Process, tempel link live stream kamu, lalu kirim.
+
+Pilih jenis Gaming. Atur posisi facecam di atas, letak kamera kanan bawah, pilih subtitle, lalu Buat Clips.
+
+AI otomatis melacak facecam di pojok, memotongnya, dan menyusunnya rapi di atas gameplay.
+
+Klip langsung jadi dengan skor viral dan subtitle. Masih bisa kamu atur ulang, atau jadwalkan auto upload ke 5 platform sekaligus.
+
+Stream berjam-jam jadi konten Shorts dalam lima menit. Download Klipers di Google Play sekarang.
+
+
+=====================================================================
+B. PER KALIMAT — satu file audio per kalimat (supaya sinkron ke animasi)
+   Simpan hasilnya sebagai audio/vo-01.mp3 … audio/vo-06.mp3
+=====================================================================
+
+[vo-01.mp3]  Mulai 0,3 dtk · Scene 1: Hook (Live stream gameplay panjang → klip vertikal split)
+Stop crop manual facecam! Satu stream tiga jam, jadi klip vertikal siap upload.
+
+[vo-02.mp3]  Scene 2: Dashboard HP, tempel link stream, kirim
+Buka Quick Process, tempel link live stream kamu, lalu kirim.
+
+[vo-03.mp3]  Scene 3: Opsi Quick Process — Jenis Gaming, Posisi Facecam, Letak Kamera, Subtitle
+Pilih jenis Gaming. Atur posisi facecam di atas, letak kamera kanan bawah, pilih sabtaitel, lalu Buat Clips.
+
+[vo-04.mp3]  Scene 4: AI Facecam Detection & Cut to Top — Animasi potong pojok ke atas
+AI otomatis melacak facecam di pojok, memotongnya, dan menyusunnya rapi di atas gameplay.
+
+[vo-05.mp3]  Scene 5: Hasil Klip + Kontrol Gaming + Auto Upload ke 5 Platform
+Klip langsung jadi dengan skor viral dan sabtaitel. Masih bisa kamu atur ulang, atau jadwalkan auto upload ke lima platform sekaligus.
+
+[vo-06.mp3]  Scene 6: Penutup, Logo Klipers, Google Play, klipers.pro
+Stream berjam-jam jadi konten Shorts dalam lima menit. Download Klipers di Google Play sekarang.
+
+
+=====================================================================
+CATATAN
+=====================================================================
+- "sabtaitel" ditulis fonetik di bagian B untuk pembacaan TTS; teks caption layar tetap "subtitle".
+- "lima" ditulis fonetik untuk angka 5 agar terbaca jelas oleh TTS.
+- UI disalin dari klipers-mobile-app: StandardDashboard + QuickProcessOptions (Mode Gaming)
+  dan ShortVideoCard (Gaming View toggle, Cam top/bottom, Lokasi facecam, ScheduleUploadModal ke 5 platform).
+- Video sumber: Windah Basudara "The Not-Deer Stew" (https://www.youtube.com/watch?v=fzEKuL9NrT4)
+  dengan posisi facecam asli di Kanan Bawah (bottom-right).
+- Tanpa tanda pisah panjang (em dash).
+- Tanpa tombol atau tab Highlight Bola.

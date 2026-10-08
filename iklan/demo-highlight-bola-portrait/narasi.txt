@@ -1,0 +1,57 @@
+NARASI DEMO KLIPERS — FITUR HIGHLIGHT BOLA (Versi HP Portrait 9:16)
+Folder       : marketing/iklan/demo-highlight-bola-portrait/
+Durasi video : ±46,5 detik (1080×1920, klipers-mobile-app, tema terang)
+Bahasa       : Indonesia
+Voice        : ElevenLabs "Janu - Calm Narrator" (speed 1.0, stability 50, similarity 75), satu
+               rekaman naskah A dipotong per kalimat di jeda heningnya.
+               Cadangan Edge-TTS: en-AU-WilliamMultilingualNeural (+4%)
+
+=====================================================================
+A. NASKAH UTUH — untuk ditempel langsung ke ElevenLabs / TTS lain
+=====================================================================
+
+Mau bikin konten bola viral tanpa nonton sembilan puluh menit penuh? Buka aplikasi Klipers, lalu pilih Highlight Bola.
+
+Cukup tempel link YouTube pertandingan yang mau kamu potong, dan biarkan AI bekerja.
+
+Pilih mode Storytelling narasi komentator, aktifkan papan skor otomatis, dan samarkan logo siaran.
+
+AI otomatis mendeteksi gemuruh stadion, menganalisis gol sah, penyelamatan kiper, hingga kartu merah.
+
+Master Reel langsung jadi dengan papan skor dinamis dan daftar momen. Siap kamu upload ke lima medsos.
+
+Bikin konten bola viral tanpa ribet dalam hitungan menit. Download Klipers di Google Play sekarang.
+
+
+=====================================================================
+B. PER KALIMAT — satu file audio per kalimat (supaya sinkron ke animasi)
+   Simpan hasilnya sebagai audio/vo-01.mp3 … audio/vo-06.mp3
+=====================================================================
+
+[vo-01.mp3]  Mulai 0,3 dtk · Scene 1: Buka Klipers & Menu Highlight Bola di HP
+Mau bikin konten bola viral tanpa nonton sembilan puluh menit penuh? Buka aplikasi Klipers, lalu pilih Highlight Bola.
+
+[vo-02.mp3]  Scene 2: Tempel Link YouTube Pertandingan di Composer Claude-Style
+Cukup tempel link YouTube pertandingan yang mau kamu potong, dan biarkan AI bekerja.
+
+[vo-03.mp3]  Scene 3: Opsi Highlight Bola — Storytelling AI, Papan Skor, Sensor Logo TV, Rasio 9:16
+Pilih mode Storytelling narasi komentator, aktifkan papan skor otomatis, dan samarkan logo siaran.
+
+[vo-04.mp3]  Scene 4: AI Audio Peak & Smart VAR Detection — Gemuruh stadion, gol sah, save, kartu merah
+AI otomatis mendeteksi gemuruh stadion, menganalisis gol sah, penyelamatan kiper, hingga kartu merah.
+
+[vo-05.mp3]  Scene 5: Hasil Master Reel 9:16 + Scoreboard FT + Filter Momen + Auto Upload 5 Platform
+Master Reel langsung jadi dengan papan skor dinamis dan daftar momen. Siap kamu upload ke lima medsos.
+
+[vo-06.mp3]  Scene 6: Penutup, Logo Klipers, Google Play, klipers.pro
+Bikin konten bola viral tanpa ribet dalam hitungan menit. Download Klipers di Google Play sekarang.
+
+
+=====================================================================
+CATATAN
+=====================================================================
+- "sembilan puluh" dan "lima" ditulis fonetik agar dibaca jelas oleh TTS tanpa salah baca angka.
+- Video diawali dengan HP di tangan membuka aplikasi Klipers dan memilih menu Highlight Bola.
+- UI disalin persis dari SportsHighlightForm.tsx, SportsHighlightProgress.tsx, dan SportsHighlightResult.tsx di KlipersPro.
+- Menampilkan fitur nyata: Scoreboard style broadcast UEFA, deteksi audio peak gemuruh stadion, smart VAR filter anti gol offside, dan blur logo siaran TV (Indosiar/Vidio/TV luar).
+- Safe zone Reels/TikTok aktif dan dipatuhi (atas 270px, bawah 670px, kanan 120px).

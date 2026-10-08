@@ -1,0 +1,1231 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Demo Quick Process Gaming Klipers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+/*
+  Klipers — DEMO QUICK PROCESS MODE GAMING (1080×1920, ±48 dtk, tema terang bawaan)
+  Alur:
+    1. Hook: Live stream gameplay panjang → klip vertikal facecam atas + gameplay bawah
+    2. Dashboard HP: tempel link stream YouTube Windah Basudara → QuickProcessOptions
+    3. Opsi Mode Gaming: Jenis "Gaming" → Posisi Facecam: Atas, Letak Kamera: Kanan Bawah, Ukuran: Default (44%)
+    4. Proses & Spotlight Auto Split: deteksi kamera di pojok kanan bawah → cut & move to top → gameplay bawah
+    5. ShortVideoCard: Gaming View toggle, pengaturan kamera, unduh hasil
+    6. Penutup: logo Klipers, Google Play, klipers.pro
+*/
+:root{
+  --k:.3;
+  --stageBg:#050505; --dots:rgba(255,255,255,.06); --glow:rgba(255,255,255,.07);
+  --bg:#0a0a0a; --card:#111; --c2:#1a1a1a; --c0:#0f0f0f; --line:#2a2a2a; --line2:#333; --line3:#222;
+  --text:#fff; --text2:#e5e7eb; --t3:#d1d5db; --muted:#9ca3af; --dim:#6b7280; --faint:#4b5563; --ghost:#374151;
+  --inv:#fff; --invText:#111827; --soft:rgba(255,255,255,.04); --soft2:rgba(255,255,255,.08); --dlg:#1f1f1f;
+}
+body.light{
+  --stageBg:#eef0f3; --dots:rgba(0,0,0,.07); --glow:rgba(0,0,0,.05);
+  --bg:#fff; --card:#fff; --c2:#f3f4f6; --c0:#f9fafb; --line:#e5e7eb; --line2:#e5e7eb; --line3:#f3f4f6;
+  --text:#111827; --text2:#1f2937; --t3:#374151; --muted:#6b7280; --dim:#6b7280; --faint:#9ca3af; --ghost:#d1d5db;
+  --inv:#111827; --invText:#fff; --soft:rgba(0,0,0,.03); --soft2:rgba(0,0,0,.06); --dlg:#fff;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#000;overflow:hidden;font-family:Inter,system-ui,sans-serif;color:var(--text)}
+body.light{background:#e5e7eb}
+svg{display:block}
+#viewport{position:fixed;left:0;right:0;top:0;bottom:56px;display:flex;align-items:center;justify-content:center}
+body.rec #viewport{bottom:0}
+#stageWrap{position:relative;width:calc(1080px * var(--k));height:calc(1920px * var(--k))}
+#stage{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(var(--k));transform-origin:0 0;overflow:hidden;background:var(--stageBg)}
+.bg{position:absolute;inset:0;overflow:hidden}
+.bg .dots{position:absolute;inset:0;background-image:radial-gradient(var(--dots) 1.4px,transparent 1.5px);background-size:40px 40px;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 80%)}
+#glowA,#glowB{position:absolute;border-radius:50%;filter:blur(120px)}
+#glowA{width:900px;height:900px;left:-200px;top:-200px;background:radial-gradient(circle,var(--glow),transparent 65%)}
+#glowB{width:1000px;height:1000px;right:-300px;bottom:-300px;background:radial-gradient(circle,var(--glow),transparent 65%)}
+.inv{display:inline-block;background:var(--inv);color:var(--invText);padding:0 .16em;border-radius:.12em}
+.logoTile{display:flex;align-items:center;justify-content:center;background:#fff;border-radius:50%;overflow:hidden;flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.logoTile img{width:92%;height:92%;object-fit:contain;display:block}
+
+/* Header */
+#head{position:absolute;left:40px;right:40px;top:60px;height:224px}
+.hd{position:absolute;left:0;right:0;top:0;margin:0;text-align:center;font:900 64px/1.08 Montserrat;letter-spacing:-2px;color:var(--text);visibility:hidden}
+.hd .w{display:inline-block}
+.hd small{display:block;margin-top:8px;font:700 28px Inter;letter-spacing:0;color:var(--muted)}
+
+/* S1 Hook */
+#hook{position:absolute;inset:0;visibility:hidden}
+#hStrip{position:absolute;left:90px;top:320px;width:900px;height:506px;border-radius:24px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.3);background:#000;border:2px solid var(--line2);transform-origin:50% 0}
+#hStrip .fr{position:absolute;inset:0}
+#hStrip .fr img{width:100%;height:100%;object-fit:cover}
+#hStrip .ph{position:absolute;top:0;bottom:0;left:0;width:5px;background:#fff;box-shadow:0 0 18px rgba(255,255,255,.9);z-index:10}
+#hStrip .cut{position:absolute;top:0;bottom:0;width:6px;margin-left:-3px;background:#ef4444;box-shadow:0 0 16px #ef4444;opacity:0;z-index:9}
+#hTc{position:absolute;left:90px;top:842px;font:700 24px Inter;color:var(--muted)}
+#hTc b{color:var(--text)}
+#hCards{position:absolute;left:100px;right:100px;top:890px;height:500px}
+.hc{position:absolute;width:260px;height:462px;border-radius:22px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.35);background:#111;border:2px solid var(--line2)}
+.hc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hc .sc2{position:absolute;left:12px;top:12px;padding:5px 12px;border-radius:999px;background:linear-gradient(90deg,#f97316,#ef4444);font:800 22px Inter;color:#fff;box-shadow:0 4px 12px rgba(239,68,68,.4);z-index:5}
+.hc .sb2{position:absolute;left:12px;right:12px;bottom:24px;text-align:center;font:900 20px/1.2 Montserrat;color:#fff;text-shadow:0 3px 0 #000,0 0 8px #000;z-index:5}
+.hc .sb2 i{font-style:normal;color:#22c55e}
+.hc .gbadge{position:absolute;right:12px;top:12px;padding:4px 8px;border-radius:6px;background:rgba(0,0,0,.7);font:700 12px Inter;color:#fff;z-index:5}
+
+/* HP Frame */
+#phone{position:absolute;left:190px;top:300px;width:700px;height:1482px;border-radius:78px;background:#0a0a0a;border:2px solid #2a2a2a;box-shadow:0 60px 160px rgba(0,0,0,.35),inset 0 0 0 6px #151515;visibility:hidden}
+.screen{position:absolute;left:14px;top:14px;width:390px;height:844px;transform:scale(1.7231);transform-origin:0 0;border-radius:37px;overflow:hidden;background:var(--bg);font-size:14px}
+.sbar{position:absolute;left:0;right:0;top:0;height:26px;display:flex;align-items:center;justify-content:space-between;padding:0 22px 0 26px;font:600 12px Inter;color:var(--text);z-index:60}
+.sbar i{display:flex;gap:5px;align-items:center}
+.sbar svg{width:14px;height:14px}
+.punch{position:absolute;left:50%;top:7px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:#000;z-index:61}
+.homebar{position:absolute;left:50%;bottom:5px;width:120px;height:4px;margin-left:-60px;border-radius:3px;background:var(--text);opacity:.5;z-index:90}
+.mtop{position:absolute;left:0;right:0;top:26px;height:42px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;background:var(--bg);border-bottom:1px solid var(--line);z-index:20}
+.mtop .l,.mtop .r{display:flex;align-items:center;gap:6px}
+.cpill{display:flex;align-items:center;gap:6px;height:28px;padding:0 4px 0 9px;border-radius:999px;background:var(--c2);border:1px solid var(--line2)}
+.cpill svg{width:14px;height:14px}
+.cpill b{font:700 12px Inter;color:var(--text)} .cpill small{font:400 10px Inter;color:var(--muted)}
+.cpill .plus{width:20px;height:20px;border-radius:50%;background:var(--inv);color:var(--invText);display:flex;align-items:center;justify-content:center}
+.cpill .plus svg{width:12px;height:12px}
+.hpill{display:flex;align-items:center;gap:4px;height:28px;padding:0 9px;border-radius:999px;background:var(--c2);border:1px solid var(--line2);font:600 10px Inter;color:var(--text2)}
+.hpill svg{width:14px;height:14px}
+.rbtn{width:30px;height:30px;border-radius:50%;background:var(--c2);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;color:var(--text)}
+.rbtn svg{width:16px;height:16px}
+.view{position:absolute;left:0;right:0;top:68px;bottom:0;overflow:hidden}
+.pnl{position:absolute;left:20px;top:6px;width:350px;visibility:hidden}
+.scr{position:relative;padding-bottom:120px}
+
+/* Tap indicator */
+#tapS{position:absolute;left:-16px;top:-16px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.3);border:2px solid rgba(255,255,255,.95);box-shadow:0 3px 10px rgba(0,0,0,.35);z-index:95;opacity:0;pointer-events:none}
+#tapR{position:absolute;left:-16px;top:-16px;width:32px;height:32px;border-radius:50%;border:2px solid var(--text);z-index:94;opacity:0;pointer-events:none}
+body.light #tapS{background:rgba(17,24,39,.2);border-color:rgba(17,24,39,.85)}
+
+/* StandardDashboard */
+.dhero{display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:14px}
+.dhero-title{margin:0 0 6px;font:800 23px/1.2 Inter;letter-spacing:-.8px;color:var(--text)}
+.dhero-amber{color:#f59e0b}
+.dhero-viral{display:inline-block;padding:2px 7px;border-radius:7px;background:linear-gradient(135deg,#f43f5e,#ec4899,#f97316);color:#fff;transform:rotate(1deg);box-shadow:0 3px 12px rgba(244,63,94,.35)}
+.dhero-sub{margin:0 0 12px;font:400 11.5px/1.45 Inter;color:var(--muted);max-width:320px}
+.dcmp{position:relative;width:100%;min-height:118px;border-radius:18px;background:var(--card);border:1px solid var(--line2);box-shadow:0 4px 16px rgba(0,0,0,.06);text-align:left;padding:12px 14px;font:400 12px Inter;color:var(--dim)}
+.dcmp #dUrl{color:var(--text);word-break:break-all;font-size:12px;line-height:1.4}
+.dcmp .ph2{color:var(--dim)}
+.dtool{position:absolute;left:10px;right:10px;bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.dtool .am{display:flex;align-items:center;gap:6px}
+.dtool .plus-btn{width:22px;height:22px;border-radius:50%;border:1px solid var(--line2);background:var(--c2);display:flex;align-items:center;justify-content:center;font:700 12px Inter;color:var(--dim)}
+.dtool .qp-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;background:var(--c2);border:1px solid var(--line2);font:600 10px Inter;color:var(--text2)}
+.dtool .snd{width:32px;height:32px;border-radius:50%;background:var(--c2);display:flex;align-items:center;justify-content:center;color:var(--faint);transition:background .2s}
+.dtool .snd.on{background:var(--inv);color:var(--invText)}
+.caret{display:inline-block;width:2px;height:16px;margin-left:1px;vertical-align:-3px;background:var(--text);opacity:0}
+.dgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;margin-top:16px}
+.dgrid .fg-item{position:relative;height:68px;border-radius:12px;background:var(--card);border:1px solid var(--line);box-shadow:0 2px 8px rgba(0,0,0,.04);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font:600 8.5px Inter;color:var(--muted);text-align:center;padding:0 4px}
+.dgrid .fg-badge-red{position:absolute;top:-4px;right:-4px;padding:1px 5px;border-radius:999px;background:#ef4444;font:800 7px Inter;color:#fff}
+.dgrid svg{width:17px;height:17px;color:var(--text2)}
+
+/* Dashboard project card */
+.projbox{margin-top:16px;opacity:0}
+.projh{display:flex;align-items:center;justify-content:space-between;margin:0 0 8px;font:700 13px Inter;color:var(--text)}
+.projh span{padding:2px 8px;border-radius:999px;background:rgba(59,130,246,.12);font:700 9.5px Inter;color:#2563eb}
+.proj{display:flex;gap:10px;padding:8px;border-radius:14px;background:var(--card);border:1px solid var(--line);box-shadow:0 2px 10px rgba(0,0,0,.05);text-align:left}
+.proj .th{position:relative;width:100px;height:56px;border-radius:8px;overflow:hidden;flex:none}
+.proj .th img{width:100%;height:100%;object-fit:cover}
+.proj .th .du{position:absolute;right:3px;bottom:3px;padding:1px 3px;border-radius:3px;background:rgba(0,0,0,.7);font:600 7.5px Inter;color:#fff}
+.proj .in{flex:1;min-width:0}
+.proj .in b{display:block;font:700 11px/1.3 Inter;color:var(--text);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.proj .st{margin-top:4px;display:flex;align-items:center;gap:5px;font:500 9.5px Inter;color:var(--muted)}
+.proj .st i{width:9px;height:9px;border-radius:50%;border:2px solid var(--line2);border-top-color:#2563eb}
+.proj .st.ok{color:#16a34a;font-weight:700}
+.proj .st.ok i{display:none}
+.proj .bar{margin-top:5px;height:4px;border-radius:2px;background:var(--c2);overflow:hidden}
+.proj .bar i{display:block;height:100%;width:0;border-radius:2px;background:linear-gradient(90deg,#3b82f6,#6366f1)}
+
+/* QuickProcessOptions */
+.qpo{background:#fff;border-radius:20px;box-shadow:0 2px 14px rgba(0,0,0,.04);border:1px solid #eef0f3;padding:12px;display:flex;flex-direction:column;gap:10px}
+.qph{position:relative;display:flex;gap:10px;align-items:flex-start}
+.qph .th{width:64px;height:64px;border-radius:12px;overflow:hidden;flex:none}
+.qph .th img{width:100%;height:100%;object-fit:cover}
+.qph .meta-col{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.qph .meta-col b{font:700 12px/1.3 Inter;color:#111827;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;padding-right:22px}
+.qph .meta-line{font:500 9.5px Inter;color:#6b7280;display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.qph .meta-line em{font-style:normal;font-weight:700;color:#111827}
+.qph .meta-line .dim{color:#9ca3af}
+.qph .xbtn-sm{position:absolute;top:0;right:0;width:24px;height:24px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;color:#6b7280}
+.qph .xbtn-sm svg{width:13px;height:13px}
+
+/* Dropdown rows */
+.isel-row{display:flex;align-items:center;gap:14px;font:500 11px Inter;color:#6b7280}
+.isel-row .is{position:relative;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.isel-row .is b{display:flex;align-items:center;gap:2px;font-weight:600;color:#1f2937;cursor:pointer}
+.isel-row .is b svg{width:12px;height:12px;color:#6b7280}
+.idd{position:absolute;left:0;top:100%;margin-top:6px;min-width:180px;padding:4px 0;border-radius:10px;background:#fff;border:1px solid #e5e7eb;box-shadow:0 16px 40px rgba(0,0,0,.25);z-index:40;display:none}
+.idd.open{display:block}
+.idd div{padding:6px 12px;font:500 11.5px Inter;color:#6b7280;white-space:nowrap;cursor:pointer}
+.idd div.h{font:700 9px Inter;letter-spacing:.08em;text-transform:uppercase;color:#9ca3af;padding-top:6px;cursor:default}
+.idd div.on{color:#111827;font-weight:700;background:#f3f4f6}
+.idd div.hi{background:rgba(59,130,246,.12);color:#1d4ed8}
+
+/* Gaming layout box */
+.gopt{display:none;flex-direction:column;gap:8px;padding:10px 12px;border-radius:14px;background:#f0f7ff;border:1px dashed #bfdbfe}
+.gopt.show{display:flex !important}
+.gopt .gh{display:flex;align-items:center;gap:5px;font:700 11px Inter;color:#2563eb}
+.gopt .gh svg{width:14px;height:14px}
+.ggrid{display:flex;flex-direction:column;gap:7px}
+.ggrid .is{display:flex;align-items:center;justify-content:space-between;width:100%;font:500 11px Inter;color:#4b5563}
+.ggrid .is b{display:flex;align-items:center;gap:3px;font-weight:600;color:#111827;cursor:pointer}
+.ggrid .is b svg{width:11px;height:11px}
+.ggrid .idd{right:0;left:auto;z-index:50}
+
+/* Toggle source video */
+.src-credit-row{display:flex;align-items:center;justify-content:space-between;font:600 11px Inter;color:#4b5563;padding:2px 0}
+.sw{width:36px;height:20px;border-radius:999px;background:#e5e7eb;position:relative;flex:none;cursor:pointer}
+.sw::after{content:'';position:absolute;left:2px;top:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:none}
+.sw.on{background:#2563eb}
+.sw.on::after{left:18px}
+
+/* Prompt */
+.prompt-sec{display:flex;flex-direction:column;gap:4px}
+.prompt-sec .f-lbl{font:600 11px Inter;color:#4b5563}
+.prompt-sec .f-inp{padding:8px 12px;border-radius:10px;border:1px solid #e5e7eb;background:#f9fafb;font:400 11.5px Inter;color:#9ca3af}
+
+/* Timeline range */
+.tf-sec{display:flex;flex-direction:column;gap:5px}
+.tf-sec .f-lbl{font:600 11px Inter;color:#4b5563}
+.tf-sec .tf-track{position:relative;height:18px;display:flex;align-items:center}
+.tf-sec .tf-bar{position:absolute;left:0;right:0;height:4px;border-radius:2px;background:#e5e7eb}
+.tf-sec .tf-act{position:absolute;left:0;right:0;height:4px;border-radius:2px;background:#2563eb}
+.tf-sec .tf-th{position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;border:3px solid #2563eb;box-shadow:0 1px 4px rgba(0,0,0,.2);margin-top:-9px;top:50%}
+.tf-sec .tf-times{display:flex;justify-content:space-between;font:500 10px Inter;color:#6b7280;margin-top:2px}
+
+/* Subtitle exact OpusClip style */
+.sub-sec-opus{display:flex;flex-direction:column;gap:8px}
+.sub-hdr-row{display:flex;align-items:center;justify-content:space-between}
+.sub-title-main{font:800 11px Inter;letter-spacing:.08em;color:#4b5563}
+.sub-toggle-pill{display:flex;gap:2px;padding:2px;border-radius:999px;background:#f3f4f6;border:1px solid #e5e7eb}
+.sub-toggle-pill span{padding:3px 10px;border-radius:999px;font:700 9px Inter;color:#6b7280;letter-spacing:.04em}
+.sub-toggle-pill span.act{background:#fff;color:#111827;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.sub-filter-row{display:flex;gap:6px}
+.sub-f-pill{padding:4px 10px;border-radius:999px;font:600 10px Inter;color:#4b5563;border:1px solid #e5e7eb;background:#fff}
+.sub-f-pill.on{background:#111827;color:#fff;border-color:#111827}
+.sub-grid-8{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.sub-card{position:relative;height:52px;border-radius:10px;background:#18181b;border:1.5px solid #27272a;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:4px 2px;cursor:pointer}
+.sub-card.on{border-color:#3b82f6;box-shadow:0 0 0 2px #3b82f6}
+.sub-c-box{display:flex;flex-direction:column;align-items:center;gap:2px}
+.kw-kata{font:800 8.5px Montserrat;color:#fff}
+.kw-viral-yel{font:900 8.5px Montserrat;color:#facc15}
+.kw-viral-grn{font:900 8.5px Montserrat;color:#22c55e}
+.kw-viral-red{font:900 9px Montserrat;color:#ef4444}
+.kw-viral-neon{font:900 9px Montserrat;color:#06b6d4;text-shadow:0 0 6px #06b6d4}
+.kw-viral-ora{font:900 8.5px Montserrat;color:#f97316}
+.kw-box-grn{font:900 8.5px Montserrat;background:#22c55e;color:#000;padding:1px 4px;border-radius:3px}
+.kw-viral-pink{font:900 8.5px Montserrat;color:#ec4899}
+.sub-c-box small{display:block;font:700 6.5px Inter;letter-spacing:.05em;color:#a1a1aa;text-transform:uppercase}
+
+/* Button Buat Clips */
+.bgo{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:12px;background:#111827;color:#fff;font:700 13px Inter;margin-top:2px;cursor:pointer;box-shadow:0 4px 14px rgba(17,24,39,.18)}
+.bgo svg{width:16px;height:16px;flex:none}
+.bgo.busy{opacity:.7}
+.atur-man-link{display:flex;align-items:center;justify-content:center;gap:5px;font:600 11.5px Inter;color:#6b7280;margin-top:2px;cursor:pointer}
+.atur-man-link svg{width:14px;height:14px}
+
+/* Bottom Navigation Bar */
+.bnav-float{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:70;display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:#fff;border:1px solid #e5e7eb;box-shadow:0 8px 30px rgba(0,0,0,.1)}
+.bnav-float .nb{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#6b7280}
+.bnav-float .nb svg{width:18px;height:18px}
+.bnav-float .nb.on{background:#f3f4f6;color:#111827}
+.bnav-float .nb.plus{background:#111827;color:#fff;width:38px;height:38px}
+
+/* Semua Clip & Spotlight Animation */
+.bread{display:flex;align-items:center;gap:6px;font:600 11.5px Inter;color:var(--muted);margin-bottom:12px}
+.bread b{color:var(--text)}
+.spot{position:relative;border-radius:16px;overflow:hidden;background:#000;border:1px solid var(--line2);box-shadow:0 6px 20px rgba(0,0,0,.15);margin-bottom:14px}
+.spot .srcw{position:relative;width:100%;height:196px;overflow:hidden}
+.spot .srcw img{width:100%;height:100%;object-fit:cover}
+.spot .tbox{position:absolute;right:4px;bottom:6px;width:98px;height:76px;border:2px solid #22c55e;box-shadow:0 0 12px rgba(34,197,94,.6);border-radius:6px;z-index:10;pointer-events:none}
+.spot .tbox .tag{position:absolute;top:-20px;right:-2px;padding:2px 5px;border-radius:4px;background:#22c55e;font:800 7px Inter;color:#000;white-space:nowrap}
+.spot .splitres{position:absolute;inset:0;background:#09090b;display:flex;align-items:center;justify-content:center;gap:14px;opacity:0}
+.spot .splitres .vclip{position:relative;width:110px;height:196px;display:flex;flex-direction:column;border-radius:8px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.6);border:1px solid var(--line2);background:#000}
+.spot .splitres .sp-top{height:44%;overflow:hidden;position:relative;border-bottom:1.5px solid #222}
+.spot .splitres .sp-top img{width:100%;height:100%;object-fit:cover}
+.spot .splitres .sp-bot{height:56%;overflow:hidden;position:relative}
+.spot .splitres .sp-bot img{width:100%;height:100%;object-fit:cover}
+.spot .splitres .subw{position:absolute;left:4px;right:4px;bottom:8px;text-align:center;font:900 8.5px Montserrat;color:#fff;text-shadow:0 2px 3px #000;z-index:10}
+.spot .splitres .subw i{color:#22c55e;font-style:normal}
+.spot .splitres .vmeta{display:flex;flex-direction:column;gap:6px;text-align:left}
+.spot .splitres .vmeta b{font:700 12px Inter;color:#fff}
+.spot .splitres .vmeta span{font:500 10px Inter;color:#a1a1aa}
+.spot .splitres .vmeta .vtag{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.4);font:700 10px Inter;color:#4ade80}
+.clist{display:flex;flex-direction:column;gap:10px}
+.cc{display:flex;gap:10px;padding:8px;border-radius:14px;background:var(--card);border:1px solid var(--line);box-shadow:0 2px 10px rgba(0,0,0,.05);cursor:pointer}
+.cc .th{position:relative;width:72px;height:100px;border-radius:8px;overflow:hidden;flex:none}
+.cc .th img{width:100%;height:100%;object-fit:cover}
+.cc .th .sc{position:absolute;left:4px;top:4px;padding:1px 5px;border-radius:999px;background:linear-gradient(90deg,#f97316,#ef4444);font:800 8.5px Inter;color:#fff}
+.cc .info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}
+.cc .info b{display:block;font:700 11.5px/1.3 Inter;color:var(--text);margin-bottom:4px}
+.cc .info .meta{display:flex;align-items:center;gap:6px;font:500 9.5px Inter;color:var(--dim)}
+.cc .info .gb{display:inline-block;padding:2px 6px;border-radius:4px;background:rgba(59,130,246,.1);font:700 8.5px Inter;color:#2563eb;margin-top:6px}
+
+/* ShortVideoCard */
+.svc{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.svc .pvbox{padding:12px 12px 0;background:var(--c0);display:flex;justify-content:center}
+.svc .pv{position:relative;width:160px;height:284px;background:#000;border-radius:12px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.15)}
+.svc .pv img{width:100%;height:100%;object-fit:cover}
+.svc .pv .sb2{position:absolute;left:8px;right:8px;bottom:12px;text-align:center;font:900 12.5px Montserrat;color:#fff;text-shadow:0 2px 4px #000}
+.svc .pv .sb2 i{color:#22c55e;font-style:normal}
+.svc .bd{padding:12px}
+.svc .bd h3{margin:0 0 6px;font:700 13px Inter;color:var(--text)}
+.svc .bdg{display:flex;gap:6px;align-items:center;margin-bottom:10px}
+.svc .vr{padding:2px 7px;border-radius:999px;background:linear-gradient(90deg,#f97316,#ef4444);font:800 10px Inter;color:#fff}
+.svc .tm,.svc .dr{font:500 10px Inter;color:var(--dim)}
+.svc .sumbox{padding:8px 10px;border-radius:8px;background:var(--c0);border:1px solid var(--line3);font:400 10.5px/1.4 Inter;color:var(--t3);margin-bottom:10px}
+.svc .gctl{padding:8px 10px;border-radius:10px;background:rgba(59,130,246,.04);border:1px solid var(--line2);margin-bottom:10px}
+.svc .gtrow{display:flex;align-items:center;justify-content:space-between;font:700 11px Inter;color:var(--text);margin-bottom:8px}
+.svc .gtrow input{accent-color:#10b981;cursor:pointer}
+.svc .cgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font:500 9.5px Inter;color:var(--dim)}
+.svc .cgrid select{width:100%;padding:3px 5px;border-radius:5px;border:1px solid var(--line2);background:var(--card);color:var(--text);font:500 9.5px Inter}
+.pv-acts{display:flex;gap:8px;margin-top:10px}
+.pvb{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 8px;border-radius:10px;font:700 11.5px Inter;cursor:pointer}
+.pvb.sec{background:var(--c2);border:1px solid var(--line2);color:var(--text)}
+.pvb.pri{background:var(--inv);color:var(--invText)}
+.pvb svg{width:14px;height:14px;flex:none}
+
+/* Bottom Sheet Schedule Upload */
+#sheetDim{position:absolute;inset:0;z-index:84;background:rgba(0,0,0,.6);opacity:0;visibility:hidden;backdrop-filter:blur(2px)}
+#sheet{position:absolute;left:0;right:0;bottom:0;z-index:85;background:var(--card);border-top:1px solid var(--line2);border-radius:24px 24px 0 0;padding:12px 14px 26px;box-shadow:0 -10px 40px rgba(0,0,0,.35)}
+#sheet .hdl{width:36px;height:4px;border-radius:2px;background:var(--line2);margin:0 auto 10px}
+#sheet .mh{display:flex;align-items:center;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid var(--line3);margin-bottom:10px}
+#sheet .mh b{display:block;font:700 13px Inter;color:var(--text)}
+#sheet .mh small{font:400 9.5px Inter;color:var(--muted)}
+#sheet .mh .x-close{width:22px;height:22px;border-radius:50%;background:var(--c2);display:flex;align-items:center;justify-content:center;color:var(--dim)}
+#sheet .mh .x-close svg{width:12px;height:12px}
+#sheet .l{display:block;font:700 10px Inter;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+.pgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:10px}
+.pgrid div{position:relative;display:flex;align-items:center;gap:6px;padding:7px 8px;border-radius:10px;border:1px solid var(--line2);background:var(--c0);font:600 10px Inter;color:var(--text)}
+.pgrid div svg{width:18px;height:18px;flex:none}
+.pgrid div.on{border-color:#10b981;background:rgba(16,185,129,.06)}
+.pgrid div .chk-badge{margin-left:auto;font:800 10px Inter;color:#10b981}
+#sheet .f{padding:7px 10px;border-radius:8px;border:1px solid var(--line2);background:var(--c0);font:500 10px Inter;color:var(--text2);margin-bottom:10px}
+#sheet .go{padding:11px 0;border-radius:10px;background:var(--inv);color:var(--invText);text-align:center;font:700 12px Inter;cursor:pointer}
+#sheet .go.done{background:#10b981;color:#fff}
+
+/* CTA / Penutup */
+#s14{position:absolute;inset:0;visibility:hidden}
+#ctaLogo{position:absolute;left:460px;top:282px;width:160px;height:160px;box-shadow:0 30px 90px rgba(0,0,0,.4),0 0 0 7px rgba(127,127,127,.18)}
+#ctaWord{position:absolute;left:0;right:0;top:600px;margin:0;text-align:center;font:900 124px/1 Inter;letter-spacing:-6px;color:var(--text)}
+#ctaApp{position:absolute;left:0;right:0;top:740px;margin:0;text-align:center;font:800 44px Inter;letter-spacing:-1.2px;color:var(--text)}
+#ctaTag{position:absolute;left:0;right:0;top:806px;margin:0;text-align:center;font:600 28px Inter;color:var(--muted)}
+#ctaTag b{color:var(--text)}
+#ctaGp{position:absolute;left:540px;top:875px;transform:translateX(-50%);display:flex;align-items:center;gap:20px;height:124px;padding:0 42px 0 30px;border-radius:26px;background:#000;border:3px solid #a6a6a6;color:#fff;overflow:hidden;white-space:nowrap}
+#ctaGp svg{width:66px;height:66px}
+#ctaGp small{display:block;font:600 20px Inter;letter-spacing:1.4px}
+#ctaGp b{display:block;font:600 52px Inter;letter-spacing:-1.2px;line-height:1}
+#ctaGp .shine{position:absolute;top:0;bottom:0;left:0;width:140px;background:linear-gradient(100deg,transparent,rgba(255,255,255,.25),transparent);transform:translateX(-180px)}
+#ctaUrl{position:absolute;left:0;right:0;top:1026px;margin:0;text-align:center;font:600 30px Inter;color:var(--muted)}
+#ctaUrl b{color:var(--text)}
+#flow{position:absolute;left:60px;right:60px;top:1096px;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:12px 10px;font:600 24px Inter;color:var(--muted)}
+#flow span{padding:8px 16px;border-radius:999px;border:1px solid var(--line2);background:var(--card);color:var(--text2)}
+
+/* Captions */
+#caps{position:absolute;left:30px;right:30px;bottom:30px;text-align:center;z-index:95;opacity:0;pointer-events:none}
+#caps .ln{display:inline-block;padding:8px 20px;border-radius:18px;background:rgba(0,0,0,.65);backdrop-filter:blur(6px)}
+#caps .cw{display:inline-block;margin:0 5px;font:800 42px/1.25 Montserrat;color:#fff;-webkit-text-stroke:6px #000;paint-order:stroke fill}
+#caps .cw.on{color:#000;-webkit-text-stroke:0;background:#fff;border-radius:8px;padding:0 8px;margin:0 2px}
+body.nocaps #caps{display:none}
+
+/* Controls */
+#controls{position:fixed;left:0;right:0;bottom:0;height:56px;display:flex;align-items:center;gap:10px;padding:0 16px;background:#0b0b0c;border-top:1px solid #1f1f22;font:600 13px Inter;color:#a1a1aa}
+#controls button{height:34px;min-width:34px;padding:0 11px;border-radius:8px;border:1px solid #2a2a2e;background:#151517;color:#fff;font:600 13px Inter;cursor:pointer;white-space:nowrap}
+#scrub{flex:1;min-width:60px;accent-color:#fff}
+#tlabel{font-variant-numeric:tabular-nums;min-width:88px;text-align:right}
+#audioNote{color:#fbbf24;display:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+body.rec #controls,body.rec #startOverlay{display:none}
+#startOverlay{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(0,0,0,.6);z-index:100;cursor:pointer;backdrop-filter:blur(3px);text-align:center;padding:20px}
+#startOverlay div{width:110px;height:110px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center}
+#startOverlay div::after{content:'';border-left:34px solid #000;border-top:21px solid transparent;border-bottom:21px solid transparent;margin-left:10px}
+#startOverlay p{margin:0;font:700 18px Inter;color:#fff}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+</head>
+<body class="light">
+
+<div id="viewport">
+  <div id="stageWrap">
+    <div id="stage">
+      <div class="bg"><div class="dots"></div><div id="glowA"></div><div id="glowB"></div></div>
+
+      <!-- Headings -->
+      <div id="head">
+        <h1 class="hd" id="hd0"><span class="w">STOP</span> <span class="w">CROP</span> <span class="w">MANUAL</span> <span class="w">FACECAM!</span><small>Satu stream 3 jam jadi klip vertikal siap upload</small></h1>
+        <h1 class="hd" id="hd1"><span class="w">SATU</span> <span class="w">STREAM</span> <span class="w">GAMEPLAY</span><small>AI otomatis melacak facecam dan split layout</small></h1>
+        <h1 class="hd" id="hdQ"><span class="w">QUICK</span> <span class="w">PROCESS</span> <span class="w">GAMING</span><small>Tempel link stream YouTube kamu</small></h1>
+        <h1 class="hd" id="hdG"><span class="w">OPSI</span> <span class="w">MODE</span> <span class="w">GAMING</span><small>Facecam di atas, gameplay di bawah</small></h1>
+        <h1 class="hd" id="hdS"><span class="w">AUTO</span> <span class="w">SPLIT</span> <span class="w">FACECAM</span><small>AI potong kamera pojok & tata rapi</small></h1>
+        <h1 class="hd" id="hdK"><span class="w">KONTROL</span> <span class="w">GAMING</span> <span class="w">VIEW</span><small>Atur ulang kamera & unduh klip vertikal</small></h1>
+        <h1 class="hd" id="hdU"><span class="w">AUTO</span> <span class="w">UPLOAD</span> <span class="w">5</span> <span class="w">PLATFORM</span><small>Jadwalkan ke YouTube, TikTok, IG, FB & Threads</small></h1>
+      </div>
+
+      <!-- S1 Hook -->
+      <div id="hook">
+        <div id="hStrip">
+          <div class="fr"><img src="__WIDE0__" alt=""></div>
+          <div class="ph" id="hPh"></div>
+          <div class="cut" style="left:220px"></div>
+          <div class="cut" style="left:450px"></div>
+          <div class="cut" style="left:680px"></div>
+        </div>
+        <div id="hTc">Live Stream: <b>Windah Basudara · 02:45:12</b></div>
+        <div id="hCards">
+          <div class="hc" id="hc0" style="left:0;top:0">
+            <img src="__CLIP0__" alt="">
+            <span class="sc2">🔥 96</span>
+            <span class="gbadge">🎮 Gaming</span>
+            <div class="sb2">MAKHLUK INI <i>BENERAN</i> ADA?!</div>
+          </div>
+          <div class="hc" id="hc1" style="left:310px;top:0">
+            <img src="__CLIP1__" alt="">
+            <span class="sc2">🔥 92</span>
+            <span class="gbadge">🎮 Gaming</span>
+            <div class="sb2">WINDAH <i>KAGET</i> ADA SUARA!</div>
+          </div>
+          <div class="hc" id="hc2" style="left:620px;top:0">
+            <img src="__CLIP2__" alt="">
+            <span class="sc2">🔥 89</span>
+            <span class="gbadge">🎮 Gaming</span>
+            <div class="sb2">LARI DARI <i>HUTAN</i> SALJU!</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phone Frame -->
+      <div id="phone">
+        <div class="screen" id="screen">
+          <div class="sbar"><span>09:41</span><div class="punch"></div><i><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.28 19.64 10.59 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/></svg><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg></i></div>
+          <div class="mtop">
+            <div class="l">
+              <div class="logoTile" style="width:24px;height:24px"><img src="__LOGO__" alt=""></div>
+              <div class="cpill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><b>240</b><small>credits</small><div class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg></div></div>
+            </div>
+            <div class="r">
+              <div class="hpill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Pro Plan</div>
+              <div class="rbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg></div>
+            </div>
+          </div>
+
+          <div class="view">
+            <!-- Panel Dashboard -->
+            <div class="pnl" id="pDash"><div class="scr">
+              <div class="dhero">
+                <h1 class="dhero-title">
+                  1 video <span class="dhero-amber">panjang</span>, 30 klip <span class="dhero-viral">viral</span>.
+                </h1>
+                <p class="dhero-sub">AI Klipers memotong video panjangmu jadi puluhan klip pendek siap viral di TikTok, Reels, dan Shorts dalam hitungan menit.</p>
+                <div class="dcmp" id="dCmp">
+                  <span class="ph2" id="dPh">Tempel link video YouTube, podcast, gaming stream...</span>
+                  <span id="dUrl"></span><i class="caret" id="dCaret"></i>
+                  <div class="dtool">
+                    <div class="am"><span class="plus-btn">+</span><span class="qp-badge">⚡ Quick Process</span></div>
+                    <div class="snd" id="dSend"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Project diproses di Dashboard -->
+              <div class="projbox" id="projBox">
+                <div class="projh"><b>Project Sedang Diproses</b><span id="projCnt">1 diproses</span></div>
+                <div class="proj" id="projCard">
+                  <div class="th"><img src="__WIDE0__" alt=""><span class="du">20:16</span></div>
+                  <div class="in">
+                    <b>AKU PERGI KE HUTAN UNTUK BERBURU MAKHLUK HITAM TERKUTUK...</b>
+                    <div class="st" id="projSt"><i></i><span id="projTx">Menunggu giliran...</span></div>
+                    <div class="bar"><i id="projBar"></i></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="dgrid">
+                <div class="fg-item"><span class="fg-badge-red">VIRAL</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>Auto Upload</div>
+                <div class="fg-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></svg>Analisis AI</div>
+                <div class="fg-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5m-1.4-9.4a2 2 0 1 1 2.8 2.8L11.8 15H9v-2.8z"/></svg>Atur Manual</div>
+                <div class="fg-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4zM4 12h16"/></svg>Split Cam</div>
+              </div>
+            </div></div>
+
+            <!-- Panel QuickProcessOptions -->
+            <div class="pnl" id="pQP"><div class="scr">
+              <div class="qpo">
+                <div class="qph">
+                  <div class="th"><img src="__WIDE0__" alt=""></div>
+                  <div class="meta-col">
+                    <b>AKU PERGI KE HUTAN UNTUK BERBURU MAKHLUK HITAM TERKUTUK INI....</b>
+                    <div class="meta-line"><span>20:16</span> <span class="dot">Saldo:</span> <em>240 Credits</em></div>
+                    <div class="meta-line"><span>Estimasi:</span> <em>~20 Credits</em> <span class="dim">2 Cr/menit</span></div>
+                    <div class="meta-line"><em>9.80 GB</em> <span class="dim">sisa</span></div>
+                  </div>
+                  <div class="xbtn-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg></div>
+                </div>
+
+                <div class="isel-row">
+                  <div class="is" id="isLang">Bahasa <b>Indonesia <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></b></div>
+                  <div class="is" id="isJenis">Jenis <b id="jTx">🔍 Auto Detect <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></b>
+                    <div class="idd" id="ddJenis">
+                      <div class="h">Auto Detection</div>
+                      <div id="jAuto">🔍 Auto Detect</div>
+                      <div id="jDyn">✨ Dynamic (Auto Layout)</div>
+                      <div id="jFace">👤 Deteksi Wajah</div>
+                      <div id="jPod">🎙️ Split 2 Wajah</div>
+                      <div class="on hi" id="jGame">🎮 Gaming</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="isel-row">
+                  <div class="is" id="isDur">Durasi <b id="durTx">Auto (0-3m) <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></b></div>
+                  <div class="is" id="isClip">Target Clips <b id="clipTx">10 clips <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></b></div>
+                </div>
+
+                <!-- Gaming Specific Options -->
+                <div class="gopt" id="gamingOpts" style="display:none">
+                  <div class="gh"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H8v3H6v-3H3v-2h3V8h2v3h3v2zm4.5 2c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4-3c-.83 0-1.5-.67-1.5-1.5S18.67 9 19.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>Layout Gaming Split View</div>
+                  <div class="ggrid">
+                    <div class="is" id="isCamPos">Posisi Facecam: <b id="camPosTx">Atas <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></b>
+                      <div class="idd" id="ddCamPos">
+                        <div class="on hi" id="cpTop">Atas</div>
+                        <div id="cpBot">Bawah</div>
+                      </div>
+                    </div>
+                    <div class="is" id="isSrcPos">Posisi Facecam (sumber): <b id="srcPosTx">Kanan Bawah <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></b>
+                      <div class="idd" id="ddSrcPos">
+                        <div>Auto</div>
+                        <div>Kiri Atas</div>
+                        <div>Kanan Atas</div>
+                        <div>Kiri Bawah</div>
+                        <div class="on hi" id="spBotR">Kanan Bawah</div>
+                        <div>Kanan Tengah</div>
+                        <div>Kiri Tengah</div>
+                      </div>
+                    </div>
+                    <div class="is" id="isCamSize">Ukuran Facecam: <b id="camSizeTx">Default (44%) <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></b>
+                      <div class="idd" id="ddCamSize">
+                        <div class="on hi">Default (44%)</div>
+                        <div>30%</div>
+                        <div>35%</div>
+                        <div>40%</div>
+                        <div>50%</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Sertakan Sumber Video -->
+                <div class="src-credit-row">
+                  <span class="sc-label">Sertakan Sumber Video</span>
+                  <div class="sw on"></div>
+                </div>
+
+                <!-- Sertakan Momen Spesifik (Prompt) -->
+                <div class="prompt-sec">
+                  <span class="f-lbl">Sertakan momen spesifik</span>
+                  <div class="f-inp">Contoh: Kumpulkan semua momen lucu</div>
+                </div>
+
+                <!-- Rentang waktu proses -->
+                <div class="tf-sec">
+                  <span class="f-lbl">Rentang waktu proses</span>
+                  <div class="tf-track">
+                    <div class="tf-bar"></div>
+                    <div class="tf-act"></div>
+                    <div class="tf-th" style="left:0%"></div>
+                    <div class="tf-th" style="right:0%"></div>
+                  </div>
+                  <div class="tf-times">
+                    <span>0:00:00</span>
+                    <span>20:16</span>
+                  </div>
+                </div>
+
+                <!-- Subtitle section exact OpusClip style -->
+                <div class="sub-sec-opus">
+                  <div class="sub-hdr-row">
+                    <span class="sub-title-main">SUBTITLE</span>
+                    <div class="sub-toggle-pill">
+                      <span class="act">PRESETS</span>
+                      <span>SETTINGS</span>
+                    </div>
+                  </div>
+                  <div class="sub-filter-row">
+                    <span class="sub-f-pill on">Semua (24)</span>
+                    <span class="sub-f-pill">New (10)</span>
+                    <span class="sub-f-pill">Populer (12)</span>
+                  </div>
+                  <div class="sub-grid-8" id="sgrid">
+                    <div class="sub-card on" id="spKaraoke">
+                      <div class="sub-c-box">
+                        <span class="kw-kata">KATA <span class="kw-viral-yel">VIRAL</span></span>
+                        <small>KARAOKE</small>
+                      </div>
+                    </div>
+                    <div class="sub-card" id="spPop">
+                      <div class="sub-c-box">
+                        <span class="kw-kata">KATA <span class="kw-viral-grn">VIRAL</span></span>
+                        <small>POP</small>
+                      </div>
+                    </div>
+                    <div class="sub-card" id="spColor">
+                      <div class="sub-c-box">
+                        <span class="kw-viral-red">VIRAL</span>
+                        <small>COLOR BURST</small>
+                      </div>
+                    </div>
+                    <div class="sub-card" id="spNeon">
+                      <div class="sub-c-box">
+                        <span class="kw-viral-neon">VIRAL</span>
+                        <small>NEON PULSE</small>
+                      </div>
+                    </div>
+                    <div class="sub-card" id="spKlipers">
+                      <div class="sub-c-box">
+                        <span class="kw-kata">KATA <span class="kw-viral-grn">VIRAL</span></span>
+                        <small>KLIPERS MOTION</small>
+                      </div>
+                    </div>
+                    <div class="sub-card" id="spBold">
+                      <div class="sub-c-box">
+                        <span class="kw-kata">KATA <span class="kw-viral-ora">VIRAL</span></span>
+                        <small>BOLD IMPACT</small>
+                      </div>
+                    </div>
+                    <div class="sub-card" id="spBox">
+                      <div class="sub-c-box">
+                        <span class="kw-box-grn">VIRAL</span>
+                        <small>BOX</small>
+                      </div>
+                    </div>
+                    <div class="sub-card" id="spCandy">
+                      <div class="sub-c-box">
+                        <span class="kw-kata">KATA <span class="kw-viral-pink">VIRAL</span></span>
+                        <small>CANDY POP</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bgo" id="bBuat">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></svg>
+                  <span id="bBuatTx">Buat Clips</span>
+                </div>
+                <div class="atur-man-link">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5m-1.4-9.4a2 2 0 1 1 2.8 2.8L11.8 15H9v-2.8z"/></svg>
+                  <span>Atur Manual</span>
+                </div>
+              </div>
+            </div></div>
+
+            <!-- Panel Semua Clip & Spotlight Animation -->
+            <div class="pnl" id="pClips"><div class="scr">
+              <div class="bread">Dashboard / <b>Semua Clip</b></div>
+
+              <!-- Spotlight Animation Card -->
+              <div class="spot" id="spotCard">
+                <div class="srcw" id="spotSrc">
+                  <img src="__WIDE0__" alt="">
+                  <div class="tbox" id="trackBox">
+                    <div class="tag">🎯 FACECAM (KANAN BAWAH)</div>
+                  </div>
+                </div>
+                <!-- Result Split View Container -->
+                <div class="splitres" id="spotRes">
+                  <div class="vclip">
+                    <div class="sp-top" id="spTop"><img src="__FACECAM0__" alt=""></div>
+                    <div class="sp-bot" id="spBot"><img src="__GAMEPLAY0__" alt=""></div>
+                    <div class="subw" id="spotSub">MAKHLUK INI <i>BENERAN</i> ADA?!</div>
+                  </div>
+                  <div class="vmeta">
+                    <b>🎯 Auto Split 9:16</b>
+                    <span>Facecam di atas (44%)</span>
+                    <span>Gameplay di bawah (56%)</span>
+                    <div class="vtag">🔥 Skor Viral 96</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Generated Clips List -->
+              <div class="clist" id="cList">
+                <div class="cc" id="cc0">
+                  <div class="th"><img src="__CLIP0__" alt=""><span class="sc">🔥 96</span></div>
+                  <div class="info">
+                    <b>Momen Makhluk Hitam Muncul</b>
+                    <div class="meta"><span>⏱ 08:14 - 08:58</span><span>·</span><span>📐 44s</span></div>
+                    <span class="gb">🎮 Gaming Split</span>
+                  </div>
+                </div>
+                <div class="cc" id="cc1">
+                  <div class="th"><img src="__CLIP1__" alt=""><span class="sc">🔥 92</span></div>
+                  <div class="info">
+                    <b>Windah Kaget Ada Suara Aneh</b>
+                    <div class="meta"><span>⏱ 12:40 - 13:18</span><span>·</span><span>📐 38s</span></div>
+                    <span class="gb">🎮 Gaming Split</span>
+                  </div>
+                </div>
+                <div class="cc" id="cc2">
+                  <div class="th"><img src="__CLIP2__" alt=""><span class="sc">🔥 89</span></div>
+                  <div class="info">
+                    <b>Lari Dari Hutan Salju Misterius</b>
+                    <div class="meta"><span>⏱ 16:02 - 16:54</span><span>·</span><span>📐 52s</span></div>
+                    <span class="gb">🎮 Gaming Split</span>
+                  </div>
+                </div>
+              </div>
+            </div></div>
+
+            <!-- Panel ShortVideoCard -->
+            <div class="pnl" id="pSVC"><div class="scr">
+              <div class="bread">Semua Clip / <b>Detail Klip 1</b></div>
+              <div class="svc" id="svcCard">
+                <div class="pvbox">
+                  <div class="pv">
+                    <img src="__CLIP0__" alt="">
+                    <div class="sb2">MAKHLUK INI <i>BENERAN</i> ADA?!</div>
+                  </div>
+                </div>
+                <div class="bd">
+                  <h3>Momen Makhluk Hitam Muncul di Salju</h3>
+                  <div class="bdg"><span class="vr">🔥 96</span><span class="tm">⏱ 08:14-08:58</span><span class="dr">📐 44s</span></div>
+                  <div class="sumbox">Windah kaget saat menyusuri hutan salju dan melihat makhluk misterius bertanduk di balik pohon.</div>
+
+                  <!-- Gaming View Toggle & Controls (ShortVideoCard UI) -->
+                  <div class="gctl">
+                    <div class="gtrow">
+                      <span>Gaming View</span>
+                      <input type="checkbox" checked id="svcGameTgl">
+                    </div>
+                    <div class="cgrid">
+                      <div>
+                        <span>Cam:</span>
+                        <select><option selected>Atas</option><option>Bawah</option></select>
+                      </div>
+                      <div>
+                        <span>Lokasi:</span>
+                        <select><option selected>Kanan Bawah</option><option>Kiri Bawah</option></select>
+                      </div>
+                      <div>
+                        <span>Ukuran:</span>
+                        <select><option selected>Default (44%)</option><option>35%</option><option>50%</option></select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="pv-acts">
+                    <div class="pvb sec" id="svDl">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                      <span id="svDlTx">Unduh</span>
+                    </div>
+                    <div class="pvb pri" id="svUpload">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>
+                      <span>Auto Upload (5 Platform)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div></div>
+          </div>
+
+          <!-- Bottom sheet jadwal upload (ScheduleUploadModal mobile) -->
+          <div id="sheetDim"></div>
+          <div id="sheet">
+            <div class="hdl"></div>
+            <div class="mh">
+              <div><b>Jadwalkan Upload Otomatis</b><small>Upload multi-platform sekaligus</small></div>
+              <div class="x-close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg></div>
+            </div>
+            <span class="l">Pilih Platform (5 Aktif):</span>
+            <div class="pgrid" id="pgrid"></div>
+            <span class="l">Waktu Tayang:</span>
+            <div class="f">📅 Hari ini, 18:00 WIB (Waktu Rekomendasi AI 🔥)</div>
+            <div class="go" id="bSheetGo">🚀 Jadwalkan ke 5 Platform</div>
+          </div>
+          <div class="bnav-float">
+            <div class="nb on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg></div>
+            <div class="nb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></div>
+            <div class="nb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/></svg></div>
+            <div class="nb plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg></div>
+            <div class="nb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M3 9h2m-2 6h2m14-6h2m-2 6h2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg></div>
+            <div class="nb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 17l-1-9 5 4 4-7 4 7 5-4-1 9zM5 20h14"/></svg></div>
+          </div>
+          <div class="homebar"></div>
+        </div>
+      </div>
+
+      <!-- Outro CTA -->
+      <div id="s14">
+        <div class="logoTile" id="ctaLogo"><img src="__LOGO__" alt=""></div>
+        <h2 id="ctaWord">Klipers</h2>
+        <p id="ctaApp">Ai Video Clipping</p>
+        <p id="ctaTag">Stream 3 Jam Jadi <b>Puluhan Shorts</b></p>
+        <div id="ctaGp">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M3.6 1.8A1.8 1.8 0 0 0 3 3.3v17.4c0 .6.2 1.1.6 1.5l.1.1 9.8-9.8v-.2L3.7 2.4z" fill="#00E5FF"/><path d="M16.9 15.7l-3.4-3.4v-.2l3.4-3.4.1.1 4 2.3c1.1.6 1.1 1.7 0 2.3l-4 2.3z" fill="#FFD600"/><path d="M13.5 12.3L3.6 22.2c.4.4 1 .4 1.6.1l11.7-6.6-3.4-3.4z" fill="#FF3D00"/><path d="M13.5 12.3l3.4-3.4L5.2 2.3C4.6 2 4 2 3.6 2.4l9.9 9.9z" fill="#00E676"/></svg>
+          <div><small>TEMUKAN DI</small><b>Google Play</b></div>
+          <div class="shine"></div>
+        </div>
+        <p id="ctaUrl">Kunjungi <b>klipers.pro</b></p>
+        <div id="flow">
+          <span>🎮 Auto Split Gaming</span>
+          <span>👤 Face Tracking</span>
+          <span>🔥 Viral Score</span>
+          <span>✨ Auto Subtitle</span>
+        </div>
+      </div>
+
+      <!-- Subtitle Captions -->
+      <div id="caps"></div>
+
+      <!-- Controls -->
+      <div id="controls">
+        <button id="bPlay">▶</button>
+        <input type="range" id="scrub" min="0" max="43.5" step="0.05" value="0">
+        <span id="tlabel">0.0 / 43.5s</span>
+        <button id="bMute">🔊</button>
+        <span id="audioNote"></span>
+      </div>
+
+      <!-- Interactive Start Overlay -->
+      <div id="startOverlay">
+        <div></div>
+        <p>Putar Demo Motion Graphic</p>
+        <small>Klik untuk memulai dengan audio</small>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const stage = $('#stage');
+const SC = 1.7231;
+const D = 43.5;
+const Q = new URLSearchParams(location.search);
+if (Q.get('theme') === 'dark') document.body.className = '';
+if (Q.get('nocaps') === '1') document.body.classList.add('nocaps');
+if (Q.get('record') === '1') document.body.classList.add('rec');
+
+function fit() {
+  const ww = innerWidth, wh = innerHeight - (document.body.classList.contains('rec') ? 0 : 56);
+  const k = Math.min(ww / 1080, wh / 1920);
+  document.documentElement.style.setProperty('--k', k);
+}
+fit(); addEventListener('resize', fit);
+
+const PLAT = {
+  youtube: '<svg viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#18181b"/><rect x="10" y="17" width="44" height="30" rx="9" fill="#FF0000"/><path d="M28 25l11 7-11 7z" fill="#fff"/></svg>',
+  tiktok: '<svg viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#000"/><g transform="translate(14 13) scale(1.5)"><path d="M16.6 5.8a4.3 4.3 0 0 1-1-2.8h-3.1v12.4a2.6 2.6 0 1 1-2.6-2.6c.3 0 .5 0 .8.1V9.7a5.8 5.8 0 1 0 5 5.7V9.1a7.4 7.4 0 0 0 4.3 1.4V7.4a4.3 4.3 0 0 1-3.4-1.6z" fill="#25F4EE" transform="translate(-.8 -.6)"/><path d="M16.6 5.8a4.3 4.3 0 0 1-1-2.8h-3.1v12.4a2.6 2.6 0 1 1-2.6-2.6c.3 0 .5 0 .8.1V9.7a5.8 5.8 0 1 0 5 5.7V9.1a7.4 7.4 0 0 0 4.3 1.4V7.4a4.3 4.3 0 0 1-3.4-1.6z" fill="#FE2C55" transform="translate(.8 .6)"/><path d="M16.6 5.8a4.3 4.3 0 0 1-1-2.8h-3.1v12.4a2.6 2.6 0 1 1-2.6-2.6c.3 0 .5 0 .8.1V9.7a5.8 5.8 0 1 0 5 5.7V9.1a7.4 7.4 0 0 0 4.3 1.4V7.4a4.3 4.3 0 0 1-3.4-1.6z" fill="#fff"/></g></svg>',
+  instagram: '<svg viewBox="0 0 64 64"><defs><radialGradient id="igg" cx=".3" cy="1" r="1.2"><stop offset="0" stop-color="#FFD600"/><stop offset=".35" stop-color="#FF7A00"/><stop offset=".6" stop-color="#FF0069"/><stop offset=".85" stop-color="#D300C5"/><stop offset="1" stop-color="#7638FA"/></radialGradient></defs><rect width="64" height="64" rx="16" fill="url(#igg)"/><rect x="15" y="15" width="34" height="34" rx="10" fill="none" stroke="#fff" stroke-width="4"/><circle cx="32" cy="32" r="8" fill="none" stroke="#fff" stroke-width="4"/><circle cx="42.5" cy="21.5" r="2.6" fill="#fff"/></svg>',
+  facebook: '<svg viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#0866FF"/><path d="M35.5 52V35h5.8l.9-6.8h-6.7v-4.3c0-2 .6-3.3 3.4-3.3h3.6v-6A48 48 0 0 0 37.3 14c-5.2 0-8.7 3.2-8.7 9v5.2h-5.8V35h5.8v17z" fill="#fff"/></svg>',
+  threads: '<svg viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#000"/><path d="M40.6 30.4c-.2-.1-.4-.2-.6-.3-.4-6.6-4-10.4-10-10.4-3.6 0-6.6 1.5-8.4 4.3l3.3 2.3c1.4-2.1 3.5-2.5 5.1-2.5 2 0 3.5.6 4.4 1.8.7.8 1.1 2 1.3 3.4-1.7-.3-3.5-.4-5.4-.3-5.4.3-8.9 3.5-8.7 7.9.1 2.2 1.2 4.2 3.1 5.4 1.6 1.1 3.7 1.6 5.8 1.5 2.8-.2 5-1.2 6.6-3.2 1.2-1.5 1.9-3.4 2.3-5.8 1.3.8 2.3 1.9 2.8 3.2.9 2.2 1 5.8-2 8.7-2.6 2.6-5.7 3.7-10.4 3.7-5.2 0-9.2-1.7-11.8-5-2.4-3.1-3.7-7.6-3.7-13.3s1.3-10.2 3.7-13.3c2.6-3.3 6.5-5 11.8-5 5.3 0 9.3 1.7 12 5.1 1.3 1.6 2.3 3.7 2.9 6.1l3.9-1c-.8-3-2-5.6-3.7-7.7-3.5-4.3-8.5-6.5-15.1-6.5-6.5 0-11.5 2.2-14.9 6.5C11.6 21.3 10 26.5 10 32.8v.1c0 6.3 1.6 11.5 4.8 15.4 3.4 4.3 8.4 6.5 14.9 6.5 5.8 0 9.8-1.5 13.2-4.9 4.4-4.4 4.2-9.9 2.8-13.2-1-2.4-3-4.4-5.1-5.3zm-9.5 9c-2.4.1-4.8-.9-4.9-3.1-.1-1.6 1.1-3.4 4.9-3.6h1.3c1.4 0 2.7.1 3.9.4-.5 5.6-3.2 6.2-5.2 6.3z" fill="#fff"/></svg>'
+};
+
+$('#pgrid').innerHTML = [
+  ['youtube', 'YouTube Shorts'],
+  ['tiktok', 'TikTok'],
+  ['instagram', 'Instagram Reels'],
+  ['facebook', 'Facebook Reels'],
+  ['threads', 'Threads']
+].map(([k, n], i) => `<div class="on" id="mp${i}">${PLAT[k]}<span>${n}</span><span class="chk-badge">✓</span></div>`).join('');
+
+/* Narasi Cues */
+const CUES = [
+  { s: 0.3, e: 6.3, file: 'audio/vo-01.mp3', text: 'Stop crop manual facecam! Satu stream tiga jam, jadi klip vertikal siap upload.', say: 'Stop crop manual facecam! Satu stream tiga jam, jadi klip vertikal siap upload.' },
+  { s: 6.6, e: 10.5, file: 'audio/vo-02.mp3', text: 'Buka Quick Process, tempel link live stream kamu, lalu kirim.' },
+  { s: 11.0, e: 18.6, file: 'audio/vo-03.mp3', text: 'Pilih jenis Gaming. Atur posisi facecam di atas, letak kamera kanan bawah, pilih subtitle, lalu Buat Clips.', say: 'Pilih jenis Gaming. Atur posisi facecam di atas, letak kamera kanan bawah, pilih sabtaitel, lalu Buat Clips.' },
+  { s: 19.2, e: 24.8, file: 'audio/vo-04.mp3', text: 'AI otomatis melacak facecam di pojok, memotongnya, dan menyusunnya rapi di atas gameplay.' },
+  { s: 25.4, e: 33.6, file: 'audio/vo-05.mp3', text: 'Klip langsung jadi dengan skor viral dan subtitle. Masih bisa kamu atur ulang, atau jadwalkan auto upload ke 5 platform sekaligus.', say: 'Klip langsung jadi dengan skor viral dan sabtaitel. Masih bisa kamu atur ulang, atau jadwalkan auto upload ke lima platform sekaligus.' },
+  { s: 34.2, e: 40.06, file: 'audio/vo-06.mp3', text: 'Stream berjam-jam jadi konten Shorts dalam lima menit. Download Klipers di Google Play sekarang.' }
+];
+
+CUES.forEach(c => {
+  const words = c.text.split(' ');
+  const wt = words.map(w => w.length + 2 + (/[.,?:!]$/.test(w) ? 4 : 0));
+  const total = wt.reduce((a, b) => a + b, 0);
+  const span = (c.e - c.s) - 0.4;
+  let acc = 0;
+  c.words = words.map((w, i) => { const st = c.s + span * acc / total; acc += wt[i]; return { w, st }; });
+  c.chunks = []; let cur = [];
+  c.words.forEach((w, i) => {
+    cur.push(i);
+    if (cur.length >= 4 || (/[.,?:!]$/.test(w.w) && cur.length >= 2)) { c.chunks.push(cur); cur = []; }
+  });
+  if (cur.length) c.chunks.push(cur);
+});
+
+const capsEl = $('#caps');
+let capKey = null;
+function renderCaps(t) {
+  const ci = CUES.findIndex(c => t >= c.s && t <= c.e);
+  if (ci < 0) { capsEl.style.opacity = 0; capKey = null; return; }
+  const c = CUES[ci];
+  let wi = 0; c.words.forEach((w, i) => { if (t >= w.st) wi = i; });
+  const chunk = c.chunks.find(ch => ch.includes(wi));
+  const key = ci + ':' + (chunk ? chunk[0] : 0);
+  if (key !== capKey && chunk) {
+    capsEl.innerHTML = '<span class="ln">' + chunk.map(i => `<span class="cw" data-i="${i}">${c.words[i].w}</span>`).join('') + '</span>';
+    capKey = key;
+  }
+  capsEl.querySelectorAll('.cw').forEach(el => el.classList.toggle('on', +el.dataset.i === wi));
+  capsEl.style.opacity = 1;
+}
+
+/* Audio Player */
+const AUD = CUES.map(c => { const a = new Audio(); a.preload = 'auto'; a.onerror = () => { c.missing = true; updateVoiceNote(); }; a.src = c.file; return a; });
+const SS = window.speechSynthesis;
+let ttsVoice = null;
+function pickVoice() {
+  if (!SS) return;
+  const vs = SS.getVoices(); if (!vs.length) return;
+  const want = (Q.get('voice') || '').toLowerCase();
+  const by = f => vs.find(f);
+  ttsVoice = (want && by(v => v.name.toLowerCase().includes(want)))
+    || by(v => /william/i.test(v.name) && /multilingual/i.test(v.name))
+    || by(v => /^id/i.test(v.lang) && /ardi/i.test(v.name))
+    || by(v => /^id/i.test(v.lang)) || null;
+  updateVoiceNote();
+}
+function updateVoiceNote() {
+  if (!CUES.some(c => c.missing)) return;
+  const n = $('#audioNote'); n.style.display = 'inline';
+  n.textContent = ttsVoice ? 'Suara: ' + ttsVoice.name.replace(/\s*-\s*.*$/, '') + ' (browser)' : 'Tidak ada voice Indonesia';
+}
+if (SS) { pickVoice(); SS.onvoiceschanged = pickVoice; }
+let muted = false, playing = false;
+
+const SFX = [], SFX_SRC = {};
+let sfxLast = null;
+function playSfx(t) {
+  if (!playing || muted) { sfxLast = t; return; }
+  if (sfxLast === null || t < sfxLast || t - sfxLast > .5) { sfxLast = t; return; }
+  SFX.forEach(ev => {
+    if (ev.t > sfxLast && ev.t <= t) {
+      const base = SFX_SRC[ev.file] || (SFX_SRC[ev.file] = new Audio(ev.file));
+      const a = base.cloneNode(); a.volume = Math.min(1, ev.vol * 0.35); a.play().catch(() => {});
+    }
+  });
+  sfxLast = t;
+}
+function stopAudio() { AUD.forEach(a => a.pause()); if (SS) SS.cancel(); CUES.forEach(c => { c.started = false; }); sfxLast = null; }
+function speakCue(c, t) {
+  if (!SS || t - c.s > 0.6) return;
+  SS.cancel();
+  const u = new SpeechSynthesisUtterance(c.say || c.text);
+  u.lang = ttsVoice ? ttsVoice.lang : 'id-ID';
+  try { if (ttsVoice) u.voice = ttsVoice; } catch (e) {}
+  u.rate = 1.05; SS.speak(u);
+}
+function syncAudio(t) {
+  if (!playing || muted) return;
+  CUES.forEach((c, i) => {
+    if (c.started) return;
+    const a = AUD[i];
+    const len = !c.missing && isFinite(a.duration) ? a.duration : (c.e - c.s);
+    if (t >= c.s && t < c.s + len) {
+      c.started = true;
+      if (c.missing) { speakCue(c, t); return; }
+      try { a.currentTime = Math.max(0, t - c.s); } catch (e) {}
+      a.play().catch(() => {});
+    }
+  });
+}
+
+/* State diskret seek-safe */
+const FLAGS = [], TEXTS = new Map();
+const EL = x => typeof x === 'string' ? $(x) : x;
+let W = t => t;
+function flag(t0, t1, el, cls) { FLAGS.push({ t0: W(t0), t1: t1 == null ? 1e9 : W(t1), el: EL(el), cls }); }
+function say(t, el, txt) {
+  t = W(t);
+  el = EL(el);
+  if (!TEXTS.has(el)) TEXTS.set(el, { init: el.textContent, list: [] });
+  TEXTS.get(el).list.push({ t, txt });
+}
+function applyState(t) {
+  const want = new Map();
+  FLAGS.forEach(f => {
+    if (!want.has(f.el)) want.set(f.el, {});
+    const on = t >= f.t0 && t < f.t1;
+    want.get(f.el)[f.cls] = want.get(f.el)[f.cls] || on;
+  });
+  want.forEach((m, el) => Object.entries(m).forEach(([c, on]) => el.classList.toggle(c, on)));
+  TEXTS.forEach((v, el) => {
+    let cur = v.init; v.list.forEach(x => { if (t >= x.t) cur = x.txt; });
+    if (el.textContent !== cur) el.textContent = cur;
+  });
+}
+
+/* Timeline Setup */
+const P = { d: 0, proj: 0, spot: 0 };
+let tl, scrubbing = false;
+const URL_WINDAH = 'https://www.youtube.com/watch?v=fzEKuL9NrT4';
+
+function sync() {
+  const t = tl.time();
+  applyState(t);
+  // Typing animation in composer
+  const typ = (el, ph, txt, n) => { $(el).textContent = txt.slice(0, Math.round(n)); $(ph).style.display = n > .5 ? 'none' : ''; };
+  typ('#dUrl', '#dPh', URL_WINDAH, P.d);
+
+  // Project progress bar
+  const pj = P.proj;
+  $('#projBar').style.width = pj + '%';
+  $('#projTx').textContent = pj >= 100 ? 'Siap · 10 clips tersedia' : pj < 15 ? 'Mengunduh stream...' : pj < 45 ? 'Mencari facecam pojok...' : pj < 75 ? 'Memotong gameplay...' : 'Membuat subtitle...';
+  $('#projSt').classList.toggle('ok', pj >= 100);
+  $('#projCnt').textContent = pj >= 100 ? '10 clips' : '1 diproses';
+
+  renderCaps(t);
+  syncAudio(t);
+  playSfx(t);
+  if (!scrubbing) $('#scrub').value = t;
+  $('#tlabel').textContent = t.toFixed(1) + ' / ' + D + 's';
+}
+
+function sp(el) {
+  el = EL(el);
+  const s = $('#screen').getBoundingClientRect(), r = el.getBoundingClientRect();
+  const k = stage.getBoundingClientRect().width / 1080 * SC;
+  const pn = el.closest('.pnl');
+  return { x: (r.left - s.left + r.width / 2) / k, y: (r.top - s.top + r.height / 2) / k, t: (r.top - s.top) / k, h: r.height / k, p: pn ? pn.id : null };
+}
+function measureWith(pairs, fn) {
+  pairs.forEach(([el, c, on]) => EL(el).classList.toggle(c, on !== false));
+  const r = fn();
+  pairs.forEach(([el, c, on]) => EL(el).classList.toggle(c, on === false));
+  return r;
+}
+
+function build() {
+  gsap.set('.pnl', { autoAlpha: 1 });
+  const M = {};
+  ['dCmp', 'dSend', 'projCard', 'isJenis', 'bBuat', 'spotCard', 'cc0', 'svcCard', 'svDl']
+    .forEach(id => { M[id] = sp('#' + id); });
+  M.jGame = measureWith([['#ddJenis', 'open']], () => sp('#jGame'));
+  M.isCamPos = measureWith([['#gamingOpts', 'show']], () => sp('#isCamPos'));
+  M.isSrcPos = measureWith([['#gamingOpts', 'show']], () => sp('#isSrcPos'));
+  M.cpTop = measureWith([['#gamingOpts', 'show'], ['#ddCamPos', 'open']], () => sp('#cpTop'));
+  M.spBotR = measureWith([['#gamingOpts', 'show'], ['#ddSrcPos', 'open']], () => sp('#spBotR'));
+  M.spKaraoke = sp('#spKaraoke');
+
+  tl = gsap.timeline({ paused: true, onUpdate: sync, onComplete: () => { playing = false; $('#bPlay').textContent = '↻'; } });
+
+  const BASE = [6.00, 3.90, 7.60, 5.60, 8.20, 5.86];
+  const SEG = CUES.map((c, i) => {
+    const n = i + 1 < CUES.length ? CUES[i + 1].s : D;
+    const N = Math.min(c.e - c.s - .2, n - c.s - .15), L = Math.min(BASE[i], n - c.s - .15);
+    return { s: c.s, n, L, N: i === CUES.length - 1 ? L : N };
+  });
+  W = t => {
+    if (typeof t !== 'number') return t;
+    for (const g of SEG) if (t >= g.s && t < g.n) {
+      const so = g.s + g.L, sn = g.s + g.N;
+      return t < so ? g.s + (t - g.s) * (g.N / g.L) : sn + (t - so) * (g.n - sn) / (g.n - so);
+    }
+    return t;
+  };
+  ['to', 'fromTo', 'set'].forEach(m => { const f = tl[m].bind(tl); tl[m] = (...a) => { const i = a.length - 1; if (typeof a[i] === 'number') a[i] = W(a[i]); return f(...a); }; });
+  tl.set({}, {}, D);
+
+  const TOP = 68;
+  const VIS = 844 - TOP - 8 - 96;
+  const scrH = id => $(`#${id} .scr`).getBoundingClientRect().height / (stage.getBoundingClientRect().width / 1080 * SC) - 120;
+  const MAXS = { pDash: 0, pQP: scrH('pQP') - VIS, pClips: scrH('pClips') - VIS, pSVC: scrH('pSVC') - VIS };
+  const need = (m, want) => Math.max(0, Math.min(m.t - TOP - want, m.p in MAXS ? MAXS[m.p] : 1e9));
+  const scroll = (t, dur, pnl, S) => tl.to(`#${pnl} .scr`, { y: -S, duration: dur, ease: 'power2.inOut' }, t);
+  const sfx = (t, name, vol = .2) => SFX.push({ t: +W(t).toFixed(3), file: `audio/sfx-${name}.mp3`, vol: +(vol * 0.4).toFixed(3) });
+
+  function tap(t, x, y) {
+    sfx(t, 'click', .45);
+    tl.set(['#tapS', '#tapR'], { x, y }, t);
+    tl.fromTo('#tapS', { opacity: .95, scale: .6 }, { opacity: 0, scale: 1.1, duration: .45, ease: 'power2.out', immediateRender: false }, t);
+    tl.fromTo('#tapR', { opacity: .9, scale: .5 }, { opacity: 0, scale: 1.9, duration: .5, ease: 'power2.out', immediateRender: false }, t);
+  }
+  const tapM = (t, m, S = 0, dx = 0, dy = 0) => tap(t, m.x + dx, m.y - S + dy);
+  const panelIn = (t, id, d = .35) => { sfx(t, 'whoosh', .3); tl.fromTo('#' + id, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: d, ease: 'power2.out', immediateRender: false }, t); };
+  const panelOut = (t, id, d = .25) => tl.to('#' + id, { autoAlpha: 0, duration: d }, t);
+  const pulse = (t, el, s = 1.08) => tl.to(EL(el), { scale: s, duration: .16, yoyo: true, repeat: 1, ease: 'power1.inOut' }, t);
+  const headIn = (t, id) => {
+    tl.to('#head .hd', { autoAlpha: 0, duration: .2 }, t - .2);
+    tl.fromTo(`#${id}`, { autoAlpha: 0 }, { autoAlpha: 1, duration: .01, immediateRender: false }, t);
+    tl.fromTo(`#${id} .w`, { autoAlpha: 0, y: 30 }, { autoAlpha: 1, y: 0, duration: .4, stagger: .08, ease: 'back.out(2)', immediateRender: false }, t);
+  };
+  const caret = (t0, t1, id) => { tl.set(id, { opacity: 1 }, t0); tl.set(id, { opacity: 0 }, t1); };
+
+  /* Initial states */
+  gsap.set('.pnl', { autoAlpha: 0 });
+  gsap.set('#head .hd', { autoAlpha: 0 });
+  gsap.set('#hook', { autoAlpha: 1 });
+  gsap.set('#hStrip', { autoAlpha: 0, y: 30 }); gsap.set('#hTc', { autoAlpha: 0 });
+  gsap.set('#hPh', { left: 0 });
+  gsap.set('.hc', { autoAlpha: 0, scale: .5, y: -260 });
+  gsap.set('#phone', { autoAlpha: 0, y: 1400 });
+  gsap.set(['#sheetDim', '#sheet'], { autoAlpha: 0 });
+  gsap.set('#sheet', { y: 400 });
+  gsap.set(['#ctaLogo', '#ctaWord', '#ctaApp', '#ctaTag', '#ctaGp', '#ctaUrl', '#flow span'], { autoAlpha: 0 });
+  gsap.set('#ctaLogo', { scale: .4, rotation: -20 });
+  gsap.set(['#ctaWord', '#ctaApp', '#ctaTag', '#ctaUrl'], { y: 30 });
+  gsap.set('#ctaGp', { scale: .85 });
+
+  /* ================= S1 · HOOK (0 – 6.3s) ================= */
+  headIn(0.2, 'hd0');
+  tl.to('#hStrip', { autoAlpha: 1, y: 0, duration: .5, ease: 'power3.out' }, 0.3);
+  tl.to('#hTc', { autoAlpha: 1, duration: .4 }, 0.6);
+  tl.to('#hPh', { left: 895, duration: 2.0, ease: 'none' }, 0.6);
+  $$('#hStrip .cut').forEach((c, i) => {
+    tl.to(c, { opacity: 1, duration: .08 }, 2.2 + i * .12);
+    sfx(2.2 + i * .12, 'strike', .8);
+  });
+  headIn(2.8, 'hd1');
+  sfx(2.9, 'whoosh', .35);
+  tl.to('#hStrip', { scale: 0.82, y: -50, duration: 0.5, ease: 'power2.out' }, 2.9);
+  tl.to('#hTc', { y: -70, duration: 0.5, ease: 'power2.out' }, 2.9);
+  [0, 1, 2].forEach(i => tl.to('#hc' + i, { autoAlpha: 1, scale: 1, y: 0, duration: .55, ease: 'back.out(1.5)' }, 3.0 + i * .15));
+  tl.to('#hook', { autoAlpha: 0, duration: .35 }, 6.1);
+
+  /* ================= S2 · QUICK PROCESS LINK (6.4 – 10.8s) ================= */
+  headIn(6.35, 'hdQ');
+  tl.to('#phone', { autoAlpha: 1, y: 0, duration: .8, ease: 'power3.out' }, 6.3);
+  tl.to('#pDash', { autoAlpha: 1, duration: .01 }, 6.3);
+  tapM(7.0, M.dCmp, 0, 0, -20);
+  tl.to(P, { d: URL_WINDAH.length, duration: 1.0, ease: 'none' }, 7.2);
+  caret(7.2, 8.6, '#dCaret');
+  flag(8.3, 9.2, '#dSend', 'on');
+  tapM(8.8, M.dSend);
+  panelOut(9.2, 'pDash');
+  panelIn(9.4, 'pQP');
+
+  /* ================= S3 · OPSI MODE GAMING (11.0 – 19.0s) ================= */
+  headIn(11.0, 'hdG');
+  tapM(11.5, M.isJenis, 0, 20);
+  flag(11.55, 12.2, '#ddJenis', 'open'); flag(11.8, 12.2, '#jGame', 'hi');
+  tapM(12.1, M.jGame);
+  say(12.2, '#jTx', '🎮 Gaming');
+  flag(12.2, null, '#gamingOpts', 'show');
+  pulse(12.3, '#gamingOpts', 1.04);
+  // Posisi Facecam: Atas
+  tapM(12.7, M.isCamPos, 0, 15);
+  flag(12.75, 13.3, '#ddCamPos', 'open');
+  tapM(13.2, M.cpTop); say(13.3, '#camPosTx', 'Atas');
+  // Letak Kamera Sumber: Kanan Bawah
+  tapM(13.7, M.isSrcPos, 0, 20);
+  flag(13.75, 14.3, '#ddSrcPos', 'open');
+  tapM(14.2, M.spBotR); say(14.3, '#srcPosTx', 'Kanan Bawah');
+  // Subtitle preset
+  const Sq = need(sp('#sgrid'), 180);
+  scroll(14.6, .5, 'pQP', Sq);
+  tapM(15.2, M.spKaraoke, Sq);
+  flag(15.25, null, '#spKaraoke', 'on');
+  // Buat clips
+  const Sb = need(M.bBuat, 330);
+  scroll(15.8, .5, 'pQP', Sb);
+  tapM(16.5, M.bBuat, Sb);
+  flag(16.55, null, '#bBuat', 'busy'); say(16.6, '#bBuatTx', 'Memproses...');
+  panelOut(17.4, 'pQP');
+  // Kembali ke dashboard dengan card project
+  tl.set('#projBox', { opacity: 1 }, 17.5);
+  panelIn(17.6, 'pDash');
+
+  /* ================= S4 · SPOTLIGHT AUTO SPLIT (19.2 – 25.2s) ================= */
+  sfx(18.0, 'processing', .7);
+  tl.to(P, { proj: 100, duration: 2.0, ease: 'power1.inOut' }, 17.8);
+  sfx(19.8, 'success', .5);
+  pulse(19.9, '#projCard', 1.05);
+  tapM(20.3, M.projCard);
+  panelOut(20.5, 'pDash');
+  panelIn(20.7, 'pClips');
+  headIn(20.8, 'hdS');
+  // Spotlight tracking animation
+  tl.fromTo('#trackBox', { scale: 1.5, opacity: 0 }, { scale: 1, opacity: 1, duration: .4, ease: 'back.out(2)' }, 21.0);
+  sfx(21.0, 'click', .6);
+  pulse(21.5, '#trackBox', 1.15);
+  // Cut & move to top
+  sfx(21.9, 'whoosh', .4);
+  tl.to('#trackBox', { top: -60, scale: .8, opacity: 0, duration: .5 }, 21.9);
+  tl.to('#spotRes', { opacity: 1, duration: .5, ease: 'power2.out' }, 22.1);
+  sfx(22.5, 'success', .5);
+  pulse(22.6, '#spotSub', 1.1);
+  // Scroll to show clips
+  const Sc = need(sp('#cc2'), 220);
+  scroll(23.2, .8, 'pClips', Sc);
+  pulse(23.8, '#cc0', 1.04); pulse(24.1, '#cc1', 1.04); pulse(24.4, '#cc2', 1.04);
+
+  /* ================= S5 · SHORTVIDEOCARD & AUTO UPLOAD (25.4 – 34.0s) ================= */
+  headIn(25.3, 'hdK');
+  tapM(25.6, M.cc0, Sc);
+  panelOut(25.8, 'pClips');
+  panelIn(26.0, 'pSVC');
+  // Highlight gaming view toggle
+  pulse(26.8, '#svcCard .gctl', 1.05);
+  sfx(26.9, 'click', .4);
+  // Scroll down to actions
+  const Sa = need(sp('#svUpload'), 340);
+  scroll(27.5, .5, 'pSVC', Sa);
+  tapM(28.0, sp('#svUpload'), Sa);
+  // Bottom sheet slides up
+  sfx(28.2, 'whoosh', .35);
+  headIn(28.2, 'hdU');
+  tl.to('#sheetDim', { autoAlpha: 1, duration: .3 }, 28.3);
+  tl.fromTo('#sheet', { y: 400, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: .45, ease: 'power3.out' }, 28.3);
+  // Highlight 5 platforms
+  [0, 1, 2, 3, 4].forEach(i => pulse(28.9 + i * 0.12, '#mp' + i, 1.06));
+  // Tap Jadwalkan ke 5 Platform
+  tapM(30.2, sp('#bSheetGo'));
+  sfx(30.4, 'success', .6);
+  say(30.5, '#bSheetGo', '✅ Terjadwal ke 5 Platform!');
+  flag(30.5, null, '#bSheetGo', 'done');
+  pulse(30.6, '#bSheetGo', 1.06);
+  // Sheet slides down
+  tl.to('#sheet', { y: 400, autoAlpha: 0, duration: .4, ease: 'power2.in' }, 32.5);
+  tl.to('#sheetDim', { autoAlpha: 0, duration: .3 }, 32.6);
+
+  /* ================= S6 · PENUTUP CTA (34.0 – 43.5s) ================= */
+  tl.to('#head .hd', { autoAlpha: 0, duration: .3 }, 33.8);
+  tl.to('#phone', { autoAlpha: 0, scale: .8, duration: .5, ease: 'power2.in' }, 33.9);
+  panelOut(33.9, 'pSVC');
+  sfx(34.1, 'whoosh', .4);
+  sfx(34.5, 'riser', .6);
+  tl.to('#s14', { autoAlpha: 1, duration: .01 }, 34.2);
+  tl.to('#ctaLogo', { autoAlpha: 1, scale: 1, rotation: 0, duration: .7, ease: 'back.out(2)' }, 34.3);
+  tl.to('#ctaWord', { autoAlpha: 1, y: 0, duration: .5, ease: 'power3.out' }, 34.7);
+  tl.to('#ctaApp', { autoAlpha: 1, y: 0, duration: .5, ease: 'power3.out' }, 34.9);
+  tl.to('#ctaTag', { autoAlpha: 1, y: 0, duration: .5, ease: 'power3.out' }, 35.1);
+  tl.to('#ctaGp', { autoAlpha: 1, scale: 1, duration: .6, ease: 'back.out(1.8)' }, 35.5);
+  tl.fromTo('#ctaGp .shine', { x: -180 }, { x: 400, duration: .9, ease: 'power1.inOut' }, 35.9);
+  tl.to('#ctaUrl', { autoAlpha: 1, y: 0, duration: .5 }, 36.1);
+  tl.to('#flow span', { autoAlpha: 1, duration: .3, stagger: .08, ease: 'back.out(1.5)' }, 36.4);
+
+  window.__duration = D;
+  window.__sfx = SFX;
+  window.__seek = t => { tl.seek(t, false); sync(); };
+  window.__ready = true;
+}
+
+build();
+
+/* Interactive UI Controls */
+$('#bPlay').onclick = () => {
+  if (playing) { tl.pause(); playing = false; $('#bPlay').textContent = '▶'; stopAudio(); }
+  else {
+    if (tl.time() >= D - .1) tl.seek(0);
+    tl.play(); playing = true; $('#bPlay').textContent = '❚❚';
+  }
+};
+$('#scrub').oninput = e => {
+  scrubbing = true;
+  tl.seek(+e.target.value, false);
+  sync();
+};
+$('#scrub').onchange = () => { scrubbing = false; };
+$('#bMute').onclick = () => {
+  muted = !muted;
+  $('#bMute').textContent = muted ? '🔇' : '🔊';
+  if (muted) stopAudio();
+};
+$('#startOverlay').onclick = () => {
+  $('#startOverlay').style.display = 'none';
+  $('#bPlay').click();
+};
+</script>
+</body>
+</html>

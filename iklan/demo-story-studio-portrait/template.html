@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Demo Story Studio HP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<!--
+  DIHASILKAN oleh marketing/tools/build-demo-story-studio.mjs dari template.html + marketing/_shared/story-studio/*.
+  Edit template.html / _shared, lalu build ulang. Jangan edit index.html langsung.
+
+  Klipers — DEMO Story Studio versi HP (1080×1920, 60 dtk, tema terang)
+  Pola demo portrait yang disetujui owner: HP tampil UTUH (y 300–1782, layar 390×844 ×1,7231),
+  judul bab di atas, caption di bawah HP. Konten panjang digulir di dalam layar.
+  UI = klipers-mobile-app/components/story-studio (layout HP tanpa breakpoint sm:/lg:).
+  URL params: ?t=12  ?nocaps=1  ?guides=1  ?record=1 (window.__seek)
+-->
+<style>
+:root{--k:.3}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#e7e5e4;overflow:hidden;font-family:Inter,system-ui,sans-serif;color:#171717}
+svg{display:block}
+#viewport{position:fixed;left:0;right:0;top:0;bottom:56px;display:flex;align-items:center;justify-content:center}
+body.rec #viewport{bottom:0}
+#stageWrap{position:relative;width:calc(1080px * var(--k));height:calc(1920px * var(--k))}
+#stage{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(var(--k));transform-origin:0 0;overflow:hidden;background:#f4f4f3}
+.bg{position:absolute;inset:0;background-image:radial-gradient(rgba(23,23,23,.07) 1.4px,transparent 1.5px);background-size:40px 40px;-webkit-mask-image:radial-gradient(ellipse at center,#000 35%,transparent 80%);mask-image:radial-gradient(ellipse at center,#000 35%,transparent 80%)}
+.logoTile{display:flex;align-items:center;justify-content:center;background:#fff;border-radius:50%;overflow:hidden;flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.logoTile img{width:92%;height:92%;object-fit:contain;display:block}
+.inv{display:inline-block;background:#171717;color:#fff;padding:0 .16em;border-radius:.1em}
+
+/* ---------- HOOK ---------- */
+#hook{position:absolute;inset:0}
+#hv{position:absolute;left:0;top:0;width:1080px;height:1920px;overflow:hidden;transform-origin:0 0;background:#000}
+#hv .ly{position:absolute;inset:-4%;opacity:0}
+#hv .ly svg{width:100%;height:100%}
+#hsub{position:absolute;left:60px;right:140px;top:1020px;text-align:center;font:900 82px/1.12 Montserrat;color:#fff;text-transform:uppercase;-webkit-text-stroke:11px #000;paint-order:stroke fill}
+#hsub .on{color:#ffe600}
+#hbar{position:absolute;left:0;bottom:0;height:10px;width:0;background:rgba(255,255,255,.9)}
+#hflash{position:absolute;inset:0;background:#fff;opacity:0}
+#hpause{position:absolute;left:50%;top:50%;width:240px;height:240px;margin:-120px 0 0 -120px;border-radius:50%;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;gap:28px;opacity:0}
+#hpause i{width:34px;height:104px;border-radius:8px;background:#fff}
+#hR{position:absolute;left:478px;top:480px;width:482px}
+#hR h1{margin:0;font:900 70px/1.06 Montserrat;letter-spacing:-2.5px;color:#171717}
+#hR h1 .w{display:inline-block}
+#hR .ln{display:block}
+#idea{position:absolute;left:60px;right:120px;top:1120px;display:flex;align-items:center;gap:16px;padding:22px 28px;border-radius:26px;background:#fff;border:1px solid #e5e5e5;box-shadow:0 24px 60px rgba(0,0,0,.08);font:500 38px/1.25 Inter;color:#171717;opacity:0;min-height:104px}
+#idea svg{width:38px;height:38px;color:#737373}
+#ideaTx.typing::after{content:'';display:inline-block;width:3px;height:40px;margin-left:3px;vertical-align:-7px;background:#171717}
+.htag{position:absolute;display:flex;align-items:center;gap:12px;padding:12px 22px 12px 12px;border-radius:999px;background:#171717;color:#fff;font:700 30px Inter;box-shadow:0 20px 50px rgba(0,0,0,.25);opacity:0}
+.htag span{width:46px;height:46px;border-radius:50%;background:#fff;color:#171717;display:flex;align-items:center;justify-content:center}
+.htag span svg{width:24px;height:24px}
+.htag b{font-weight:600;color:#a3a3a3;margin-left:2px}
+
+/* ---------- judul bab (atas) ---------- */
+#head{position:absolute;left:40px;right:40px;top:58px;height:224px}
+.hd{position:absolute;left:0;right:0;top:0;margin:0;text-align:center;font:900 70px/1.08 Montserrat;letter-spacing:-2px;color:#171717;visibility:hidden}
+.hd small{display:block;margin-top:10px;font:700 32px Inter;letter-spacing:0;color:#737373}
+.hd .n{display:inline-flex;align-items:center;justify-content:center;width:68px;height:68px;margin-right:16px;border-radius:50%;background:#171717;color:#fff;font:900 36px Inter;vertical-align:8px;letter-spacing:0}
+
+/* ---------- HP ---------- */
+#phone{position:absolute;left:190px;top:300px;width:700px;height:1482px;border-radius:78px;background:#0a0a0a;border:2px solid #2a2a2a;box-shadow:0 60px 160px rgba(0,0,0,.25),inset 0 0 0 6px #151515;visibility:hidden}
+.screen{position:absolute;left:14px;top:14px;width:390px;height:844px;transform:scale(1.7231);transform-origin:0 0;border-radius:37px;overflow:hidden;background:#fff;font-size:14px}
+.sbar{position:absolute;left:0;right:0;top:0;height:26px;display:flex;align-items:center;justify-content:space-between;padding:0 22px 0 26px;font:600 12px Inter;color:#171717;z-index:60;background:#fff}
+.sbar i{display:flex;gap:5px;align-items:center}
+.sbar svg{width:14px;height:14px}
+.punch{position:absolute;left:50%;top:7px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:#000;z-index:61}
+.homebar{position:absolute;left:50%;bottom:5px;width:120px;height:4px;margin-left:-60px;border-radius:3px;background:#171717;opacity:.5;z-index:90}
+.mtop{position:absolute;left:0;right:0;top:26px;height:42px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;background:#fff;border-bottom:1px solid #e5e5e5;z-index:20}
+.mtop .l,.mtop .r{display:flex;align-items:center;gap:6px}
+.cpill{display:flex;align-items:center;gap:6px;height:28px;padding:0 4px 0 9px;border-radius:999px;background:#f3f4f6;border:1px solid #e5e7eb}
+.cpill svg{width:14px;height:14px}
+.cpill b{font:700 12px Inter;color:#111827}.cpill small{font:400 10px Inter;color:#6b7280}
+.cpill .plus{width:20px;height:20px;border-radius:50%;background:#111827;color:#fff;display:flex;align-items:center;justify-content:center}
+.cpill .plus svg{width:12px;height:12px}
+.hpill{display:flex;align-items:center;gap:4px;height:28px;padding:0 9px;border-radius:999px;background:#f3f4f6;border:1px solid #e5e7eb;font:600 10px Inter;color:#1f2937}
+.hpill svg{width:14px;height:14px}
+.rbtn{width:30px;height:30px;border-radius:50%;background:#f3f4f6;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;color:#111827}
+.rbtn svg{width:16px;height:16px}
+.rbtn.money{background:#111827;color:#fff;border:0;font:800 14px Inter}
+#appBox{position:absolute;left:0;top:68px;width:390px;height:776px;overflow:hidden}
+#app{width:390px;height:776px}
+
+/* ---------- CTA ---------- */
+#cta{position:absolute;inset:0;visibility:hidden}
+#logoBig{position:absolute;left:460px;top:300px;width:160px;height:160px;box-shadow:0 30px 70px rgba(0,0,0,.15),0 0 0 6px rgba(0,0,0,.05)}
+#wordmark{position:absolute;left:0;right:0;top:500px;margin:0;text-align:center;font:900 116px/1 Montserrat;letter-spacing:-5px;color:#171717}
+#tagline{position:absolute;left:0;right:0;top:640px;margin:0;text-align:center;font:600 46px Inter;color:#525252;letter-spacing:-.8px}
+#tagline b{color:#171717}
+#flow{position:absolute;left:90px;right:150px;top:738px;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:14px 10px;font:600 24px Inter;color:#a3a3a3}
+#flow span{display:flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;border:1px solid #e5e5e5;background:#fff;color:#262626}
+#flow span svg{width:22px;height:22px}
+#play{position:absolute;left:90px;right:150px;top:880px;display:flex;align-items:center;gap:20px;padding:20px;border-radius:30px;background:#fff;border:1px solid #e5e5e5;box-shadow:0 20px 60px rgba(0,0,0,.08)}
+#play .appIcon{width:96px;height:96px;border-radius:22px}
+.appTxt{flex:1;min-width:0}
+.appTxt small{display:block;font:600 18px Inter;color:#737373;letter-spacing:.4px}
+.appTxt b{display:block;font:800 31px/1.15 Inter;color:#171717;letter-spacing:-.6px;margin-top:4px}
+.gp{position:absolute;left:50%;top:1046px;transform:translateX(-50%);overflow:hidden;display:flex;align-items:center;gap:16px;height:104px;padding:0 34px 0 26px;border-radius:20px;background:#000;border:2px solid #a6a6a6;color:#fff}
+.gp svg{width:54px;height:54px}
+.gp small{display:block;font:600 17px Inter;letter-spacing:1px}
+.gp b{display:block;font:600 40px Inter;letter-spacing:-.6px;line-height:1}
+.shine{position:absolute;top:0;bottom:0;left:0;width:120px;background:linear-gradient(100deg,transparent,rgba(255,255,255,.5),transparent);transform:translateX(-160px)}
+#ctaUrl{position:absolute;left:0;right:0;top:1176px;margin:0;text-align:center;font:600 32px Inter;color:#737373}
+#ctaUrl b{color:#171717}
+#ctaVid{position:absolute;left:90px;right:150px;top:1290px;display:flex;justify-content:center;gap:12px}
+#ctaVid div{width:150px;height:266px;border-radius:16px;overflow:hidden;box-shadow:0 14px 34px rgba(0,0,0,.14)}
+#ctaVid svg{width:100%;height:100%}
+
+/* ---------- caption, garis safe zone & kontrol ---------- */
+#caps{position:absolute;left:30px;right:30px;bottom:30px;text-align:center;z-index:95;opacity:0;pointer-events:none}
+#caps .ln{display:inline-block;padding:8px 20px;border-radius:18px;background:rgba(0,0,0,.66);backdrop-filter:blur(6px)}
+#caps .cw{display:inline-block;margin:0 5px;font:800 42px/1.25 Montserrat;color:#fff;-webkit-text-stroke:6px #000;paint-order:stroke fill}
+#caps .cw.on{color:#000;-webkit-text-stroke:0;background:#fff;border-radius:8px;padding:0 8px;margin:0 2px}
+body.nocaps #caps{display:none}
+#guides{position:absolute;inset:0;z-index:99;pointer-events:none;display:none}
+body.guides #guides{display:block}
+#guides i{position:absolute;background:rgba(255,0,0,.18);border:2px dashed rgba(255,60,60,.8)}
+#controls{position:fixed;left:0;right:0;bottom:0;height:56px;display:flex;align-items:center;gap:10px;padding:0 16px;background:#0b0b0c;border-top:1px solid #1f1f22;font:600 13px Inter;color:#a1a1aa}
+#controls button{height:34px;min-width:34px;padding:0 11px;border-radius:8px;border:1px solid #2a2a2e;background:#151517;color:#fff;font:600 13px Inter;cursor:pointer;white-space:nowrap}
+#controls button.off{color:#71717a;text-decoration:line-through}
+#scrub{flex:1;min-width:60px;accent-color:#fff}
+#tlabel{font-variant-numeric:tabular-nums;min-width:88px;text-align:right}
+#audioNote{color:#fbbf24;display:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+body.rec #controls,body.rec #startOverlay{display:none}
+#startOverlay{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(0,0,0,.55);z-index:100;cursor:pointer;backdrop-filter:blur(3px);text-align:center;padding:20px}
+#startOverlay div{width:110px;height:110px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center}
+#startOverlay div::after{content:'';border-left:34px solid #000;border-top:21px solid transparent;border-bottom:21px solid transparent;margin-left:10px}
+#startOverlay p{margin:0;font:700 18px Inter;color:#fff}
+#startOverlay small{font:500 14px Inter;color:#d4d4d4}
+.spinA{animation:sp .9s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+body.rec .spinA{animation:none}
+@media (prefers-reduced-motion: reduce){.spinA{animation:none}}
+#flow .plats5 svg{width:26px;height:26px;border-radius:7px}
+#flow .plats5 svg:first-child{width:22px;height:22px;border-radius:0}
+/*__UICSS__*/
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stageWrap"><div id="stage">
+  <div class="bg"></div>
+
+  <section id="hook">
+    <div id="hv"><div class="ly" id="hv0"></div><div class="ly" id="hv1"></div><div id="hsub"></div><div id="hbar"></div><div id="hpause"><i></i><i></i></div><div id="hflash"></div></div>
+    <div class="htag" id="tag0" style="left:40px;top:396px"><span id="tagI0"></span>Gambar <b>AI</b></div>
+    <div class="htag" id="tag1" style="left:250px;top:700px"><span id="tagI1"></span>Narasi <b>AI</b></div>
+    <div class="htag" id="tag2" style="left:40px;top:1010px"><span id="tagI2"></span>Subtitle <b>AI</b></div>
+    <div id="hR"><h1><span class="ln"><span class="w">Video</span> <span class="w">ini</span></span><span class="ln"><span class="w">dibuat</span> <span class="w">dari</span></span><span class="ln"><span class="w"><span class="inv">1 kalimat.</span></span></span></h1></div>
+    <div id="idea"><span id="ideaIc"></span><span id="ideaTx"></span></div>
+  </section>
+
+  <div id="head">
+    <h2 class="hd" id="hd0">Story Studio<small>4 langkah, ide jadi video</small></h2>
+    <h2 class="hd" id="hd1"><span class="n">1</span>Tulis ide<small>Gaya, durasi, dan format</small></h2>
+    <h2 class="hd" id="hd2"><span class="n">2</span>Naskah AI<small>Tinggal kamu rapikan</small></h2>
+    <h2 class="hd" id="hd3"><span class="n">3</span>Storyboard<small>Wajah tokoh tetap sama</small></h2>
+    <h2 class="hd" id="hd4"><span class="n">3</span>Suara &amp; gerak<small>Narasi AI, efek, kamera</small></h2>
+    <h2 class="hd" id="hd5"><span class="n">4</span>Editor<small>Subtitle, musik, MP4</small></h2>
+    <h2 class="hd" id="hd6">Siap unggah<small>Judul, caption, dan cover</small></h2>
+    <h2 class="hd" id="hd7">Auto upload<small>5 platform sekaligus</small></h2>
+  </div>
+
+  <div id="phone"><div class="screen">
+    <div class="sbar"><span>9:41</span><i>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 20h3V16H2zm5 0h3v-7H7zm5 0h3V9h-3zm5 0h3V5h-3z"/></svg>
+      <svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="7" width="18" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="4" y="9" width="12" height="6" rx="1"/><rect x="21" y="10" width="1.6" height="4" rx=".8"/></svg>
+    </i></div>
+    <div class="punch"></div>
+    <div class="mtop">
+      <div class="l">
+        <div class="cpill"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 3L4 14h7l-2 7 9-11h-7l2-7z"/></svg><b>240</b><small>cr</small><span class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 4.5v15m7.5-7.5h-15"/></svg></span></div>
+        <div class="hpill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>Riwayat</div>
+      </div>
+      <div class="r"><span class="rbtn money">$</span><span class="rbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 0 0-4-5.7V5a2 2 0 1 0-4 0v.3C7.7 6.2 6 8.4 6 11v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0v1a3 3 0 1 1-6 0v-1m6 0H9"/></svg></span></div>
+    </div>
+    <div id="appBox"><div id="app"></div></div>
+    <div class="homebar"></div>
+  </div></div>
+
+  <section id="cta">
+    <div id="logoBig" class="logoTile"><img alt="Klipers" src="__LOGO__"></div>
+    <h1 id="wordmark">Story Studio</h1>
+    <p id="tagline"><b>Satu ide,</b> jadi video cerita.</p>
+    <div id="flow"></div>
+    <div id="play"><div class="appIcon logoTile"><img alt="Klipers" src="__LOGO__"></div><div class="appTxt"><small>DOWNLOAD APLIKASINYA</small><b>Klipers - Ai Video Clipping</b></div></div>
+    <div class="gp"><svg viewBox="0 0 24 24"><path d="M4 2.5 13.5 12 4 21.5c-.4-.2-.6-.6-.6-1.1V3.6c0-.5.2-.9.6-1.1z" fill="#2196F3"/><path d="M4 2.5c.4-.2.9-.2 1.3.1L16.6 9l-3.1 3z" fill="#4CAF50"/><path d="M4 21.5 13.5 12l3.1 3-11.3 6.4c-.4.3-.9.3-1.3.1z" fill="#F44336"/><path d="M16.6 9l3.6 2c.8.5.8 1.5 0 2l-3.6 2-3.1-3z" fill="#FFC107"/></svg><div><small>TERSEDIA DI</small><b>Google Play</b></div><i class="shine"></i></div>
+    <p id="ctaUrl">atau buka <b>klipers.pro</b></p>
+    <div id="ctaVid"></div>
+  </section>
+
+  <div id="caps"></div>
+  <div id="guides"><i style="left:0;right:0;top:0;height:270px"></i><i style="left:0;right:0;bottom:0;height:670px"></i><i style="right:0;top:270px;bottom:670px;width:120px"></i></div>
+</div></div></div>
+
+<div id="controls">
+  <button id="bPlay">▶</button><button id="bRestart">↺</button>
+  <input id="scrub" type="range" min="0" max="63" step="0.01" value="0">
+  <span id="tlabel">0.0 / 63s</span>
+  <span id="audioNote"></span>
+  <button id="bCaps">CC Caption: On</button><button id="bMute">🔊 Suara</button>
+</div>
+<div id="startOverlay"><div></div><p>Putar demo Story Studio</p><small>Narasi: audio/vo-*.mp3 · efek: audio/sfx-*.mp3</small></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+/*__ART__*/
+/*__UI__*/
+/*__ENGINE__*/
+/*__FLOW__*/
+(() => {
+const LOGO = document.querySelector('#logoBig img').src;
+const CUES = /*__CUES__*/;
+let hookSub = null, flowSync = null;
+
+storyEngine({
+  W: 1080, H: 1920, D: 63, CUES, capWords: 4,
+  build(A) {
+    const { tl, $, $$, type, say, sfx } = A;
+    const app = $('#app');
+    buildStudio(app, { mode: 'm', aspect: '9:16', logo: LOGO });
+
+    /* ---------- HOOK (0 – 11) ---------- */
+    $('#hv0').innerHTML = art(0, { uid: 'h0' });
+    $('#hv1').innerHTML = art(1, { uid: 'h1' });
+    $('#tagI0').innerHTML = IC.image; $('#tagI1').innerHTML = IC.mic; $('#tagI2').innerHTML = IC.caps;
+    $('#ideaIc').innerHTML = IC.bulb;
+    tl.fromTo('#hv0', { opacity: 0 }, { opacity: 1, duration: .35, immediateRender: false }, 0);
+    tl.fromTo('#hv0', { scale: 1, x: 0 }, { scale: 1.1, x: -30, duration: 3.2, ease: 'none', immediateRender: false }, 0);
+    tl.to('#hv1', { opacity: 1, duration: .25 }, 2.9);
+    tl.fromTo('#hv1', { scale: 1.12 }, { scale: 1.02, duration: 3.2, ease: 'none', immediateRender: false }, 2.9);
+    tl.fromTo('#hbar', { width: 0 }, { width: '19%', duration: 5.8, ease: 'none', immediateRender: false }, 0);
+    sfx(0.05, 'whoosh', .3);
+    tl.to('#hflash', { opacity: .85, duration: .08 }, 5.75);
+    tl.to('#hflash', { opacity: 0, duration: .35 }, 5.83);
+    sfx(5.75, 'strike', .45);
+    tl.to('#hpause', { opacity: 1, duration: .15 }, 5.8);
+    tl.to('#hpause', { opacity: 0, duration: .3 }, 6.9);
+    tl.to('#hv', { scale: .37, x: 70, y: 420, borderRadius: 80, boxShadow: '0 40px 100px rgba(0,0,0,.28)', duration: .8, ease: 'power3.inOut' }, 5.95);
+    tl.to('#hsub', { opacity: 0, duration: .2 }, 5.95);
+    const ws = $$('#hR .w');
+    [6.15, 6.4, 8.55, 8.8, 9.35].forEach((t, k) => tl.fromTo(ws[k], { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: .4, ease: 'back.out(1.6)', immediateRender: false }, t));
+    tl.set(ws, { opacity: 0 }, 0);
+    [[0, 6.95], [1, 7.35], [2, 7.75]].forEach(([k, t]) => { tl.fromTo('#tag' + k, { opacity: 0, scale: .6 }, { opacity: 1, scale: 1, duration: .35, ease: 'back.out(2)', immediateRender: false }, t); sfx(t, 'click', .3); });
+    tl.fromTo('#idea', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: .35, immediateRender: false }, 9.55);
+    type(9.7, 10.5, '#ideaTx', 'Legenda Danau Toba, akhir yang haru.');
+    sfx(9.4, 'success', .3);
+    const c0 = CUES[0];
+    hookSub = t => {
+      if (t > 5.95) return;
+      let wi = -1; c0.words.forEach((w, k) => { if (t >= w.st) wi = k; });
+      const el = $('#hsub');
+      if (wi < 0) { el.innerHTML = ''; return; }
+      const s = Math.floor(wi / 3) * 3;
+      el.innerHTML = c0.words.slice(s, s + 3).map((w, k) => s + k === wi ? `<span class="on">${w.w}</span>` : w.w).join(' ');
+    };
+    tl.to('#hook', { autoAlpha: 0, y: -40, duration: .45, ease: 'power2.in' }, 10.6);
+
+    /* ---------- HP (10,8 – 51,0) ---------- */
+    tl.set('#phone', { autoAlpha: 0 }, 0);
+    tl.fromTo('#phone', { autoAlpha: 0, y: 120 }, { autoAlpha: 1, y: 0, duration: .65, ease: 'power3.out', immediateRender: false }, 10.8);
+    sfx(10.8, 'whoosh', .35);
+    flowSync = storyFlow(A, { root: app, vh: 776, aspect: '9:16', mode: 'm', cursorStart: { x: 260, y: 520 } });
+    const HD = [[10.9, 16.1], [16.1, 24.0], [24.0, 29.8], [29.8, 35.75], [35.75, 41.0], [41.0, 46.0], [46.0, 49.4], [49.4, 54.6]];
+    HD.forEach(([a, b], k) => {
+      tl.set('#hd' + k, { autoAlpha: 0 }, 0);
+      tl.fromTo('#hd' + k, { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: .35, ease: 'power2.out', immediateRender: false }, a);
+      tl.to('#hd' + k, { autoAlpha: 0, y: -16, duration: .25 }, b - .25);
+    });
+    tl.to('#phone', { autoAlpha: 0, y: 80, scale: .96, duration: .5, ease: 'power2.in' }, 54.6);
+
+    /* ---------- CTA (51,4 – 60) ---------- */
+    $('#flow').innerHTML = [['bulb', 'Ide'], ['scroll', 'Naskah'], ['gallery', 'Storyboard'], ['clapper', 'Editor']].map(([k, l]) => `<span>${IC[k]}${l}</span>`).join('<i>→</i>') + `<i>→</i><span class="plats5">${IC.upload}Auto upload ${['youtube', 'tiktok', 'instagram', 'facebook', 'threads'].map(x => PLAT_IC[x]).join('')}</span>`;
+    $('#ctaVid').innerHTML = [0, 1, 2, 4].map(k => `<div>${art(k, { uid: 'cv' + k })}</div>`).join('');
+    tl.set('#cta', { autoAlpha: 0 }, 0);
+    tl.set('#cta', { autoAlpha: 1 }, 55);
+    tl.fromTo('#logoBig', { scale: 0, rotation: -20 }, { scale: 1, rotation: 0, duration: .55, ease: 'back.out(1.8)', immediateRender: false }, 55.05);
+    tl.fromTo('#wordmark', { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: .5, ease: 'power3.out', immediateRender: false }, 55.2);
+    tl.fromTo(['#play', '.gp'], { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: .45, stagger: .1, ease: 'power3.out', immediateRender: false }, 55.6);
+    tl.fromTo('#tagline', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: .45, immediateRender: false }, 56.7);
+    tl.fromTo('#flow span, #flow i', { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: .3, stagger: .08, immediateRender: false }, 57);
+    tl.fromTo('#ctaUrl', { opacity: 0 }, { opacity: 1, duration: .4, immediateRender: false }, 57.6);
+    tl.fromTo('#ctaVid div', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: .4, stagger: .08, immediateRender: false }, 57.8);
+    tl.fromTo('.gp .shine', { x: -160 }, { x: 520, duration: .8, ease: 'power2.inOut', immediateRender: false }, 60);
+    tl.to('.gp', { scale: 1.06, duration: .25, yoyo: true, repeat: 1 }, 59.8);
+    sfx(55.05, 'riser', .3);
+    sfx(55.6, 'success', .35);
+  },
+  onSync(t) { hookSub && hookSub(t); flowSync && flowSync(t); },
+});
+})();
+</script>
+</body>
+</html>

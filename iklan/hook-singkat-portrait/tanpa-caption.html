@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Klipers Hook Singkat Portrait Tanpa Caption</title>
+<!-- Versi tanpa caption dari index.html (parameter lain ikut diteruskan) -->
+<script>
+  const q = new URLSearchParams(location.search); q.set('nocaps', '1');
+  location.replace('index.html?' + q.toString() + location.hash);
+</script>
+<style>body{margin:0;background:#050505;color:#9ca3af;font:500 15px system-ui;display:flex;align-items:center;justify-content:center;height:100vh}a{color:#fff}</style>
+</head>
+<body><p>Membuka iklan tanpa caption… <a href="index.html?nocaps=1">klik di sini</a> kalau tidak otomatis.</p></body>
+</html>

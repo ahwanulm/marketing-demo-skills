@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Demo Story Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Montserrat:wght@700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<!--
+  DIHASILKAN oleh marketing/tools/build-demo-story-studio.mjs dari template.html + marketing/_shared/story-studio/*.
+  Edit template.html / _shared, lalu build ulang. Jangan edit index.html langsung.
+
+  Klipers — DEMO Story Studio (1920×1080, 60 dtk, tema terang)
+  Hook: video cerita jadi diputar dulu, lalu dibongkar: "dibuat dari 1 kalimat".
+  UI disalin dari frontend/components/story-studio (Ide → Naskah → Storyboard → Editor → Unggah).
+  URL params: ?t=12  ?nocaps=1  ?record=1 (window.__seek)
+-->
+<style>
+:root{--k:.5}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#e7e5e4;overflow:hidden;font-family:Inter,system-ui,sans-serif;color:#171717}
+svg{display:block}
+#viewport{position:fixed;left:0;right:0;top:0;bottom:56px;display:flex;align-items:center;justify-content:center}
+body.rec #viewport{bottom:0}
+#stageWrap{position:relative;width:calc(1920px * var(--k));height:calc(1080px * var(--k))}
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform:scale(var(--k));transform-origin:0 0;overflow:hidden;background:#f4f4f3}
+.bg{position:absolute;inset:0;background-image:radial-gradient(rgba(23,23,23,.07) 1.3px,transparent 1.4px);background-size:38px 38px;-webkit-mask-image:radial-gradient(ellipse at center,#000 35%,transparent 80%);mask-image:radial-gradient(ellipse at center,#000 35%,transparent 80%)}
+.logoTile{display:flex;align-items:center;justify-content:center;background:#fff;border-radius:50%;overflow:hidden;flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.logoTile img{width:92%;height:92%;object-fit:contain;display:block}
+.inv{display:inline-block;background:#171717;color:#fff;padding:0 .16em;border-radius:.1em}
+
+/* ---------- HOOK ---------- */
+#hook{position:absolute;inset:0}
+#hv{position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:hidden;transform-origin:0 0;background:#000;border-radius:0}
+#hv .ly{position:absolute;inset:-4%;opacity:0}
+#hv .ly svg{width:100%;height:100%}
+#hsub{position:absolute;left:0;right:0;bottom:120px;text-align:center;font:900 76px/1.15 Montserrat;color:#fff;text-transform:uppercase;-webkit-text-stroke:10px #000;paint-order:stroke fill;letter-spacing:.5px}
+#hsub .on{color:#ffe600}
+#hbar{position:absolute;left:0;bottom:0;height:8px;width:0;background:rgba(255,255,255,.9)}
+#hflash{position:absolute;inset:0;background:#fff;opacity:0}
+#hpause{position:absolute;left:50%;top:50%;width:180px;height:180px;margin:-90px 0 0 -90px;border-radius:50%;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;gap:22px;opacity:0}
+#hpause i{width:26px;height:80px;border-radius:6px;background:#fff}
+#hR{position:absolute;left:1100px;top:250px;width:760px}
+#hR h1{margin:0;font:900 104px/1.02 Montserrat;letter-spacing:-4px;color:#171717}
+#hR h1 .w{display:inline-block}
+#hR .ln{display:block}
+#idea{margin-top:44px;display:flex;align-items:center;gap:18px;padding:22px 30px;border-radius:24px;background:#fff;border:1px solid #e5e5e5;box-shadow:0 24px 60px rgba(0,0,0,.08);font:500 34px/1.3 Inter;color:#171717;opacity:0;min-height:96px}
+#idea svg{width:34px;height:34px;color:#737373}
+#ideaTx.typing::after{content:'';display:inline-block;width:3px;height:36px;margin-left:3px;vertical-align:-6px;background:#171717}
+.htag{position:absolute;display:flex;align-items:center;gap:12px;padding:14px 22px 14px 14px;border-radius:999px;background:#171717;color:#fff;font:700 28px Inter;box-shadow:0 20px 50px rgba(0,0,0,.25);opacity:0}
+.htag span{width:44px;height:44px;border-radius:50%;background:#fff;color:#171717;display:flex;align-items:center;justify-content:center}
+.htag span svg{width:24px;height:24px}
+.htag b{font-weight:600;color:#a3a3a3;margin-left:2px}
+
+/* ---------- JENDELA APP ---------- */
+#win{position:absolute;left:120px;top:36px;width:1680px;height:930px;border-radius:20px;background:#fff;border:1px solid #e5e5e5;box-shadow:0 50px 120px rgba(23,23,23,.16);overflow:hidden;visibility:hidden}
+.tb{height:40px;display:flex;align-items:center;gap:8px;padding:0 18px;background:#fafafa;border-bottom:1px solid #e5e5e5}
+.tb>i{width:12px;height:12px;border-radius:50%;background:#e5e5e5}
+.url{margin:0 auto;transform:translateX(-30px);width:520px;height:26px;border-radius:8px;background:#f5f5f5;border:1px solid #e5e5e5;display:flex;align-items:center;justify-content:center;gap:8px;font:500 14px Inter;color:#737373}
+.url svg{width:13px;height:13px}
+#vp{position:absolute;left:0;top:40px;width:1680px;height:890px;overflow:hidden}
+#scaler{position:absolute;left:0;top:0;transform:scale(1.25);transform-origin:0 0}
+#app{width:1344px;height:712px}
+
+/* ---------- CTA ---------- */
+#cta{position:absolute;inset:0;visibility:hidden}
+#logoBig{position:absolute;left:885px;top:92px;width:150px;height:150px;box-shadow:0 30px 70px rgba(0,0,0,.15),0 0 0 6px rgba(0,0,0,.05)}
+#wordmark{position:absolute;left:0;right:0;top:270px;margin:0;text-align:center;font:900 124px/1 Montserrat;letter-spacing:-5px;color:#171717}
+#tagline{position:absolute;left:0;right:0;top:420px;margin:0;text-align:center;font:600 40px Inter;color:#525252;letter-spacing:-.6px}
+#tagline b{color:#171717}
+#flow{position:absolute;left:0;right:0;top:506px;display:flex;justify-content:center;align-items:center;gap:14px;font:600 24px Inter;color:#a3a3a3}
+#flow span{display:flex;align-items:center;gap:10px;padding:10px 20px;border-radius:999px;border:1px solid #e5e5e5;background:#fff;color:#262626}
+#flow span svg{width:22px;height:22px}
+#ctaRow{position:absolute;left:0;right:0;top:620px;display:flex;justify-content:center;align-items:center;gap:28px}
+#ctaPill{position:relative;display:flex;align-items:center;gap:22px;height:96px;padding:0 10px 0 34px;border-radius:999px;background:#fff;border:1px solid #e5e5e5;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.08)}
+#ctaPill>span{font:700 32px Inter;color:#171717}
+#ctaPill>b{height:76px;padding:0 32px;border-radius:999px;background:#171717;color:#fff;display:flex;align-items:center;font:800 26px Inter}
+.shine{position:absolute;top:0;bottom:0;left:0;width:120px;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:translateX(-160px)}
+#play{display:flex;align-items:center;gap:22px;padding:14px 16px 14px 14px;border-radius:26px;background:#fff;border:1px solid #e5e5e5;box-shadow:0 20px 60px rgba(0,0,0,.08)}
+#play .appIcon{width:76px;height:76px;border-radius:18px}
+.appTxt small{display:block;font:600 14px Inter;color:#737373;letter-spacing:.4px}
+.appTxt b{display:block;font:800 26px Inter;color:#171717;letter-spacing:-.5px;margin-top:3px}
+.gp{position:relative;overflow:hidden;display:flex;align-items:center;gap:12px;height:68px;padding:0 22px 0 16px;border-radius:14px;background:#000;border:1.5px solid #a6a6a6;color:#fff}
+.gp svg{width:36px;height:36px}
+.gp small{display:block;font:600 12px Inter;letter-spacing:.8px}
+.gp b{display:block;font:600 26px Inter;letter-spacing:-.4px;line-height:1}
+#ctaVid{position:absolute;left:50%;top:790px;transform:translateX(-50%);display:flex;gap:14px}
+#ctaVid div{width:200px;height:113px;border-radius:14px;overflow:hidden;box-shadow:0 14px 34px rgba(0,0,0,.14)}
+#ctaVid svg{width:100%;height:100%}
+
+/* ---------- caption & kontrol ---------- */
+#caps{position:absolute;left:0;right:0;bottom:24px;text-align:center;z-index:90;opacity:0;pointer-events:none}
+#caps .ln{display:inline-block;padding:10px 24px;border-radius:16px;background:rgba(0,0,0,.66);backdrop-filter:blur(6px)}
+#caps .cw{display:inline-block;margin:0 7px;font:800 42px/1.2 Montserrat;color:#fff;-webkit-text-stroke:6px #000;paint-order:stroke fill}
+#caps .cw.on{color:#000;-webkit-text-stroke:0;background:#fff;border-radius:8px;padding:0 8px;margin:0 2px}
+body.nocaps #caps{display:none}
+#controls{position:fixed;left:0;right:0;bottom:0;height:56px;display:flex;align-items:center;gap:12px;padding:0 18px;background:#0b0b0c;border-top:1px solid #1f1f22;font:600 13px Inter;color:#a1a1aa}
+#controls button{height:34px;min-width:34px;padding:0 12px;border-radius:8px;border:1px solid #2a2a2e;background:#151517;color:#fff;font:600 13px Inter;cursor:pointer;white-space:nowrap}
+#controls button.off{color:#71717a;text-decoration:line-through}
+#scrub{flex:1;min-width:60px;accent-color:#fff}
+#tlabel{font-variant-numeric:tabular-nums;min-width:96px;text-align:right}
+#audioNote{color:#fbbf24;display:none;white-space:nowrap}
+body.rec #controls,body.rec #startOverlay{display:none}
+#startOverlay{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(0,0,0,.55);z-index:100;cursor:pointer;backdrop-filter:blur(3px);text-align:center;padding:20px}
+#startOverlay div{width:110px;height:110px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center}
+#startOverlay div::after{content:'';border-left:34px solid #000;border-top:21px solid transparent;border-bottom:21px solid transparent;margin-left:10px}
+#startOverlay p{margin:0;font:700 18px Inter;color:#fff}
+#startOverlay small{font:500 14px Inter;color:#d4d4d4}
+.spinA{animation:sp .9s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+body.rec .spinA{animation:none}
+@media (prefers-reduced-motion: reduce){.spinA{animation:none}}
+#flow .plats5 svg{width:26px;height:26px;border-radius:7px}
+#flow .plats5 svg:first-child{width:22px;height:22px;border-radius:0}
+/*__UICSS__*/
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stageWrap"><div id="stage">
+  <div class="bg"></div>
+
+  <section id="hook">
+    <div id="hv"><div class="ly" id="hv0"></div><div class="ly" id="hv1"></div><div id="hsub"></div><div id="hbar"></div><div id="hpause"><i></i><i></i></div><div id="hflash"></div></div>
+    <div class="htag" id="tag0" style="left:120px;top:226px"><span id="tagI0"></span>Gambar <b>AI</b></div>
+    <div class="htag" id="tag1" style="left:610px;top:226px"><span id="tagI1"></span>Narasi <b>AI</b></div>
+    <div class="htag" id="tag2" style="left:300px;top:790px"><span id="tagI2"></span>Subtitle <b>AI</b></div>
+    <div id="hR">
+      <h1><span class="ln"><span class="w">Video</span> <span class="w">ini</span></span><span class="ln"><span class="w">dibuat</span> <span class="w">dari</span></span><span class="ln"><span class="w"><span class="inv">1 kalimat.</span></span></span></h1>
+      <div id="idea"><span id="ideaIc"></span><span id="ideaTx"></span></div>
+    </div>
+  </section>
+
+  <div id="win">
+    <div class="tb"><i></i><i></i><i></i><div class="url"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span id="urlTx">klipers.pro/story-studio</span></div></div>
+    <div id="vp"><div id="scaler"><div id="app"></div></div></div>
+  </div>
+
+  <section id="cta">
+    <div id="logoBig" class="logoTile"><img alt="Klipers" src="__LOGO__"></div>
+    <h1 id="wordmark">Story Studio</h1>
+    <p id="tagline"><b>Satu ide,</b> jadi video cerita.</p>
+    <div id="flow"></div>
+    <div id="ctaRow">
+      <div id="ctaPill"><span>klipers.pro</span><b>Coba Sekarang →</b><i class="shine"></i></div>
+      <div id="play"><div class="appIcon logoTile"><img alt="Klipers" src="__LOGO__"></div><div class="appTxt"><small>DOWNLOAD APLIKASINYA</small><b>Klipers - Ai Video Clipping</b></div>
+        <div class="gp"><svg viewBox="0 0 24 24"><path d="M4 2.5 13.5 12 4 21.5c-.4-.2-.6-.6-.6-1.1V3.6c0-.5.2-.9.6-1.1z" fill="#2196F3"/><path d="M4 2.5c.4-.2.9-.2 1.3.1L16.6 9l-3.1 3z" fill="#4CAF50"/><path d="M4 21.5 13.5 12l3.1 3-11.3 6.4c-.4.3-.9.3-1.3.1z" fill="#F44336"/><path d="M16.6 9l3.6 2c.8.5.8 1.5 0 2l-3.6 2-3.1-3z" fill="#FFC107"/></svg><div><small>TERSEDIA DI</small><b>Google Play</b></div><i class="shine"></i></div></div>
+    </div>
+    <div id="ctaVid"></div>
+  </section>
+
+  <div id="caps"></div>
+</div></div></div>
+
+<div id="controls">
+  <button id="bPlay">▶</button><button id="bRestart">↺</button>
+  <input id="scrub" type="range" min="0" max="63" step="0.01" value="0">
+  <span id="tlabel">0.0 / 63s</span>
+  <span id="audioNote"></span>
+  <button id="bCaps">CC Caption: On</button><button id="bMute">🔊 Suara</button>
+</div>
+<div id="startOverlay"><div></div><p>Putar demo Story Studio</p><small>Narasi: audio/vo-*.mp3 · efek: audio/sfx-*.mp3</small></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+/*__ART__*/
+/*__UI__*/
+/*__ENGINE__*/
+/*__FLOW__*/
+(() => {
+const LOGO = document.querySelector('#logoBig img').src;
+const CUES = /*__CUES__*/;
+const APPK = 1.25, VW = 1344, VH = 712;
+let hookSub = null, flowSync = null;
+
+storyEngine({
+  W: 1920, H: 1080, D: 63, CUES,
+  build(A) {
+    const { tl, $, flag, say, type, sfx, rel } = A;
+    const app = $('#app');
+    buildStudio(app, { mode: 'd', aspect: '16:9', logo: LOGO });
+
+    /* ---------- HOOK (0 – 11) ---------- */
+    $('#hv0').innerHTML = art(0, { uid: 'h0' });
+    $('#hv1').innerHTML = art(1, { uid: 'h1' });
+    $('#tagI0').innerHTML = IC.image; $('#tagI1').innerHTML = IC.mic; $('#tagI2').innerHTML = IC.caps;
+    $('#ideaIc').innerHTML = IC.bulb;
+    tl.set('#hook', { autoAlpha: 1 }, 0);
+    tl.fromTo('#hv0', { opacity: 0 }, { opacity: 1, duration: .35, immediateRender: false }, 0);
+    tl.fromTo('#hv0', { scale: 1, x: 0 }, { scale: 1.1, x: -50, duration: 3.2, ease: 'none', immediateRender: false }, 0);
+    tl.to('#hv1', { opacity: 1, duration: .25 }, 2.9);
+    tl.fromTo('#hv1', { scale: 1.12 }, { scale: 1.02, duration: 3.2, ease: 'none', immediateRender: false }, 2.9);
+    tl.fromTo('#hbar', { width: 0 }, { width: '19%', duration: 5.8, ease: 'none', immediateRender: false }, 0);
+    sfx(0.05, 'whoosh', .3);
+    // freeze → kartu di kiri
+    tl.to('#hflash', { opacity: .85, duration: .08 }, 5.75);
+    tl.to('#hflash', { opacity: 0, duration: .35 }, 5.83);
+    sfx(5.75, 'strike', .45);
+    tl.to('#hpause', { opacity: 1, duration: .15 }, 5.8);
+    tl.to('#hpause', { opacity: 0, duration: .3 }, 6.9);
+    tl.to('#hv', { scale: .47, x: 120, y: 300, borderRadius: 56, boxShadow: '0 40px 100px rgba(0,0,0,.28)', duration: .8, ease: 'power3.inOut' }, 5.95);
+    tl.to('#hsub', { opacity: 0, duration: .2 }, 5.95);
+    const ws = A.$$('#hR .w');
+    [6.15, 6.4, 8.55, 8.8, 9.35].forEach((t, k) => tl.fromTo(ws[k], { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: .4, ease: 'back.out(1.6)', immediateRender: false }, t));
+    tl.set(ws, { opacity: 0 }, 0);
+    [[0, 6.95], [1, 7.35], [2, 7.75]].forEach(([k, t]) => { tl.fromTo('#tag' + k, { opacity: 0, scale: .6 }, { opacity: 1, scale: 1, duration: .35, ease: 'back.out(2)', immediateRender: false }, t); sfx(t, 'click', .3); });
+    tl.fromTo('#idea', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: .35, immediateRender: false }, 9.55);
+    type(9.7, 10.5, '#ideaTx', 'Legenda Danau Toba, akhir yang haru.');
+    sfx(9.4, 'success', .3);
+    // subtitle terbakar di video (karaoke) dari kata vo-01
+    const c0 = CUES[0];
+    hookSub = t => {
+      if (t > 5.95) return;
+      let wi = -1; c0.words.forEach((w, k) => { if (t >= w.st) wi = k; });
+      const el = $('#hsub');
+      if (wi < 0) { el.innerHTML = ''; return; }
+      const s = Math.floor(wi / 3) * 3;
+      el.innerHTML = c0.words.slice(s, s + 3).map((w, k) => s + k === wi ? `<span class="on">${w.w}</span>` : w.w).join(' ');
+    };
+    tl.to('#hook', { autoAlpha: 0, y: -40, duration: .45, ease: 'power2.in' }, 10.6);
+
+    /* ---------- JENDELA (10,8 – 51,4) ---------- */
+    tl.fromTo('#win', { autoAlpha: 0, y: 70, scale: .96 }, { autoAlpha: 1, y: 0, scale: 1, duration: .6, ease: 'power3.out', immediateRender: false }, 10.8);
+    tl.set('#win', { autoAlpha: 0 }, 0);
+    sfx(10.8, 'whoosh', .35);
+    // kamera: zoom ke elemen (koordinat app, dikurangi gulir sy)
+    const box = (el, sy) => { const p = rel(el, app); const inScroll = !!$(el).closest('.scroll'); return { l: p.l, t: p.t - (inScroll ? sy : 0), r: p.l + p.w, b: p.t - (inScroll ? sy : 0) + p.h }; };
+    const cam = (t, el, z, d, el2, sy) => {
+      let b = box(el, sy);
+      if (el2) { const b2 = box(el2, sy); b = { l: Math.min(b.l, b2.l), t: Math.min(b.t, b2.t), r: Math.max(b.r, b2.r), b: Math.max(b.b, b2.b) }; }
+      const cx = (b.l + b.r) / 2, cy = (b.t + b.b) / 2;
+      const x = Math.min(0, Math.max(VW - VW * z, VW / 2 - cx * z));
+      const y = Math.min(0, Math.max(VH - VH * z, VH / 2 - cy * z));
+      tl.to('#app', { x, y, scale: z, transformOrigin: '0 0', duration: d || .01, ease: 'power2.inOut' }, t);
+    };
+    flowSync = storyFlow(A, { root: app, vh: VH, aspect: '16:9', mode: 'd', cam, cursorStart: { x: 900, y: 600 } });
+    say(16.1, '#urlTx', 'klipers.pro/story-studio/baru'); say(24.0, '#urlTx', 'klipers.pro/story-studio/legenda-danau-toba');
+    tl.to('#win', { autoAlpha: 0, scale: .94, y: 30, duration: .5, ease: 'power2.in' }, 54.6);
+
+    /* ---------- CTA (51,4 – 60) ---------- */
+    $('#flow').innerHTML = [['bulb', 'Ide'], ['scroll', 'Naskah'], ['gallery', 'Storyboard'], ['clapper', 'Editor']].map(([k, l]) => `<span>${IC[k]}${l}</span>`).join('<i>→</i>') + `<i>→</i><span class="plats5">${IC.upload}Auto upload ${['youtube', 'tiktok', 'instagram', 'facebook', 'threads'].map(x => PLAT_IC[x]).join('')}</span>`;
+    $('#ctaVid').innerHTML = [0, 1, 2, 3, 4].map(k => `<div>${art(k, { uid: 'cv' + k })}</div>`).join('');
+    tl.set('#cta', { autoAlpha: 0 }, 0);
+    tl.set('#cta', { autoAlpha: 1 }, 55);
+    tl.fromTo('#logoBig', { scale: 0, rotation: -20 }, { scale: 1, rotation: 0, duration: .55, ease: 'back.out(1.8)', immediateRender: false }, 55.05);
+    tl.fromTo('#wordmark', { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: .5, ease: 'power3.out', immediateRender: false }, 55.2);
+    tl.fromTo('#tagline', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: .45, immediateRender: false }, 56.7);
+    tl.fromTo('#flow span, #flow i', { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: .3, stagger: .08, immediateRender: false }, 57);
+    tl.fromTo('#ctaRow', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: .45, ease: 'power3.out', immediateRender: false }, 55.6);
+    tl.fromTo('#ctaVid div', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: .4, stagger: .08, immediateRender: false }, 57.8);
+    tl.to('#ctaVid div', { y: -8, duration: 2.6, ease: 'sine.inOut', stagger: .15, yoyo: true, repeat: 1 }, 58.4);
+    tl.fromTo('#ctaPill .shine', { x: -160 }, { x: 620, duration: .9, ease: 'power2.inOut', immediateRender: false }, 59.2);
+    tl.fromTo('.gp .shine', { x: -160 }, { x: 380, duration: .8, ease: 'power2.inOut', immediateRender: false }, 60);
+    tl.to('#play .gp', { scale: 1.06, duration: .25, yoyo: true, repeat: 1 }, 59.8);
+    sfx(55.05, 'riser', .3);
+    sfx(55.6, 'success', .35);
+  },
+  onSync(t) { hookSub && hookSub(t); flowSync && flowSync(t); },
+});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+NARASI DEMO KLIPERS — AI CLIPPING VERSI HP (Quick Process · Analisis AI · Atur Manual)
+Folder       : marketing/iklan/demo-ai-clipping-portrait/
+Durasi video : ±70 detik (1080×1920, klipers-mobile-app, tema terang)
+Bahasa       : Indonesia
+Voice        : ElevenLabs "Janu - Calm Narrator" (speed 1.0, stability 50, similarity 75), satu
+               rekaman naskah A (46,8 dtk) dipotong per kalimat di jeda heningnya.
+               Cadangan Edge-TTS: audio/v2-edge/ (naskah hook), audio/v1-edge/ (naskah awal)
+
+=====================================================================
+A. NASKAH UTUH — untuk ditempel langsung ke ElevenLabs / TTS lain
+=====================================================================
+
+Stop potong video manual! Satu podcast sejam, bisa jadi tiga puluh klip viral.
+
+Cara tercepat, Quick Process. Tempel link, kirim, beres.
+
+Mau layout dinamis? Lima belas klip? Subtitle keren? Pilih, lalu Buat Clips.
+
+Sambil kamu ngopi, AI sudah memotong momen terbaik, lengkap subtitle dan face tracking.
+
+Mau lebih jitu? Analisis AI kasih skor viral di tiap momen, jadi kamu tahu mana yang bakal meledak.
+
+Lengkap dengan alasan kenapa viral. Pilih yang paling kuat, proses, unduh.
+
+Punya momen favorit sendiri? Pakai Atur Manual, tentukan detik mulai dan selesainya.
+
+Pilih rasio, nyalakan subtitle, klik proses. Klipmu siap diunggah.
+
+Kerja seharian, jadi lima menit. Download Klipers di Google Play sekarang.
+
+
+=====================================================================
+B. PER KALIMAT — satu file audio per kalimat (supaya sinkron ke animasi)
+   Simpan hasilnya sebagai audio/vo-01.mp3 … audio/vo-09.mp3
+=====================================================================
+
+[vo-01.mp3]  Mulai 0,3 dtk · Scene: Hook (1 video panjang → puluhan klip)
+Stop potong video manual! Satu podcast sejam, bisa jadi tiga puluh klip viral.
+
+[vo-02.mp3]  Scene: Cara 1 Quick Process — dashboard, tempel link, kirim
+Cara tercepat, Quick Process. Tempel link, kirim, beres.
+
+[vo-03.mp3]  Scene: Opsi Quick Process — Jenis, Durasi, Target Clips, Subtitle, Buat Clips
+Mau layout dinamis? Lima belas klip? Sabtaitel keren? Pilih, lalu Buat Clips.
+
+[vo-04.mp3]  Scene: Project diproses → Semua Clip → daftar klip
+Sambil kamu ngopi, AI sudah memotong momen terbaik, lengkap sabtaitel dan face tracking.
+
+[vo-05.mp3]  Scene: Cara 2 Analisis AI — composer, Durasi/Clips/Bahasa, analisis, Momen Viral Ditemukan
+Mau lebih jitu? Analisis AI kasih skor viral di tiap momen, jadi kamu tahu mana yang bakal meledak.
+
+[vo-06.mp3]  Scene: ShortVideoCard — Rangkuman, Kenapa viral, opsi, Proses Video → Selesai
+Lengkap dengan alasan kenapa viral. Pilih yang paling kuat, proses, unduh.
+
+[vo-07.mp3]  Scene: Cara 3 Atur Manual — Load Video, Klip 1, Start/End
+Punya momen favorit sendiri? Pakai Atur Manual, tentukan detik mulai dan selesainya.
+
+[vo-08.mp3]  Scene: Rasio, Auto Subtitle, Klik Untuk Process Video → Download
+Pilih rasio, nyalakan sabtaitel, klik proses. Klipmu siap diunggah.
+
+[vo-09.mp3]  Scene: Penutup + Google Play
+Kerja seharian, jadi lima menit. Download Klipers di Google Play sekarang.
+
+
+=====================================================================
+CATATAN
+=====================================================================
+- "sabtaitel" ditulis fonetik untuk TTS; caption layar tetap "subtitle".
+- UI diambil dari klipers-mobile-app: StandardDashboard + QuickProcessOptions,
+  MainApp mode 'ai' (VideoInputForm, ShortVideoCard), mode 'manual'
+  (ManualSegmentForm, ManualSegmentCard). Tab "Highlight Bola" sengaja tidak ditampilkan.
+- Versi 2 (lebih hook): pola stop/masalah + angka, pertanyaan ke penonton di tiap cara,
+  tutup dengan janji hasil. Suara versi 1 disimpan di audio/v1-edge/.
+- Kalau mengubah kalimat, ubah juga array CUES di index.html.

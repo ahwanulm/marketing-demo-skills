@@ -1,0 +1,1025 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Demo Highlight Bola Klipers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+/*
+  Klipers — DEMO FITUR HIGHLIGHT BOLA (1080×1920, ±44 dtk, tema terang bawaan)
+  Alur Baru (Buka Klipers di Awal + UI Presisi):
+    1. Hook & Buka Klipers: HP di layar sejak detik 0 → tap icon Klipers di home screen → masuk Dashboard Klipers → tap "⚽ Highlight Bola (NEW)"
+    2. Input Link Pertandingan: Tab Highlight Bola aktif → Composer Claude-Style ketik link YouTube laga → YouTubePreviewCard muncul di dalam composer
+    3. Pengaturan Pintar: Toolbar composer (Storytelling AI komentator, Papan Skor broadcast, Sensor logo TV, Rasio 9:16) → klik "Buat Highlight"
+    4. Progress Deteksi AI: Progress card Klipers (PixelLoadingCube, 68%), visualizer audio gemuruh stadion, verifikasi Smart VAR gol sah
+    5. Hasil Master Reel: Ribbon Scoreboard FT, player 9:16 subtitle karaoke, filter momen (Gol/Save/Kartu), auto upload 5 platform
+    6. Penutup: Logo Klipers, Google Play, klipers.pro
+*/
+:root{
+  --k:.3;
+  --stageBg:#050505; --dots:rgba(255,255,255,.06); --glow:rgba(255,255,255,.07);
+  --bg:#0a0a0a; --card:#111; --c2:#1a1a1a; --c0:#0f0f0f; --line:#2a2a2a; --line2:#333; --line3:#222;
+  --text:#fff; --text2:#e5e7eb; --t3:#d1d5db; --muted:#9ca3af; --dim:#6b7280; --faint:#4b5563; --ghost:#374151;
+  --inv:#fff; --invText:#111827; --soft:rgba(255,255,255,.04); --soft2:rgba(255,255,255,.08); --dlg:#1f1f1f;
+}
+body.light{
+  --stageBg:#eef0f3; --dots:rgba(0,0,0,.07); --glow:rgba(0,0,0,.05);
+  --bg:#fff; --card:#fff; --c2:#f3f4f6; --c0:#f9fafb; --line:#e5e7eb; --line2:#e5e7eb; --line3:#f3f4f6;
+  --text:#111827; --text2:#1f2937; --t3:#374151; --muted:#6b7280; --dim:#6b7280; --faint:#9ca3af; --ghost:#d1d5db;
+  --inv:#111827; --invText:#fff; --soft:rgba(0,0,0,.03); --soft2:rgba(0,0,0,.06); --dlg:#fff;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#000;overflow:hidden;font-family:Inter,system-ui,sans-serif;color:var(--text)}
+body.light{background:#e5e7eb}
+svg{display:block}
+#viewport{position:fixed;left:0;right:0;top:0;bottom:56px;display:flex;align-items:center;justify-content:center}
+body.rec #viewport{bottom:0}
+#stageWrap{position:relative;width:calc(1080px * var(--k));height:calc(1920px * var(--k))}
+#stage{position:absolute;left:0;top:0;width:1080px;height:1920px;transform:scale(var(--k));transform-origin:0 0;overflow:hidden;background:var(--stageBg)}
+.bg{position:absolute;inset:0;overflow:hidden}
+.bg .dots{position:absolute;inset:0;background-image:radial-gradient(var(--dots) 1.4px,transparent 1.5px);background-size:40px 40px;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 80%)}
+#glowA,#glowB{position:absolute;border-radius:50%;filter:blur(120px)}
+#glowA{width:900px;height:900px;left:-200px;top:-200px;background:radial-gradient(circle,var(--glow),transparent 65%)}
+#glowB{width:1000px;height:1000px;right:-300px;bottom:-300px;background:radial-gradient(circle,var(--glow),transparent 65%)}
+.inv{display:inline-block;background:var(--inv);color:var(--invText);padding:0 .16em;border-radius:.12em}
+.logoTile{display:flex;align-items:center;justify-content:center;background:#fff;border-radius:50%;overflow:hidden;flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.logoTile img{width:92%;height:92%;object-fit:contain;display:block}
+
+/* Safe Zone Guides Overlay */
+#guidesOverlay{position:absolute;inset:0;pointer-events:none;z-index:99;display:none}
+body.guides #guidesOverlay{display:block}
+.gz-line{position:absolute;border-style:dashed;border-color:rgba(239,68,68,.75);pointer-events:none}
+.gz-top{left:0;right:0;top:270px;border-top-width:2px}
+.gz-bot{left:0;right:0;bottom:670px;border-bottom-width:2px}
+.gz-right{top:0;bottom:0;right:120px;border-right-width:2px}
+.gz-tag{position:absolute;padding:3px 8px;border-radius:4px;background:#ef4444;color:#fff;font:800 11px Inter}
+
+/* Header */
+#head{position:absolute;left:40px;right:40px;top:60px;height:224px}
+.hd{position:absolute;left:0;right:0;top:0;margin:0;text-align:center;font:900 60px/1.08 Montserrat;letter-spacing:-2px;color:var(--text);visibility:hidden}
+.hd .w{display:inline-block}
+.hd small{display:block;margin-top:8px;font:700 26px Inter;letter-spacing:0;color:var(--muted)}
+
+/* Phone Frame */
+#phone{position:absolute;left:190px;top:300px;width:700px;height:1482px;border-radius:78px;background:#0a0a0a;border:2px solid #2a2a2a;box-shadow:0 60px 160px rgba(0,0,0,.35),inset 0 0 0 6px #151515}
+.screen{position:absolute;left:14px;top:14px;width:390px;height:844px;transform:scale(1.7231);transform-origin:0 0;border-radius:37px;overflow:hidden;background:var(--bg);font-size:14px}
+.sbar{position:absolute;left:0;right:0;top:0;height:26px;display:flex;align-items:center;justify-content:space-between;padding:0 22px 0 26px;font:600 12px Inter;color:var(--text);z-index:60}
+.sbar i{display:flex;gap:5px;align-items:center}
+.sbar svg{width:14px;height:14px}
+.punch{position:absolute;left:50%;top:7px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:#000;z-index:61}
+.homebar{position:absolute;left:50%;bottom:5px;width:120px;height:4px;margin-left:-60px;border-radius:3px;background:var(--text);opacity:.5;z-index:90}
+
+/* Top Navigation Bar in App */
+.mtop{position:absolute;left:0;right:0;top:26px;height:42px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;background:var(--bg);border-bottom:1px solid var(--line);z-index:20}
+.mtop .l,.mtop .r{display:flex;align-items:center;gap:6px}
+.cpill{display:flex;align-items:center;gap:6px;height:28px;padding:0 4px 0 9px;border-radius:999px;background:var(--c2);border:1px solid var(--line2)}
+.cpill svg{width:14px;height:14px}
+.cpill b{font:700 12px Inter;color:var(--text)} .cpill small{font:400 10px Inter;color:var(--muted)}
+.cpill .plus{width:20px;height:20px;border-radius:50%;background:var(--inv);color:var(--invText);display:flex;align-items:center;justify-content:center}
+.cpill .plus svg{width:12px;height:12px}
+.hpill{display:flex;align-items:center;gap:4px;height:28px;padding:0 9px;border-radius:999px;background:var(--c2);border:1px solid var(--line2);font:600 10px Inter;color:var(--text2)}
+.hpill svg{width:14px;height:14px}
+.rbtn{width:30px;height:30px;border-radius:50%;background:var(--c2);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;color:var(--text)}
+.rbtn svg{width:16px;height:16px}
+.view{position:absolute;left:0;right:0;top:68px;bottom:0;overflow:hidden}
+.pnl{position:absolute;left:20px;top:6px;width:350px;visibility:hidden}
+.scr{position:relative;padding-bottom:120px}
+
+/* Tap indicator */
+#tapS{position:absolute;left:-16px;top:-16px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.3);border:2px solid rgba(255,255,255,.95);box-shadow:0 3px 10px rgba(0,0,0,.35);z-index:95;opacity:0;pointer-events:none}
+#tapR{position:absolute;left:-16px;top:-16px;width:32px;height:32px;border-radius:50%;border:2px solid var(--text);z-index:94;opacity:0;pointer-events:none}
+body.light #tapS{background:rgba(17,24,39,.2);border-color:rgba(17,24,39,.85)}
+
+/* S1: Mobile OS Home Screen */
+#pHome{position:absolute;inset:0;background:linear-gradient(135deg,#0f172a,#1e293b);z-index:50;display:flex;flex-direction:column;justify-content:space-between;padding:50px 24px 70px;visibility:visible}
+.home-clock{text-align:center;color:#fff;margin-top:20px}
+.home-clock .time{font:300 58px Inter;letter-spacing:-2px;line-height:1}
+.home-clock .date{font:500 13px Inter;color:#94a3b8;margin-top:4px}
+.app-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px 14px}
+.app-icon{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer}
+.app-icon .icon-squircle{width:54px;height:54px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,.25);overflow:hidden}
+.app-icon .icon-squircle img{width:88%;height:88%;object-fit:contain}
+.app-icon span{font:500 11px Inter;color:#e2e8f0}
+.app-icon.active .icon-squircle{box-shadow:0 0 0 3px #38bdf8, 0 8px 30px rgba(56,189,248,.6)}
+
+/* Horizontal Mode Tabs in MainApp (Exact Match) */
+.mode-tabs-bar{display:flex;align-items:center;gap:4px;padding:3px;background:var(--c2);border:1px solid var(--line);border-radius:14px;margin-bottom:12px}
+.m-tab-btn{position:relative;flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:6px 4px;border-radius:10px;font:600 10.5px Inter;color:var(--muted);white-space:nowrap;cursor:pointer;transition:all .2s}
+.m-tab-btn.on{background:#fff;color:#111827;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.m-tab-btn .badge-new{position:absolute;top:-6px;right:-2px;padding:1px 5px;border-radius:999px;background:#2563eb;color:#fff;font:900 7px Inter;letter-spacing:.04em;border:1.5px solid #fff}
+
+/* StandardDashboard Hero & Feature Grid */
+.dhero{display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:12px}
+.dhero-title{margin:0 0 4px;font:800 21px/1.2 Inter;letter-spacing:-.8px;color:var(--text)}
+.dhero-amber{color:#16a34a}
+.dhero-viral{display:inline-block;padding:2px 7px;border-radius:7px;background:linear-gradient(135deg,#2563eb,#38bdf8);color:#fff;transform:rotate(1deg);box-shadow:0 3px 12px rgba(37,99,235,.35)}
+.dhero-sub{margin:0 0 10px;font:400 11px/1.4 Inter;color:var(--muted);max-width:320px}
+.dgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;margin-top:12px}
+.dgrid .fg-item{position:relative;height:66px;border-radius:12px;background:var(--card);border:1px solid var(--line);box-shadow:0 2px 8px rgba(0,0,0,.04);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font:600 8.5px Inter;color:var(--muted);text-align:center;padding:0 4px;cursor:pointer}
+.dgrid .fg-item.on{border-color:#10b981;background:#f0fdf4;color:#065f46;box-shadow:0 0 0 1px #10b981}
+.dgrid .fg-badge-red{position:absolute;top:-4px;right:-4px;padding:1px 5px;border-radius:999px;background:#ef4444;font:800 7px Inter;color:#fff}
+.dgrid svg{width:16px;height:16px;color:var(--text2)}
+
+/* ClaudeStyleAiInput Composer in SportsHighlightForm */
+.composer-box{background:#fff;border-radius:18px;border:1px solid #e5e7eb;box-shadow:0 4px 16px rgba(0,0,0,.06);padding:12px;display:flex;flex-direction:column;gap:10px;text-align:left}
+.composer-textarea{min-height:48px;font:400 12px/1.4 Inter;color:#111827;position:relative}
+.composer-textarea .ph2{color:#9ca3af;position:absolute;left:0;top:0}
+.composer-textarea #dUrl{color:#111827;word-break:break-all;font-size:11.5px;font-weight:500}
+.caret{display:inline-block;width:2px;height:15px;margin-left:1px;vertical-align:-2px;background:#111827;opacity:0}
+
+/* YouTubePreviewCard Inside Composer (Exact match) */
+.yt-card{background:#f9fafb;border-radius:12px;border:1px solid #e5e7eb;padding:8px;display:flex;gap:8px;align-items:center;opacity:0}
+.yt-th{position:relative;width:90px;height:52px;border-radius:8px;overflow:hidden;flex:none}
+.yt-th img{width:100%;height:100%;object-fit:cover}
+.yt-th .yt-dur{position:absolute;right:3px;bottom:3px;padding:1px 4px;border-radius:3px;background:rgba(0,0,0,.8);font:700 8px Inter;color:#fff}
+.yt-info{flex:1;min-width:0}
+.yt-info b{font:700 10.5px/1.3 Inter;color:#111827;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.yt-info .subm{margin-top:2px;font:500 8.5px Inter;color:#6b7280}
+.yt-tag-row{margin-top:3px;display:flex;gap:4px}
+.yt-tag-row span{padding:1px 5px;border-radius:3px;background:#eff6ff;color:#2563eb;font:700 8px Inter}
+
+/* Composer Toolbar & InlineSelect Options */
+.comp-toolbar{display:flex;flex-direction:column;gap:8px;border-top:1px solid #f3f4f6;padding-top:8px}
+.inline-select-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.inline-pill{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:8px;background:#f3f4f6;border:1px solid #e5e7eb;font:600 9.5px Inter;color:#374151;white-space:nowrap;cursor:pointer}
+.inline-pill.on{background:#eff6ff;border-color:#3b82f6;color:#1d4ed8}
+.inline-pill svg{width:11px;height:11px;color:#6b7280}
+.comp-btn-row{display:flex;align-items:center;justify-content:space-between}
+.comp-btn-reset{display:flex;align-items:center;gap:4px;font:600 10.5px Inter;color:#9ca3af;cursor:pointer}
+.comp-btn-reset svg{width:12px;height:12px}
+.bgo{display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 16px;border-radius:10px;background:#111827;color:#fff;font:700 11.5px Inter;cursor:pointer;box-shadow:0 3px 12px rgba(17,24,39,.18)}
+.bgo svg{width:13px;height:13px}
+
+/* SportsHighlightProgress (Exact Match) */
+.sh-prog-card{background:#fff;border-radius:16px;border:1px solid #e5e7eb;box-shadow:0 2px 14px rgba(0,0,0,.05);padding:14px;position:relative;overflow:hidden;text-align:left}
+.prog-top-line{position:absolute;top:0;left:0;right:0;height:4px;background:#f3f4f6}
+.prog-top-fill{height:100%;width:0;background:linear-gradient(90deg,#2563eb,#38bdf8);transition:width .3s}
+.prog-header-row{display:flex;align-items:center;gap:10px;margin-top:4px}
+.pixel-cube{width:32px;height:32px;border-radius:8px;background:#eff6ff;border:1.5px solid #93c5fd;display:flex;align-items:center;justify-content:center;font-size:16px;flex:none}
+.prog-title-wrap h3{margin:0;font:700 12.5px Inter;color:#111827;display:flex;align-items:center;gap:6px}
+.prog-title-wrap h3 .dot{width:6px;height:6px;border-radius:50%;background:#22c55e;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.prog-title-wrap p{margin:2px 0 0;font:400 9.5px Inter;color:#6b7280}
+.av-card{margin-top:12px;background:#09090b;border-radius:10px;padding:8px 10px;color:#fff}
+.av-hdr{display:flex;align-items:center;justify-content:space-between;font:600 8.5px Inter;color:#a1a1aa}
+.av-tag{padding:1px 5px;border-radius:3px;background:#ef4444;color:#fff;font:800 7.5px Inter}
+.av-bars{height:30px;display:flex;align-items:flex-end;gap:3px;padding:3px 0}
+.av-bars span{flex:1;background:#27272a;border-radius:2px}
+.av-bars span.pk{background:#22c55e}
+.av-bars span.pk-gold{background:#eab308;box-shadow:0 0 6px #eab308}
+.s-steps{display:flex;flex-direction:column;gap:5px;margin-top:12px}
+.s-step{display:flex;gap:8px;align-items:center;padding:5px 8px;border-radius:8px;background:#f9fafb;border:1px solid #f3f4f6}
+.s-step .ic{width:16px;height:16px;border-radius:50%;background:#e5e7eb;color:#9ca3af;display:flex;align-items:center;justify-content:center;font:800 8px Inter;flex:none}
+.s-step.ok .ic{background:#10b981;color:#fff}
+.s-step .tx b{display:block;font:700 9.5px Inter;color:#111827}
+.s-step .tx span{display:block;font:400 8px Inter;color:#6b7280}
+
+/* SportsHighlightResult (Exact Match) */
+.sh-res{display:flex;flex-direction:column;gap:10px;text-align:left}
+.ribbon{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:12px;background:#fff;border:1px solid #e5e7eb;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.rb-meta b{display:block;font:800 11px Inter;color:#111827}
+.rb-meta span{display:inline-flex;align-items:center;gap:3px;font:700 8.5px Inter;color:#2563eb;background:#eff6ff;padding:1px 5px;border-radius:4px;margin-top:2px}
+.rb-score{display:flex;align-items:center;height:24px;border-radius:6px;overflow:hidden;border:1px solid #0c192e;font-family:Montserrat,sans-serif}
+.rb-score .sb-t{padding:0 6px;height:100%;display:flex;align-items:center;font-weight:900;font-size:9.5px;color:#fff;background:#0c192e}
+.rb-score .sb-val{padding:0 6px;height:100%;display:flex;align-items:center;font-weight:900;font-size:10px;color:#0c192e;background:#fff}
+
+.reel-box{position:relative;width:100%;height:185px;border-radius:14px;overflow:hidden;background:#000;box-shadow:0 4px 16px rgba(0,0,0,.15);border:1px solid #e5e7eb}
+.reel-box img{width:100%;height:100%;object-fit:cover}
+.reel-karaoke{position:absolute;left:8px;right:8px;bottom:8px;text-align:center;font:900 10.5px Montserrat;color:#fff;text-shadow:0 2px 4px #000;background:rgba(0,0,0,.55);padding:4px 6px;border-radius:6px;backdrop-filter:blur(4px)}
+.reel-karaoke i{font-style:normal;color:#22c55e}
+.reel-play-ic{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.9);color:#000;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.reel-play-ic svg{width:15px;height:15px;margin-left:2px}
+
+.m-tabs{display:flex;gap:4px;overflow-x:auto}
+.m-tab{padding:3px 8px;border-radius:999px;font:700 8.5px Inter;border:1px solid #e5e7eb;background:#fff;color:#6b7280;white-space:nowrap}
+.m-tab.on{background:#111827;color:#fff;border-color:#111827}
+
+.mlist{display:flex;flex-direction:column;gap:5px}
+.mc{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;background:#fff;border:1px solid #e5e7eb;text-align:left}
+.mc .ico{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;flex:none}
+.mc .ico.gol{background:#eff6ff}
+.mc .ico.save{background:#ecfdf5}
+.mc .info{flex:1;min-width:0}
+.mc .info b{display:block;font:700 9px Inter;color:#111827}
+.mc .info span{display:block;font:500 7.5px Inter;color:#6b7280}
+.mc .sc{padding:1px 5px;border-radius:999px;background:linear-gradient(90deg,#f97316,#ef4444);color:#fff;font:800 7.5px Inter}
+
+/* Bottom Sheet Schedule Upload */
+#sheetDim{position:absolute;inset:0;background:rgba(0,0,0,.5);z-index:75;visibility:hidden}
+#sheet{position:absolute;left:0;right:0;bottom:0;border-radius:24px 24px 0 0;background:#fff;padding:14px 14px 28px;z-index:80;box-shadow:0 -10px 40px rgba(0,0,0,.25);visibility:hidden}
+.sh-bar{width:36px;height:4px;border-radius:2px;background:#d1d5db;margin:0 auto 10px}
+.sh-head b{display:block;font:800 13px Inter;color:#111827}
+.sh-head small{display:block;font:500 9.5px Inter;color:#6b7280;margin-top:2px}
+.sh-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:14px 0}
+.sh-item{padding:8px 4px;border-radius:10px;border:1.5px solid #22c55e;background:#f0fdf4;display:flex;flex-direction:column;align-items:center;gap:4px;font:700 8.5px Inter;color:#111827}
+.sh-item .chk{width:14px;height:14px;border-radius:50%;background:#22c55e;color:#fff;font:800 7px Inter;display:flex;align-items:center;justify-content:center}
+.sh-btn{padding:10px;border-radius:12px;background:#111827;color:#fff;font:700 12px Inter;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+
+/* CTA & Logo */
+#ctaLogo{position:absolute;left:50%;top:460px;width:150px;height:150px;margin-left:-75px}
+#ctaWord{position:absolute;left:0;right:0;top:630px;margin:0;text-align:center;font:900 68px/1 Montserrat;letter-spacing:-2px;color:var(--text)}
+#ctaApp{position:absolute;left:0;right:0;top:710px;margin:0;text-align:center;font:700 24px Inter;color:#22c55e}
+#ctaTag{position:absolute;left:0;right:0;top:750px;margin:0;text-align:center;font:600 22px Inter;color:var(--muted)}
+#ctaGp{position:absolute;left:50%;top:820px;transform:translateX(-50%);display:flex;align-items:center;gap:16px;padding:14px 28px;border-radius:18px;background:#000;color:#fff;border:2px solid #333;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+#ctaGp svg{width:36px;height:36px;flex:none}
+#ctaGp .tx{text-align:left}
+#ctaGp .tx small{display:block;font:600 12px Inter;color:#9ca3af;letter-spacing:.05em;text-transform:uppercase}
+#ctaGp .tx b{display:block;font:800 19px Inter;color:#fff}
+#ctaUrl{position:absolute;left:0;right:0;top:940px;margin:0;text-align:center;font:600 28px Inter;color:var(--muted)}
+#ctaUrl b{color:var(--text)}
+#flow{position:absolute;left:60px;right:60px;top:1000px;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px;font:600 20px Inter;color:var(--muted)}
+#flow span{padding:6px 14px;border-radius:999px;border:1px solid var(--line2);background:var(--card);color:var(--text2)}
+
+/* Kinetic Typography Captions */
+#caps{position:absolute;left:20px;right:20px;bottom:32px;text-align:center;z-index:95;opacity:0;pointer-events:none}
+#caps .ln{display:inline-flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px 10px;padding:12px 22px;border-radius:24px;background:rgba(12,18,30,.85);border:1.5px solid rgba(255,255,255,.18);backdrop-filter:blur(14px);box-shadow:0 16px 45px rgba(0,0,0,.5)}
+#caps .cw{display:inline-block;font:900 40px/1.2 Montserrat,Inter,sans-serif;letter-spacing:-.8px;color:#fff;-webkit-text-stroke:6px #000;paint-order:stroke fill;transform:scale(.92);opacity:.85;transition:transform .14s cubic-bezier(.34,1.56,.64,1),color .12s,opacity .14s}
+#caps .cw.on{color:#000 !important;-webkit-text-stroke:0 !important;background:linear-gradient(135deg,#facc15,#eab308);border-radius:12px;padding:2px 14px;margin:0 4px;transform:scale(1.24) rotate(-2deg) translateY(-4px);opacity:1;box-shadow:0 8px 24px rgba(234,179,8,.7),inset 0 1px 1px #fff;animation:kineticPop .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes kineticPop{
+  0%{transform:scale(.85) rotate(-6deg) translateY(6px);opacity:.6}
+  60%{transform:scale(1.34) rotate(-3deg) translateY(-6px)}
+  100%{transform:scale(1.24) rotate(-2deg) translateY(-4px);opacity:1}
+}
+body.nocaps #caps{display:none}
+
+/* Reel Preview Kinetic Subtitles */
+.reel-karaoke{position:absolute;left:8px;right:8px;bottom:8px;display:flex;align-items:center;justify-content:center;gap:6px;padding:6px 10px;border-radius:10px;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);font:900 11px/1 Montserrat,sans-serif;text-align:center}
+.reel-karaoke .kw{display:inline-block;color:#fff;-webkit-text-stroke:2px #000;paint-order:stroke fill;transition:transform .15s}
+.reel-karaoke .kw.pop{background:#22c55e;color:#000;-webkit-text-stroke:0;padding:2px 6px;border-radius:5px;transform:scale(1.2) rotate(-2deg);box-shadow:0 3px 10px rgba(34,197,94,.7);animation:reelPop 1s infinite alternate ease-in-out}
+.reel-karaoke .kw.gold{background:#facc15;box-shadow:0 3px 10px rgba(250,204,21,.7);animation-delay:.3s}
+@keyframes reelPop{
+  0%{transform:scale(1.12) rotate(-2deg)}
+  100%{transform:scale(1.24) rotate(1.5deg)}
+}
+
+/* Controls */
+#controls{position:fixed;left:0;right:0;bottom:0;height:56px;display:flex;align-items:center;gap:10px;padding:0 16px;background:#0b0b0c;border-top:1px solid #1f1f22;font:600 13px Inter;color:#a1a1aa}
+#controls button{height:34px;min-width:34px;padding:0 11px;border-radius:8px;border:1px solid #2a2a2e;background:#151517;color:#fff;font:600 13px Inter;cursor:pointer;white-space:nowrap}
+#scrub{flex:1;min-width:60px;accent-color:#fff}
+#tlabel{font-variant-numeric:tabular-nums;min-width:88px;text-align:right}
+#audioNote{color:#fbbf24;display:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+body.rec #controls,body.rec #startOverlay{display:none}
+#startOverlay{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(0,0,0,.6);z-index:100;cursor:pointer;backdrop-filter:blur(3px);text-align:center;padding:20px}
+#startOverlay div{width:110px;height:110px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center}
+#startOverlay div::after{content:'';border-left:34px solid #000;border-top:21px solid transparent;border-bottom:21px solid transparent;margin-left:10px}
+#startOverlay p{margin:0;font:700 18px Inter;color:#fff}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+</head>
+<body class="light">
+
+<div id="viewport">
+  <div id="stageWrap">
+    <div id="stage">
+      <div class="bg"><div class="dots"></div><div id="glowA"></div><div id="glowB"></div></div>
+
+      <!-- Safe Zone Overlay (?guides=1) -->
+      <div id="guidesOverlay">
+        <div class="gz-line gz-top"><span class="gz-tag" style="top:-24px;left:20px">Safe Zone Top 270px</span></div>
+        <div class="gz-line gz-bot"><span class="gz-tag" style="bottom:-24px;left:20px">Safe Zone Bottom 670px</span></div>
+        <div class="gz-line gz-right"><span class="gz-tag" style="top:280px;right:-110px">Right 120px</span></div>
+      </div>
+
+      <!-- Headings -->
+      <div id="head">
+        <h1 class="hd" id="hd0"><span class="w">KONTEN</span> <span class="w">BOLA</span> <span class="w">VIRAL?</span><small>Buka aplikasi Klipers, pilih Highlight Bola</small></h1>
+        <h1 class="hd" id="hdQ"><span class="w">TEMPEL</span> <span class="w">LINK</span> <span class="w">PERTANDINGAN</span><small>Masukkan link YouTube laga bola favoritmu</small></h1>
+        <h1 class="hd" id="hdForm"><span class="w">PENGATURAN</span> <span class="w">PINTAR</span> <span class="w">REEL</span><small>Storytelling narasi, papan skor, dan sensor logo TV</small></h1>
+        <h1 class="hd" id="hdProg"><span class="w">DETEKSI</span> <span class="w">AI</span> <span class="w">CANGGIH</span><small>Audio gemuruh penonton & Smart VAR gol sah</small></h1>
+        <h1 class="hd" id="hdRes"><span class="w">MASTER</span> <span class="w">REEL</span> <span class="w">SIAP</span> <span class="w">POSTING</span><small>Scoreboard FT, filter momen, auto upload 5 medsos</small></h1>
+        <h1 class="hd" id="hdCta"><span class="w">KONTEN</span> <span class="w">BOLA</span> <span class="w">VIRAL</span> <span class="w">INSTAN</span><small>Tersedia di Google Play sekarang!</small></h1>
+      </div>
+
+      <!-- Phone Frame -->
+      <div id="phone">
+        <div class="screen" id="screen">
+          <div class="sbar"><span>09:41</span><div class="punch"></div><i><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.28 19.64 10.59 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/></svg><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg></i></div>
+          
+          <!-- S1: Phone Home Screen (Opening Klipers) -->
+          <div id="pHome">
+            <div class="home-clock">
+              <div class="time">09:41</div>
+              <div class="date">Sabtu, 7 Oktober</div>
+            </div>
+            <div class="app-grid">
+              <div class="app-icon"><div class="icon-squircle" style="background:#0284c7"><svg viewBox="0 0 24 24" fill="#fff" style="width:28px;height:28px"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M9 4.5 7.5 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3.5L15 4.5H9Z"/></svg></div><span>Kamera</span></div>
+              <div class="app-icon"><div class="icon-squircle" style="background:#10b981"><svg viewBox="0 0 24 24" fill="#fff" style="width:28px;height:28px"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l7.88-7.88"/></svg></div><span>Pesan</span></div>
+              <div class="app-icon active" id="appIconKlipers">
+                <div class="icon-squircle"><img src="data:image/png;base64,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" alt="Klipers Icon"></div>
+                <span style="font-weight:700;color:#fff">Klipers</span>
+              </div>
+              <div class="app-icon"><div class="icon-squircle" style="background:#64748b"><svg viewBox="0 0 24 24" fill="#fff" style="width:28px;height:28px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div><span>Setelan</span></div>
+            </div>
+          </div>
+
+          <!-- App Topbar Header -->
+          <div class="mtop" id="appMTop" style="opacity:0">
+            <div class="l">
+              <div class="logoTile" style="width:24px;height:24px"><img src="data:image/png;base64,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" alt=""></div>
+              <div class="cpill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><b>240</b><small>credits</small><div class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg></div></div>
+            </div>
+            <div class="r">
+              <div class="hpill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Pro Plan</div>
+              <div class="rbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg></div>
+            </div>
+          </div>
+
+          <div class="view">
+            <!-- Panel 1: Dashboard Klipers (Memilih Highlight Bola) -->
+            <div class="pnl" id="pDash"><div class="scr">
+              <!-- Mode Tabs Bar (Persis MainApp.tsx) -->
+              <div class="mode-tabs-bar">
+                <div class="m-tab-btn"><span>🔍</span> Analisis AI</div>
+                <div class="m-tab-btn on" id="tabSports">
+                  <span class="badge-new">NEW</span>
+                  <span>⚽</span> Highlight Bola
+                </div>
+                <div class="m-tab-btn"><span>⚙️</span> Manual</div>
+                <div class="m-tab-btn"><span>⬚</span> Split Cam</div>
+              </div>
+
+              <div class="dhero">
+                <h1 class="dhero-title">
+                  1 laga <span class="dhero-amber">penuh</span>, highlight <span class="dhero-viral">viral</span>.
+                </h1>
+                <p class="dhero-sub">AI Klipers deteksi otomatis momen gol, penyelamatan kiper, dan kartu merah jadi reel vertikal.</p>
+              </div>
+
+              <!-- Feature Grid Dashboard -->
+              <div class="dgrid">
+                <div class="fg-item on" id="fgSports">
+                  <span class="fg-badge-red">NEW</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24m5.66 5.66 4.24 4.24m-14.14 0 4.24-4.24m5.66-5.66 4.24-4.24"/></svg>
+                  Highlight Bola
+                </div>
+                <div class="fg-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></svg>Analisis AI</div>
+                <div class="fg-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>Auto Upload</div>
+                <div class="fg-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4zM4 12h16"/></svg>Split Cam</div>
+              </div>
+            </div></div>
+
+            <!-- Panel 2: SportsHighlightForm (Composer ClaudeStyleAiInput) -->
+            <div class="pnl" id="pForm"><div class="scr">
+              <!-- Mode Tabs Bar -->
+              <div class="mode-tabs-bar">
+                <div class="m-tab-btn"><span>🔍</span> Analisis AI</div>
+                <div class="m-tab-btn on">
+                  <span class="badge-new">NEW</span>
+                  <span>⚽</span> Highlight Bola
+                </div>
+                <div class="m-tab-btn"><span>⚙️</span> Manual</div>
+                <div class="m-tab-btn"><span>⬚</span> Split Cam</div>
+              </div>
+
+              <!-- Header Sports Highlight Form -->
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                <b style="font:800 12.5px Inter;color:#111827">Highlight Sepak Bola AI</b>
+                <span style="font:700 9.5px Inter;color:#2563eb;background:#eff6ff;padding:2px 8px;border-radius:999px">⚽ 2 Kredit</span>
+              </div>
+
+              <!-- Claude-Style Composer Box -->
+              <div class="composer-box" id="compBox">
+                <div class="composer-textarea">
+                  <span class="ph2" id="dPh">Tempel link YouTube laga sepak bola...</span>
+                  <span id="dUrl"></span><i class="caret" id="dCaret"></i>
+                </div>
+
+                <!-- YouTubePreviewCard Inside Composer (Exact match) -->
+                <div class="yt-card" id="ytCard">
+                  <div class="yt-th">
+                    <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20480%20270%22%20width%3D%22480%22%20height%3D%22270%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22ytGrad%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%231e3a8a%22%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2250%25%22%20stop-color%3D%22%230f172a%22%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23991b1b%22%2F%3E%0A%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%3Crect%20width%3D%22480%22%20height%3D%22270%22%20fill%3D%22url(%23ytGrad)%22%2F%3E%0A%0A%20%20%3C!--%20Left%20Club%20Badge%20Shield%20(PERSIB)%20--%3E%0A%20%20%3Cg%20transform%3D%22translate(70%2C%2075)%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M0%2C0%20L60%2C0%20L60%2C50%20Q60%2C90%2030%2C110%20Q0%2C90%200%2C50%20Z%22%20fill%3D%22%232563eb%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%223%22%2F%3E%0A%20%20%20%20%3Ctext%20x%3D%2230%22%20y%3D%2255%22%20font-family%3D%22Montserrat%2C%20Inter%22%20font-weight%3D%22900%22%20font-size%3D%2213%22%20fill%3D%22%23ffffff%22%20text-anchor%3D%22middle%22%3EPERSIB%3C%2Ftext%3E%0A%20%20%3C%2Fg%3E%0A%0A%20%20%3C!--%20VS%20in%20center%20--%3E%0A%20%20%3Ccircle%20cx%3D%22240%22%20cy%3D%22120%22%20r%3D%2228%22%20fill%3D%22%23facc15%22%20stroke%3D%22%23000%22%20stroke-width%3D%223%22%2F%3E%0A%20%20%3Ctext%20x%3D%22240%22%20y%3D%22128%22%20font-family%3D%22Montserrat%2C%20Inter%22%20font-weight%3D%22900%22%20font-size%3D%2222%22%20fill%3D%22%23000%22%20text-anchor%3D%22middle%22%3EVS%3C%2Ftext%3E%0A%0A%20%20%3C!--%20Right%20Club%20Badge%20Shield%20(PERSIJA)%20--%3E%0A%20%20%3Cg%20transform%3D%22translate(350%2C%2075)%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M0%2C0%20L60%2C0%20L60%2C50%20Q60%2C90%2030%2C110%20Q0%2C90%200%2C50%20Z%22%20fill%3D%22%23ea580c%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%223%22%2F%3E%0A%20%20%20%20%3Ctext%20x%3D%2230%22%20y%3D%2255%22%20font-family%3D%22Montserrat%2C%20Inter%22%20font-weight%3D%22900%22%20font-size%3D%2212%22%20fill%3D%22%23ffffff%22%20text-anchor%3D%22middle%22%3EPERSIJA%3C%2Ftext%3E%0A%20%20%3C%2Fg%3E%0A%0A%20%20%3C!--%20Banner%20Bottom%20--%3E%0A%20%20%3Crect%20y%3D%22200%22%20width%3D%22480%22%20height%3D%2270%22%20fill%3D%22rgba(0%2C0%2C0%2C0.85)%22%2F%3E%0A%20%20%3Ctext%20x%3D%22240%22%20y%3D%22228%22%20font-family%3D%22Montserrat%2C%20Inter%22%20font-weight%3D%22900%22%20font-size%3D%2216%22%20fill%3D%22%23ffffff%22%20text-anchor%3D%22middle%22%3EFULL%20HIGHLIGHT%3A%20DERBI%20INDONESIA%3C%2Ftext%3E%0A%20%20%3Ctext%20x%3D%22240%22%20y%3D%22250%22%20font-family%3D%22Inter%22%20font-weight%3D%22700%22%20font-size%3D%2212%22%20fill%3D%22%23facc15%22%20text-anchor%3D%22middle%22%3EPEKAN%2028%20BRI%20LIGA%201%20%E2%80%A2%2018%3A42%20DURATION%3C%2Ftext%3E%0A%0A%20%20%3C!--%20HD%20badge%20--%3E%0A%20%20%3Crect%20x%3D%22424%22%20y%3D%2212%22%20width%3D%2242%22%20height%3D%2222%22%20rx%3D%224%22%20fill%3D%22%23ef4444%22%2F%3E%0A%20%20%3Ctext%20x%3D%22445%22%20y%3D%2227%22%20font-family%3D%22Inter%22%20font-weight%3D%22900%22%20font-size%3D%2211%22%20fill%3D%22%23fff%22%20text-anchor%3D%22middle%22%3E1080p%3C%2Ftext%3E%0A%3C%2Fsvg%3E" alt="">
+                    <span class="yt-dur">18:42</span>
+                  </div>
+                  <div class="yt-info">
+                    <b>FULL HIGHLIGHT: PERSIB VS PERSIJA | PEKAN 28 BRI LIGA 1</b>
+                    <div class="subm">Indosiar Sports • 1,2 jt ditonton</div>
+                    <div class="yt-tag-row">
+                      <span>🏆 Liga 1</span>
+                      <span style="background:#fef2f2;color:#dc2626">FT 2 - 1</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Composer Toolbar & Inline Selects -->
+                <div class="comp-toolbar" id="compToolbar">
+                  <div class="inline-select-row">
+                    <div class="inline-pill on" id="pillStory">✨ <b>Storytelling AI</b></div>
+                    <div class="inline-pill on" id="pillSubKinetik" style="background:#f0fdf4;border-color:#86efac;color:#166534">⚡ <b>Subtitle Kinetik</b></div>
+                    <div class="inline-pill" id="pillVoice">🎙️ <b>Andrew (Komentator)</b></div>
+                    <div class="inline-pill on" id="pillScore">⏱️ <b>Papan Skor ON</b></div>
+                    <div class="inline-pill on" id="pillBlur">🛡️ <b>Sensor Logo TV</b></div>
+                  </div>
+                  <div class="comp-btn-row">
+                    <div class="comp-btn-reset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg><span>Reset</span></div>
+                    <div class="bgo" id="bSubmit">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24m5.66 5.66 4.24 4.24"/></svg>
+                      <span>Buat Highlight</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div></div>
+
+            <!-- Panel 3: SportsHighlightProgress (Deteksi AI & Smart VAR) -->
+            <div class="pnl" id="pProg"><div class="scr">
+              <div class="sh-prog-card">
+                <div class="prog-top-line"><div class="prog-top-fill" id="progTopFill"></div></div>
+                <div class="prog-header-row">
+                  <div class="pixel-cube">⚽</div>
+                  <div class="prog-title-wrap">
+                    <h3><span class="dot"></span><span id="progTitle">Membuat Highlight Sepak Bola</span> <span id="progPct" style="font-family:monospace;font-weight:400;color:#6b7280">(68%)</span></h3>
+                    <p id="progSub">AI menganalisis visual gawang, peluang, dan skor...</p>
+                  </div>
+                </div>
+
+                <!-- Audio Energy Spikes Visualizer -->
+                <div class="av-card">
+                  <div class="av-hdr">
+                    <span>Grafik Gemuruh Sorak Stadion</span>
+                    <span class="av-tag">PUNCAK GOL TERDETEKSI</span>
+                  </div>
+                  <div class="av-bars" id="avBars">
+                    <span style="height:35%"></span><span style="height:55%"></span>
+                    <span style="height:40%"></span><span style="height:80%" class="pk"></span>
+                    <span style="height:100%" class="pk-gold"></span><span style="height:70%" class="pk"></span>
+                    <span style="height:45%"></span><span style="height:60%"></span>
+                    <span style="height:90%" class="pk-red"></span><span style="height:95%" class="pk-gold"></span>
+                    <span style="height:50%"></span><span style="height:35%"></span>
+                  </div>
+                </div>
+
+                <!-- 4 Steps Check -->
+                <div class="s-steps">
+                  <div class="s-step ok" id="st1">
+                    <div class="ic">✓</div>
+                    <div class="tx"><b>Unduh & Ekstraksi Audio</b><span>Stream YouTube 1080p berhasil dimuat</span></div>
+                  </div>
+                  <div class="s-step ok" id="st2">
+                    <div class="ic">✓</div>
+                    <div class="tx"><b>Deteksi Gemuruh Penonton</b><span>Titik puncak sorak stadion teridentifikasi</span></div>
+                  </div>
+                  <div class="s-step ok" id="st3">
+                    <div class="ic">✓</div>
+                    <div class="tx"><b>Smart VAR & Gol Sah</b><span>Menganulir offside, mengunci 3 gol sah</span></div>
+                  </div>
+                  <div class="s-step ok" id="st4">
+                    <div class="ic">✓</div>
+                    <div class="tx"><b>Rakit Master Reel 9:16</b><span>Papan skor broadcast & narasi siap</span></div>
+                  </div>
+                </div>
+              </div>
+            </div></div>
+
+            <!-- Panel 4: SportsHighlightResult (Hasil Master Reel) -->
+            <div class="pnl" id="pRes"><div class="scr">
+              <div class="sh-res">
+                <!-- Scoreboard Ribbon (UEFA Style) -->
+                <div class="ribbon">
+                  <div class="rb-meta">
+                    <b>PERSIB vs PERSIJA</b>
+                    <span>✨ Storytelling AI</span>
+                  </div>
+                  <div class="rb-score">
+                    <div class="sb-t" style="background:#2563eb">PER</div>
+                    <div class="sb-val">2 - 1</div>
+                    <div class="sb-t" style="background:#f97316">PSJ</div>
+                  </div>
+                </div>
+
+                <!-- Master Reel Player -->
+                <div class="reel-box" id="reelBox">
+                  <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20390%20694%22%20width%3D%22390%22%20height%3D%22694%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22turfBg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%230b1726%22%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2235%25%22%20stop-color%3D%22%2314532d%22%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%2270%25%22%20stop-color%3D%22%2315803d%22%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23064e3b%22%2F%3E%0A%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%3CradialGradient%20id%3D%22flashGlow%22%20cx%3D%220.5%22%20cy%3D%220.5%22%20r%3D%220.6%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22rgba(255%2C255%2C255%2C0.2)%22%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22transparent%22%2F%3E%0A%20%20%20%20%3C%2FradialGradient%3E%0A%20%20%3C%2Fdefs%3E%0A%0A%20%20%3C!--%20Blurred%20Stadium%20Turf%20Background%20--%3E%0A%20%20%3Crect%20width%3D%22390%22%20height%3D%22694%22%20fill%3D%22url(%23turfBg)%22%2F%3E%0A%20%20%3Crect%20width%3D%22390%22%20height%3D%22694%22%20fill%3D%22url(%23flashGlow)%22%2F%3E%0A%0A%20%20%3C!--%2016%3A9%20Central%20Sharp%20Match%20Window%20--%3E%0A%20%20%3Cg%20transform%3D%22translate(0%2C%20180)%22%3E%0A%20%20%20%20%3Crect%20width%3D%22390%22%20height%3D%22220%22%20fill%3D%22%2315803d%22%2F%3E%0A%20%20%20%20%3Cellipse%20cx%3D%22195%22%20cy%3D%22290%22%20rx%3D%22280%22%20ry%3D%22120%22%20fill%3D%22%2316a34a%22%2F%3E%0A%20%20%20%20%3Cline%20x1%3D%22195%22%20y1%3D%220%22%20x2%3D%22195%22%20y2%3D%22220%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%223%22%20opacity%3D%220.7%22%2F%3E%0A%20%20%20%20%3Cellipse%20cx%3D%22195%22%20cy%3D%22110%22%20rx%3D%2290%22%20ry%3D%2245%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%223%22%20opacity%3D%220.7%22%2F%3E%0A%0A%20%20%20%20%3C!--%20Striker%20Running%20to%20Corner%20Flag%20Knee%20Slide%20Celebration%20--%3E%0A%20%20%20%20%3Cg%20transform%3D%22translate(210%2C%2080)%22%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%2225%22%20cy%3D%2214%22%20r%3D%2212%22%20fill%3D%22%23fbcfe8%22%2F%3E%0A%20%20%20%20%20%20%3C!--%20Kneeling%20body%20--%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M10%2C28%20L40%2C28%20L32%2C60%20L5%2C60%20Z%22%20fill%3D%22%232563eb%22%2F%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2225%22%20y%3D%2248%22%20font-family%3D%22Montserrat%2C%20Inter%22%20font-weight%3D%22900%22%20font-size%3D%2213%22%20fill%3D%22%23ffffff%22%20text-anchor%3D%22middle%22%3E10%3C%2Ftext%3E%0A%20%20%20%20%20%20%3C!--%20Arms%20spread%20wide%20in%20glory%20--%3E%0A%20%20%20%20%20%20%3Cline%20x1%3D%2210%22%20y1%3D%2236%22%20x2%3D%22-14%22%20y2%3D%2222%22%20stroke%3D%22%232563eb%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22%2F%3E%0A%20%20%20%20%20%20%3Cline%20x1%3D%2240%22%20y1%3D%2236%22%20x2%3D%2264%22%20y2%3D%2222%22%20stroke%3D%22%232563eb%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22%2F%3E%0A%20%20%20%20%20%20%3C!--%20Turf%20spray%20particles%20behind%20--%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22-5%22%20cy%3D%2264%22%20r%3D%223%22%20fill%3D%22%2386efac%22%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22-16%22%20cy%3D%2258%22%20r%3D%222.5%22%20fill%3D%22%2386efac%22%2F%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22-28%22%20cy%3D%2262%22%20r%3D%222%22%20fill%3D%22%2386efac%22%2F%3E%0A%20%20%20%20%3C%2Fg%3E%0A%0A%20%20%20%20%3C!--%20Mini%20Scorebug%20Inside%20Reel%20--%3E%0A%20%20%20%20%3Cg%20transform%3D%22translate(16%2C%2016)%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22145%22%20height%3D%2226%22%20rx%3D%225%22%20fill%3D%22rgba(12%2C25%2C46%2C0.92)%22%20stroke%3D%22rgba(255%2C255%2C255%2C0.2)%22%20stroke-width%3D%221%22%2F%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%220%22%20y%3D%220%22%20width%3D%224%22%20height%3D%2226%22%20rx%3D%222%22%20fill%3D%22%232563eb%22%2F%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2212%22%20y%3D%2217%22%20font-family%3D%22Montserrat%2C%20Inter%22%20font-weight%3D%22900%22%20font-size%3D%2211%22%20fill%3D%22%23ffffff%22%3EPER%3C%2Ftext%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2242%22%20y%3D%224%22%20width%3D%2228%22%20height%3D%2218%22%20rx%3D%223%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2256%22%20y%3D%2217%22%20font-family%3D%22Montserrat%2C%20Inter%22%20font-weight%3D%22900%22%20font-size%3D%2211%22%20fill%3D%22%230c192e%22%20text-anchor%3D%22middle%22%3E2-1%3C%2Ftext%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2276%22%20y%3D%2217%22%20font-family%3D%22Montserrat%2C%20Inter%22%20font-weight%3D%22900%22%20font-size%3D%2211%22%20fill%3D%22%23ffffff%22%3EPSJ%3C%2Ftext%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22110%22%20y%3D%2217%22%20font-family%3D%22Inter%22%20font-weight%3D%22800%22%20font-size%3D%2210%22%20fill%3D%22%23facc15%22%3E85%3A12%3C%2Ftext%3E%0A%20%20%20%20%3C%2Fg%3E%0A%20%20%3C%2Fg%3E%0A%3C%2Fsvg%3E" alt="">
+                  <div class="reel-play-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+                  <div class="reel-karaoke">
+                    <span class="kw">GOL</span>
+                    <span class="kw pop">ROKET!</span>
+                    <span class="kw">MENIT</span>
+                    <span class="kw pop gold">85'</span>
+                    <span class="kw">KEMENANGAN!</span>
+                  </div>
+                </div>
+
+                <!-- Moment Tabs -->
+                <div class="m-tabs">
+                  <div class="m-tab on">Semua (4)</div>
+                  <div class="m-tab">⚽ Gol (3)</div>
+                  <div class="m-tab">🧤 Save (1)</div>
+                  <div class="m-tab">🟥 Kartu (1)</div>
+                </div>
+
+                <!-- Moment List -->
+                <div class="mlist">
+                  <div class="mc" id="mc0">
+                    <div class="ico gol">⚽</div>
+                    <div class="info">
+                      <b>14' Gol David da Silva (1-0)</b>
+                      <span>Peluang emas sontekan tiang jauh • 00:15</span>
+                    </div>
+                    <div class="sc">🔥 98</div>
+                  </div>
+                  <div class="mc" id="mc1">
+                    <div class="ico save">🧤</div>
+                    <div class="info">
+                      <b>38' Penyelamatan Terbang Kiper</b>
+                      <span>Refleks menepis tendangan bebas • 00:32</span>
+                    </div>
+                    <div class="sc">🔥 95</div>
+                  </div>
+                  <div class="mc" id="mc2">
+                    <div class="ico gol">⚽</div>
+                    <div class="info">
+                      <b>85' Gol Roket Spektakuler (2-1)</b>
+                      <span>Tendangan keras luar kotak penalti • 00:48</span>
+                    </div>
+                    <div class="sc">🔥 99</div>
+                  </div>
+                </div>
+
+                <!-- Action Button -->
+                <div class="bgo" id="bAutoUpload" style="background:#16a34a;padding:11px;font-size:12px">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>
+                  <span>Auto Upload ke 5 Medsos</span>
+                </div>
+              </div>
+            </div></div>
+          </div>
+
+          <!-- Bottom Navigation Bar -->
+          <div class="homebar"></div>
+
+          <!-- Bottom Sheet Schedule Upload -->
+          <div id="sheetDim"></div>
+          <div id="sheet">
+            <div class="sh-bar"></div>
+            <div class="sh-head">
+              <b>Jadwalkan Auto Upload 5 Platform</b>
+              <small>Posting otomatis ke semua media sosial tanpa ribet</small>
+            </div>
+            <div class="sh-grid">
+              <div class="sh-item"><span class="chk">✓</span>🔴<b>YouTube</b><small>Shorts</small></div>
+              <div class="sh-item"><span class="chk">✓</span>⚫<b>TikTok</b><small>Video</small></div>
+              <div class="sh-item"><span class="chk">✓</span>🟣<b>Instagram</b><small>Reels</small></div>
+              <div class="sh-item"><span class="chk">✓</span>🔵<b>Facebook</b><small>Reels</small></div>
+              <div class="sh-item"><span class="chk">✓</span>🟢<b>GDrive</b><small>Backup</small></div>
+            </div>
+            <div class="sh-btn">✓ Jadwalkan Unggah Sekarang</div>
+          </div>
+
+          <!-- Tap indicators -->
+          <div id="tapS"></div>
+          <div id="tapR"></div>
+        </div>
+      </div>
+
+      <!-- S6 CTA Screen -->
+      <div class="logoTile" id="ctaLogo"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAAABmJLR0QA/wD/AP+gvaeTAAAYd0lEQVR42u2dCXQUVbrH+zhzxnkz43NmHEcHyAJG0ktAIAqmu4MBNMiigBgQAhmQRRYBQXF7Ao6CAsIEQXZEVhFGIyoqgiyyhUVGEdlJwhZCQthDAjHhvvvdrhvakGgvlU4t/985deTE6upbt75/112+xWIBAAAAAAAAAKB77qif+Mdwu8sRbnW3jbC6nub/fjPM5poTYXN+HG5zbeDHHn5k8uOschTwgylHgdffM5VzN9Bn6Rr8Wm+Ia/Jr03fUiI39A3ocaJJateL+JyzadW+EzdUr3OacFG51reH/zvMy9tAcVlcufTe1gdpCbaK24QmBkBJhi/9HuMP5ODfK1HCbexv/b3FFBnt3g2asWZuuLKXPMPbSqPFs8ox5bPHST9iXq9az9O3fsQOHMtnRY9ns/IWL4rhcWMQk9G/5dzpn/8EM8Rn6LF1j8vR54prd+bUTWncR31WJcIqVNqZGWJ0dqe14gkBVIiMTfs8N7CH+q/xvPpzZV94I68Q0ZYntUtig4a+yabMXsXUbt7LsnFwWaug7121IF22gtjz0aHfRthtF494bYXdPpHuKimp1M54w8Js6dWJv5YaUwgXxKTeky94GZr8vUfxyT5o6l21K38EKLhcyrUJtozamvvMu69Z7KLPd+1B5wRTwYdkn/F670z3jyYNKud2R8KcIuyvZYzCuK9KI+K8ta92xJxufOpNt37mL/VRSwvQKtX3rju/YuNQZ7OEOPcS9eYmF7nl5hNXdlRYYYBFAwFeCYrkoZnDjuCCNpXZMPOvSc7AY75/OP8OMSm5ePlv4wcesc49B4p69xEJ9MZ3PWRrBQky68sSF0Zev+Oz0HnI83m0AW7AkjeWfOcvMRt7pM2z+4o/YY8n9yg/Dvg23OvvQXAyWY3DujIq/nY+3X+APPVsaQEzjluzFUePYvgOHGfCQkXmUvTlxGmvoalMmFM/StXMsXz6uAUsyGLVtzghlGFUkH/gjSb3Z8hWr2dWrxVBEJVDfLP9sFWub1Mv7jVIYYXNPq+Nwh8OydM5d9Z1/p189KYxIRzzr+uQQtnrtJli/n9ACRf9nXvGeq1wNtztn1qobVxOWprc5hiPur2LfwksYQ55/TQwdQHAczjgi9lmoT+UbJczunBBez/0XWJ7WSUj4LU2+pasHLWP27D+c7d1/CJatMocystgzL7zmLRTuN+YeQs8AhqhBwqxxLRWnPvHAkns9A2GEgD37Doolca85yo+0Sw+L1NY8Y4F8QE1bdmYrVq6F5YaYjVt2sOZtkr2FsoxWDWGh1bnJR+4gNlc+PRBroxZs5tz3WXExVqWqc9WLfMGiG7aQIjnNJ/LdYKmhnoTzlZNwu3ul/LUi36jjJ07CQjXCseMnxRBXPh8ew/IF9k9CBF+D7yDfGvWaPCzcQa5duwar1CA01G3gbC2Fci7M5nwCFlxFiAg9m2u2/FX651PPGdpPykguLBQT4+VuPwvOkCoTWTfOKmMx6jZszuYt+hBvDR1Bz2ruwmVegV3uvbWjXdGwbDWGVFbXY7xTL1LHUmASReIBfUKRkQ8+0q3MYzjMFt8eFh4wSb+hRAe8I69Rh9LubWFREaxM51A48cBhI6VIrvEfwDH0rGHv/s43PIFLImyUlg6BsaDFlTr1HvB4CltdX0ZHu24xveE7HI7f8fHnON4pJz0u586x9Lefr1LxpAgUg8A7jlZAKAIOGJP0bf9l98S1lllZtkc6Eu70114MtrEnPGvLBeQ4x5a5i9icMXzN/Cj9/YGHO7PMI8dhRQYnI+sYi0/sJO0hK9wRb/fVXgwoEPFLUD5iLUf8Pwp9VfY32j3Rl0f1nYP1mIRz5y+IaE65XxJpc93/a/ZiVIFkV3DDJ/ibo6lcqeoz6CV25cpVWI3JKCq6wnoPfPH6CpfdFV+ZvZhqiMXTab7P3dJF2s1Bz43SddYQEBwlJaVs2EujFbtwF4bb4pbeIBC+smnwSboQSbbnEB0gUuy8MHIcKy0thZWYHLIBsoXrqYiEjWSbYpLujTKsEknZRo2ZhJ1xUAbZwsjRqVIkl2m4ZS5vXEdcYznneO7lNyAOUKFIKP9w2ZzE4bzPFOIQJQE8af1FnDiGVeCXhlvkQaGI5Iz3ErBBXdXFJuARuuG+g1/GhBz8KmQjXqtbWeU3E40zrOLZDHkyha10ox2T+2MpF/i1BNyha1nGx28N6C4vHA8/lTvkZ86ex1MHfkEbx1477su5Ud1kuP0P8rsh1wIAAuHIsRNl6VD5PsloI8VzXCPPTTgegmDZsnWnLAx0jSesa6drcVDUmCwr8O6CZXi6QBVmzV0ih1oXdbuyRQVpZJgsuZAAoBa0RzJg6Agpkj26rPIryhUrYbLeBSoBUAMqL9eibbKMJZmhM3HEt5eVXvfuR90NUDVQfgJK4iFyb+llPkIJwmRcB2UfAaAqmTN/aVkWR12Uuab4Ypm3Cj5WIBTzEZl3izI4any/Q+TKFbHkSOoGQgUlpyuLbddqLuAadRP+JutypH26Ek8NhJRlaZ/LoVY+ZfzXoCOiewk1kF53AFQH3XoPlSJZqK2JudWZSA2zxT7ITmTn4ElVwMb0naxV0lMstllSUEerTv3YZp4uB9zI0WPZ10sv2ONaaEMdVPZMqexE9TlAxZBhBysOebTu3A8dWglTZy2U+X9/0ETGRj4pGkQNIk9LlFSuHLXEIQ9QMVRAiTzGPatazv7VKw5e2VTueXy9bjOeDgSiCb5ctb4sCrGmtfFt1TgxF6WWRTUhAIFoic49BkmRjK+eCEEqg8brkFMZYFSThUC0xu49B0QZcMqKUi1hujzh21RSKHlVAghEi1CWTiWf76SQiqOOwx1OSb1qx8SLgvIAAtEi5MxIIxyy1RoxTcNCNznn7sUybQ+AQLTM08+Okn5a74REHLSNz7+wkJSZkXkUTwAC0TQHD2eVzUXIHSoUid/+RYqkXEUAAtEDPfoNVxI9uEZUqTgiIxN+z7/oFH3Ztm+/R89DILqAEj0okYe5lJ+tCucezj70RY8k9UavQyC6os3jT8q3SK+qzG+1k75k+YrV6HEIRFd8/NlXZbUQq+jtIUqkicAU+FxBIHqDbJYC+cRbxB7XsMqWdl8fPwW9DYHoEqpD40nw4JqiqjhE3XIlARwtmwEIRI/sP5ghXeHPq5pLK8LuSpZZ2QEEomeogrJS67CTmnsfIjP7giVp6OEAQcCUNpi7cJncWf9Inb2PBgl/ln5XyFQSOBQmq4ZISBybtyEJeKBQBhSyZfJEj4pq8r9qxJv3IMV16TnYVB25bedu1vWpl1jLpP5BHcn9XmLb//sjW7N+M2uc0J5VUPfbr6NJQge2bkO66u0zE51SBiqrWa5kNfY+PqOLLVq63FSdSIYTrPHJo1u/l4VhBysOedzfrIPq7TMT899P8y7EE7RryWVy9srNyzdVJ6plfPJQSxzyULt9ZiLnVJ50YLwUVN11mc6ndceephurQiDGhqoOiGGWw9k8iOGVK5UuMj51JgQCgRiKNyZMCz5mXRbA2b5zFwQCgRiKMg9fm2t3MGUMmP2+RFPWM4dAjA3lz6JMoFTrMKBcvuF2dxI9iO4mzbULgRgf2rpQKuZ2CGR5dxJ9+O1p70EgEIghmThljqxONSGQCfoO+vDmrd9CIBCIIflm0zbpdpLuX1I4HpbIP1hM9aipWCIEAoEYkUuXCqTbyVXa8/N9gu5w3kcP4aFHuzOzAoGYA1kpl9c3bORPzt3eZs97BYGYg7K8Wdzn0J/w2rfpQ9PnLIJAIBBDM2XmfMVx0T3RjzrnrnX0oXUbt0IgEIihobIdSp+u8if+PJc+dDInFwKBQAwNlQxU+jTbn/hzdneDZqaucw6BmIPS0lIWdU+C2FH3KU6dl62KoQfQrE1XZmYgEPPQtKWnZFtk3TirLxP0tijnjIApM9H1ySGiX2s53A//+hKv1fU0nfzyq2+ZutMoDFUNIyTj2/HdHhEmq4ZISBy0eKJ2+8zMCyPH+V70k7u4v0kn0/KXnti1N4M99/p01vu5t4I6hr8+g+3el6l6XfOVq9czK5/X3XqHPajDxq+xas0G1dundv/picnT53mWeq2uMb4s8c6hk99f9omubpIeTLAPVx7Pj56hepoemwrikIe9YXPV26d2/+mJhR98rOTKcs70pfbgx3TyytXf6Oom1Xq48lA70Zta4pCH2u1Tu//0xIqVa33PlcVP3Egnb93xHQQCgZhCIDK6kL8c1vsgEPdeOpkKIEIgEIgZBLJ3/2G5CPKjL8u8x+nkbJ3tokMgEEiwu+l8iHXUF0/ePDo5/8xZCAQCMYVAKB2p8gbJ8WWIdZ5OvnjxEgQCgZhCIOcvXJQCOevLJL2QTi4qugKBQCCmEEhhUZEUyGVfBFJCJ5eUlEIgEIgpBEK2rgikBAKBQCCQIAWCIRYEgiEWJukQCAQSwCQdy7wQCJZ5sVEIgUAggW0U8hP30MlUMhcCgUDM4WpySJaH/sEXgWygk9O3w1kRAjGHQCi9rvIGWedLPEganfzFV+sgEAjEFAL57Ms1njeI1f0fX94gs+nkxUsRMIWAKXMETC1YohT1tLpmGDbklsI81XjI9HB3789Uva45hcmqIRISx+o1G1Vvn9r9pyf8CrnVa9IGrdc1VzsmHXXX1eP5EWP9SNqg07Q/Wk/To/YQC2mE1MOvtD98iOXQY+I4rSd6U3uSjkR06hGf2En0Qe1oV7RhU49CIBBIIFDq0bvqe1KP+lxER4/JqyEQCCQQjp846V/yakUga+hDa7/ZAoFAIIYWyKq1G2UffOVPAc9U+tDUWQshEAjE0AKZPGOeUmHK9ZbvJdjs7ifpQ4OGvwqBQCCGFsjAYSOlH1aKoYt4QiAQSCAEVMRTj2WgIRAIxF8CLgOtRBZuo47blL4DAoFADCmQ9byMhDK82mzxFx5Z+G/68KSpcyEQCMSQApkweba8//H+C8Tq7Egf7tZ7KAQCgRhSIJ17DPKsYNmd7QJ4g8T/gz5svy+R/VRSAoFAIIYSSHFxMbM2aiF20O+q7/y7JRBkpvdt334PgUAghhKIjCLkU4ldlkDh+yET6SLjU2dCIBCIoQQy5q2pcoI+LmCB8As8RBdp9VhPCAQCMZRAEtuleEo/W90JAQskKqrVzfwiBfxNwnLz8iEQCMQQAsk5lcfIpvl9X3Q4HL+zBAN3XPyEOnDR0uWavmkETCFgylfmL/5IZjFJswQLH6N1p4s90WOwpm9a63XN1Y5JR931wOmY3F9xUHR3CVog0dGuW/jFiiId8exU7mlmFrRed93Mdc2DgWyYbJkSVd/uSPiTRQ34xZaT4ujVZBa0nkbIzGl6gmH2vA98z4Hl+666uytd9LHkfqbpSK0nojNzordgeCSpt0cgdlcn1QSiePeeowsfPJwFgUAgumTfAVnu2X2+RmzsHyxqQlnn6OKvj5sCgUAgumTk6FTF98o1xaI2fMwWSxe/J641u3LlKgQCgegKstn697fybA46nA0sVUG4zbmTvmD5Z6sgEAhEV6R9ulLm391uqSrCrc4+9CVtk3pBIBCIrmjdsad0TuxVZQJRXE9y9Fg/BAIxr0AoKlZ5e+T6HVobwFtkFH3ZkwOeh0AgEF2Q0vdZmZz6/yxVzZ1R8bdTqWjajTyccQQCgUA0DZUSVBwTC2paG99mCQURNvc0veXNgkDMKZABQ0fI4dVkS6io43CH8y+9Qm+RvfsPQyAQiGbfHorfVVHNqCa1LKGEuwq/Q8rsN+QVCAQC0eYzHPii9FpOtYSasGhXDZqL0Phuz76DEAgEoil27d5XNveoHdPkDkt1wNOlTCCFduk5GAKBQDRFp5SBytvDOdZSXYTXc/+FN+I0NWTl1xsgEAhEE6xYuVZuCuZFNkj4s6U64StaA6kx7sQkdvVqMQQCgVQr5HPlfPBxGfPR11LtJCT8ljfmR2rQtNmLDNPRCJjSJ171Pr63WJJ+Y9ECMj0QZao7dvykITpa63XXzVzXvDKyjh5ndXnMvhheRbuaWbQE97FfLJM76Kn4JzAGZHOynDM/5lu0Ro26CX+TxT8/XP4lnhgIKUs/WiHFcZrcoSxaJNzu7CaDqvJOn8FTAyGBkhrKYCjKn2DRMnyH/QtqKHlQYqgFQjG0ohIdytvjc4vWoV1L3tBT1OD3Fv0HTxBUKbPeW1I2tKKSHRY9QAVJqNFR9yQY1pkRVD8HDmWyu3m2SrGs63A9atETfD4yU1bKvVxYhKcJVKWg4DJr3kZWqHVPs+iNO+on/pE3fg/dwNPPjsITBarOO8iLXBla7VY9x1WoqGl116UkXXQjNFYEQA2mz1kkxXExsm6c1aJnwmzx7akOHNVcT+e7yQAEA5VOI1viNlXKfa0esRiBCKtrDCme1qozMo/iKYOAoBwIcr+D59b9l8U4JP1GZoiPT+zE8s+cw9MGfpF/5qzwGFcK33zEjeomi5GgBNj8xtLpBinDdmERVraAbxQVXWHtuzwl5x07aAHIYkQiHQl38hvMohuleGE91F8H1ctPP/0kcrAp4sgMuKa5bvZHHPF2fqNnZNqg0tJSWAGokJKSUrFFoIgjPyLmfpvFDFB2bVlv5NmXx8BnC9wA2cSLo8ZJcVzgSULutZgJHj8ST3XiqAOobgNEArzFIWt5CBtxuN2mEAXVpOYbh+P4TZ/kR3a4LW4pJaCjjnhh5DgMt4AYVj0/YqwUB9nG0uv24hwbdF1zTc8/+A2WL0McYXO+z/MXFUiXFJqUAfOKY+iLr0v/qkLlB7Rc6epqTOMTgtj1kxXU6s5RhlsX5OoWLesBc0HL/nK1iv9gXqBhVWX2YmSBZFdwwyfE//OUeBM5ttp17iM2hoA5OHvuvKigrNjD2Vp2d5NfsxfTDLG4y8Cb5ZaAs+SOO9xSjA+5j8gdctrn8F7K/TV7MegkXdx0dmWTLrGZyOvISd8tODgaF3I8rNfkYZkFcWv5TUBf7MWUUJksZfWC1Y6JFwnpsAxsrGXcdxcsY3XqPSB9q9J0G9NRjdzEVzJGk6s8deLAYSNZweVCWJfOoUhAr2Cna1wcrxnO8TC0G4oivl2scLVom8z2HUCMu17Zu//Q9TBZWqkySjxHdeOJTPTk/6UgfXo9Y8ilryHV7HkfiCQeMky2lq3p3bBsFaExKp+8z5CrGSl9hiE5nQ6gpG5eeauuUYIFzDeqcshljWspa7XHNG7JFi/9BG8TjUJ1Oho4W5fV6tBdah69QgnCZAZHOihp8dFj2bBIjXDk2AlRdcxr/+JzWr6H5YZ649GTC1jsvkc3bMGmzlpoqCI+eoOK11B9jrISBPytoflcuYYXCZWBU5LU0XF/sw7ILl8NrF67yXtHnI5lms2ybs63SVwL7kr/g3xAnXsMYrv3HIDlVjFUTfZ6wUxPZSfNFa8B1zcXuUhSZJ0SOT/5cS+EojaUF7f/M6/IUsvME0btHqKZsmfgF1xVeGVT/sDGy4jFSEe8iDU5eDgLlh0k+w9msAFDR4g+VYRRQD5S1V5NFvgPjYEVZ7dC+UYht2oaL2Np2D+279zFevYf7v3GuEpzP92UHAC/sBMf1aQWXxZ+R75R6GjdsSdL+3SlWHkBla9KUR9RX3lNvgv4EHZyrbpxNWFZBqNOndhbaZxMQTfygTv4ZiNlz9iz7yAUoXAoI4u9OXFa2Safp+Y4n9fZ3a/WtDa+DZZk9DkKd6fna/S9KUufdzBOuyf6srkLl7FTuadNJ4qcU3nCx+3RTn1+HqDEY3N4X/WKimp1MyzHjGLhObqU4dc5aRQ0AaWlywVL0gwtlpM5uWzeog/Z490GeE+6RdgrzxMwpbbDfQ8sBAiU3MGdKTGy96Sejpbt/ymGHBTdqOesK8XFxSKKb8xbU1liu5Tysd6FPJz1Qz6MSqI3LCwCVEp0tOuWCLsrmSLduOFc8jYkW+yDws9o4pQ57JtN20QAkFa5dKmArd+4VbT1iR6DmbVRi/KiuET3SO4gdM948sBvKAY6wuFsruyr7C6fRIBCgimQiyIe35m5gH29bjM7fuJkSJPg0XfRd9Ly9ZSZ80VbqE3UthvzkLl20b3QPSG+G6gOJRagqlk80nECN7QtYj/gxtQ07K76Caxpy84sudczImvk5OnzxJzm86/WiqEaRUaSBzLVSjl/4eLP3kT0b/ob/T86h87dsnWn+Cxd4+1p74nsg+QlQN9B31VRG5S2baG2UmQmfKNAtayIUU6vMKuzB99Em8gNcnUl+Zyq+qCl61VCDNQWW3wjzCWAtpeSeY4nPpdpFWZzDxBl6PjOMy0C8HSr60UIsd2Vobjrny0317mk/O20cs5u+oxYQKDda36tMJuzP12bilhCCAAAAAAAAABgDP4f5lnir/s0nMkAAAAASUVORK5CYII=" alt="Klipers Logo"></div>
+      <h2 id="ctaWord">Klipers</h2>
+      <h3 id="ctaApp">Fitur Highlight Bola AI</h3>
+      <p id="ctaTag">1 Laga Penuh Jadi Reel Siap Viral</p>
+      <div id="ctaGp">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.609 1.814L13.793 12 3.61 22.186a2.38 2.38 0 0 1-.61-.914V2.728c.174-.356.388-.669.61-.914zm11.242 11.243l2.424 2.424-11.83 6.83 9.406-9.254zm0-2.114L5.445 1.689l11.83 6.83-2.424 2.424zM18.67 11.03l2.872 1.658c.958.553.958 1.453 0 2.006l-2.872 1.658-2.613-2.613 2.613-2.613z"/></svg>
+        <div class="tx">
+          <small>Tersedia di Google Play</small>
+          <b>Klipers - AI Video Clipping</b>
+        </div>
+      </div>
+      <p id="ctaUrl">klipers.pro · <b>Coba Gratis</b></p>
+      <div id="flow">
+        <span>⚽ Gol & Penyelamatan</span>
+        <span>⏱️ Scoreboard FT</span>
+        <span>🛡️ Sensor Logo TV</span>
+        <span>🎙️ Komentator AI</span>
+        <span>🚀 5 Platform</span>
+      </div>
+
+      <!-- Captions -->
+      <div id="caps"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Controls -->
+<div id="controls">
+  <button type="button" id="bPlay" title="Putar / Jeda (Spasi)">▶</button>
+  <button type="button" id="bMute" title="Bisu (M)">🔊</button>
+  <input type="range" id="scrub" min="0" max="44" step="0.05" value="0">
+  <span id="tlabel">0.0 / 44.0s</span>
+  <button type="button" id="bRestart" title="Ulangi">↺</button>
+  <button type="button" id="bTheme" title="Ganti Tema">◐</button>
+  <button type="button" id="bCC" title="Tampilkan / Sembunyikan Caption">CC</button>
+  <button type="button" id="bRec" title="Mode Rekam (sembunyikan bar)">⏺</button>
+  <span id="audioNote"></span>
+</div>
+
+<div id="startOverlay">
+  <div></div>
+  <p>Klik untuk Memutar Demo Highlight Bola</p>
+</div>
+
+<script>
+/*<![CDATA[*/
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const stage = $('#stage');
+const SC = 1.7231;
+
+const Q = new URLSearchParams(location.search);
+if (Q.get('theme') === 'dark') document.body.classList.remove('light');
+else document.body.classList.add('light');
+if (Q.get('nocaps') === '1') document.body.classList.add('nocaps');
+if (Q.get('record') === '1') document.body.classList.add('rec');
+if (Q.get('guides') === '1') document.body.classList.add('guides');
+
+/* CUES (Voiceover timestamps) */
+const CUES = [
+  { s: 0.3, e: 7.9, file: 'audio/vo-01.mp3', text: 'Mau bikin konten bola viral tanpa nonton sembilan puluh menit penuh? Buka aplikasi Klipers, lalu pilih Highlight Bola.' },
+  { s: 8.1, e: 13.5, file: 'audio/vo-02.mp3', text: 'Cukup tempel link YouTube pertandingan yang mau kamu potong, dan biarkan AI bekerja.' },
+  { s: 13.8, e: 20.8, file: 'audio/vo-03.mp3', text: 'Pilih mode Storytelling narasi komentator, aktifkan papan skor otomatis, dan samarkan logo siaran.' },
+  { s: 21.0, e: 28.0, file: 'audio/vo-04.mp3', text: 'AI otomatis mendeteksi gemuruh stadion, menganalisis gol sah, penyelamatan kiper, hingga kartu merah.' },
+  { s: 28.3, e: 35.5, file: 'audio/vo-05.mp3', text: 'Master Reel langsung jadi dengan papan skor dinamis dan daftar momen. Siap kamu upload ke 5 platform sekaligus.', say: 'Master Reel langsung jadi dengan papan skor dinamis dan daftar momen. Siap kamu upload ke lima platform sekaligus.' },
+  { s: 35.8, e: 43.0, file: 'audio/vo-06.mp3', text: 'Bikin konten bola viral tanpa ribet dalam hitungan menit. Download Klipers di Google Play sekarang.' }
+];
+
+const D = 44.0;
+window.__duration = D;
+
+/* Chunking Captions Words */
+CUES.forEach(c => {
+  const ws = c.text.split(/\s+/).filter(Boolean);
+  const dur = c.e - c.s;
+  const step = dur / ws.length;
+  c.words = ws.map((w, i) => ({ w, st: c.s + i * step, en: c.s + (i + 1) * step }));
+  c.chunks = [];
+  let cur = [];
+  c.words.forEach((w, i) => {
+    cur.push(i);
+    if (cur.length >= 4 || (/[.,?:!]$/.test(w.w) && cur.length >= 2)) { c.chunks.push(cur); cur = []; }
+  });
+  if (cur.length) c.chunks.push(cur);
+});
+
+const capsEl = $('#caps');
+let capKey = null;
+function renderCaps(t) {
+  const ci = CUES.findIndex(c => t >= c.s && t <= c.e);
+  if (ci < 0) { capsEl.style.opacity = 0; capKey = null; return; }
+  const c = CUES[ci];
+  let wi = 0; c.words.forEach((w, i) => { if (t >= w.st) wi = i; });
+  const chunk = c.chunks.find(ch => ch.includes(wi));
+  const key = ci + ':' + (chunk ? chunk[0] : 0);
+  if (key !== capKey && chunk) {
+    capsEl.innerHTML = '<span class="ln">' + chunk.map(i => `<span class="cw" data-i="${i}">${c.words[i].w}</span>`).join('') + '</span>';
+    capKey = key;
+  }
+  capsEl.querySelectorAll('.cw').forEach(el => el.classList.toggle('on', +el.dataset.i === wi));
+  capsEl.style.opacity = 1;
+}
+
+/* Audio Player */
+const AUD = CUES.map(c => {
+  const a = new Audio();
+  a.preload = 'auto';
+  a.onerror = () => { c.missing = true; updateVoiceNote(); };
+  a.src = c.file;
+  return a;
+});
+
+const SS = window.speechSynthesis;
+let ttsVoice = null;
+function pickVoice() {
+  if (!SS) return;
+  const vs = SS.getVoices(); if (!vs.length) return;
+  const want = (Q.get('voice') || '').toLowerCase();
+  const by = f => vs.find(f);
+  ttsVoice = (want && by(v => v.name.toLowerCase().includes(want)))
+    || by(v => /william/i.test(v.name) && /multilingual/i.test(v.name))
+    || by(v => /^id/i.test(v.lang) && /ardi/i.test(v.name))
+    || by(v => /^id/i.test(v.lang)) || null;
+  updateVoiceNote();
+}
+function updateVoiceNote() {
+  if (!CUES.some(c => c.missing)) return;
+  const n = $('#audioNote'); n.style.display = 'inline';
+  n.textContent = ttsVoice ? 'Suara: ' + ttsVoice.name.replace(/\s*-\s*.*$/, '') + ' (browser)' : 'Tidak ada voice Indonesia';
+}
+if (SS) { pickVoice(); SS.onvoiceschanged = pickVoice; }
+let muted = false, playing = false;
+
+const SFX = [], SFX_SRC = {};
+window.__sfx = SFX;
+let sfxLast = null;
+function playSfx(t) {
+  if (!playing || muted) { sfxLast = t; return; }
+  if (sfxLast === null || t < sfxLast || t - sfxLast > .5) { sfxLast = t; return; }
+  SFX.forEach(ev => {
+    if (ev.t > sfxLast && ev.t <= t) {
+      const base = SFX_SRC[ev.file] || (SFX_SRC[ev.file] = new Audio(ev.file));
+      const a = base.cloneNode(); a.volume = Math.min(1, ev.vol * 0.35); a.play().catch(() => {});
+    }
+  });
+  sfxLast = t;
+}
+function stopAudio() { AUD.forEach(a => a.pause()); if (SS) SS.cancel(); CUES.forEach(c => { c.started = false; }); sfxLast = null; }
+function speakCue(c, t) {
+  if (!SS || t - c.s > 0.6) return;
+  SS.cancel();
+  const u = new SpeechSynthesisUtterance(c.say || c.text);
+  u.lang = ttsVoice ? ttsVoice.lang : 'id-ID';
+  try { if (ttsVoice) u.voice = ttsVoice; } catch (e) {}
+  u.rate = 1.05; SS.speak(u);
+}
+function syncAudio(t) {
+  if (!playing || muted) return;
+  CUES.forEach((c, i) => {
+    if (c.started) return;
+    const a = AUD[i];
+    const len = !c.missing && isFinite(a.duration) ? a.duration : (c.e - c.s);
+    if (t >= c.s && t < c.s + len) {
+      c.started = true;
+      if (c.missing) { speakCue(c, t); return; }
+      try { a.currentTime = Math.max(0, t - c.s); } catch (e) {}
+      a.play().catch(() => {});
+    }
+  });
+}
+
+/* State diskret seek-safe */
+const FLAGS = [], TEXTS = new Map();
+const EL = x => typeof x === 'string' ? $(x) : x;
+let W = t => t;
+function flag(t0, t1, el, cls) { FLAGS.push({ t0: W(t0), t1: t1 == null ? 1e9 : W(t1), el: EL(el), cls }); }
+function say(t, el, txt) {
+  t = W(t);
+  el = EL(el);
+  if (!TEXTS.has(el)) TEXTS.set(el, { init: el.textContent, list: [] });
+  TEXTS.get(el).list.push({ t, txt });
+}
+function applyState(t) {
+  const want = new Map();
+  FLAGS.forEach(f => {
+    if (!want.has(f.el)) want.set(f.el, {});
+    const on = t >= f.t0 && t < f.t1;
+    want.get(f.el)[f.cls] = want.get(f.el)[f.cls] || on;
+  });
+  want.forEach((m, el) => Object.entries(m).forEach(([c, on]) => el.classList.toggle(c, on)));
+  TEXTS.forEach((v, el) => {
+    let cur = v.init; v.list.forEach(x => { if (t >= x.t) cur = x.txt; });
+    if (el.textContent !== cur) el.textContent = cur;
+  });
+}
+
+/* Timeline Setup */
+const P = { d: 0, prog: 0 };
+let tl, scrubbing = false;
+const URL_MATCH = 'https://www.youtube.com/watch?v=persib-vs-persija-full-highlight';
+
+function sync() {
+  const t = tl.time();
+  applyState(t);
+
+  // Typing animation in composer
+  const typ = (el, ph, txt, n) => { $(el).textContent = txt.slice(0, Math.round(n)); $(ph).style.display = n > .5 ? 'none' : ''; };
+  typ('#dUrl', '#dPh', URL_MATCH, P.d);
+
+  // Progress Bar in S4
+  const pr = P.prog;
+  $('#progTopFill').style.width = pr + '%';
+  $('#progPct').textContent = '(' + Math.round(pr) + '%)';
+  if (pr >= 100) {
+    $('#progTitle').textContent = 'Highlight Selesai!';
+    $('#progSub').textContent = 'Master Reel siap ditonton & diposting';
+  } else if (pr >= 70) {
+    $('#progTitle').textContent = 'Merender Layout 9:16...';
+    $('#progSub').textContent = 'Menyusun scoreboard broadcast & narasi';
+  } else if (pr >= 35) {
+    $('#progTitle').textContent = 'Smart VAR & Deteksi Gol...';
+    $('#progSub').textContent = 'Memvalidasi 3 gol sah & 1 penyelamatan';
+  } else {
+    $('#progTitle').textContent = 'Membuat Highlight Sepak Bola';
+    $('#progSub').textContent = 'Menganalisis audio gemuruh & transkrip';
+  }
+
+  renderCaps(t);
+  syncAudio(t);
+  playSfx(t);
+  if (!scrubbing) $('#scrub').value = t;
+  $('#tlabel').textContent = t.toFixed(1) + ' / ' + D + 's';
+}
+
+function sp(el) {
+  el = EL(el);
+  const s = $('#screen').getBoundingClientRect(), r = el.getBoundingClientRect();
+  const k = stage.getBoundingClientRect().width / 1080 * SC;
+  const pn = el.closest('.pnl');
+  return { x: (r.left - s.left + r.width / 2) / k, y: (r.top - s.top + r.height / 2) / k, t: (r.top - s.top) / k, h: r.height / k, p: pn ? pn.id : null };
+}
+
+function build() {
+  gsap.set('.pnl', { autoAlpha: 1 });
+  const M = {};
+  ['compBox', 'bSubmit', 'bAutoUpload', 'reelBox', 'sheet']
+    .forEach(id => { M[id] = sp('#' + id); });
+
+  tl = gsap.timeline({ paused: true, onUpdate: sync, onComplete: () => { playing = false; $('#bPlay').textContent = '↻'; } });
+
+  const BASE = [7.60, 5.40, 7.00, 7.00, 7.20, 6.50];
+  const SEG = CUES.map((c, i) => {
+    const n = i + 1 < CUES.length ? CUES[i + 1].s : D;
+    const N = Math.min(c.e - c.s - .2, n - c.s - .15), L = Math.min(BASE[i], n - c.s - .15);
+    return { s: c.s, n, L, N: i === CUES.length - 1 ? L : N };
+  });
+  W = t => {
+    if (typeof t !== 'number') return t;
+    for (const g of SEG) if (t >= g.s && t < g.n) {
+      const so = g.s + g.L, sn = g.s + g.N;
+      return t < so ? g.s + (t - g.s) * (g.N / g.L) : sn + (t - so) * (g.n - sn) / (g.n - so);
+    }
+    return t;
+  };
+  ['to', 'fromTo', 'set'].forEach(m => { const f = tl[m].bind(tl); tl[m] = (...a) => { const i = a.length - 1; if (typeof a[i] === 'number') a[i] = W(a[i]); return f(...a); }; });
+  tl.set({}, {}, D);
+
+  const sfx = (t, name, vol = .2) => SFX.push({ t: +W(t).toFixed(3), file: `audio/sfx-${name}.mp3`, vol: +(vol * 0.4).toFixed(3) });
+
+  function tap(t, x, y) {
+    sfx(t, 'click', .45);
+    tl.set(['#tapS', '#tapR'], { x, y }, t);
+    tl.fromTo('#tapS', { opacity: .95, scale: .6 }, { opacity: 0, scale: 1.1, duration: .45, ease: 'power2.out', immediateRender: false }, t);
+    tl.fromTo('#tapR', { opacity: .9, scale: .5 }, { opacity: 0, scale: 1.9, duration: .5, ease: 'power2.out', immediateRender: false }, t);
+  }
+  const tapM = (t, m, dx = 0, dy = 0) => tap(t, m.x + dx, m.y + dy);
+  const panelIn = (t, id, d = .35) => { sfx(t, 'whoosh', .3); tl.fromTo('#' + id, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: d, ease: 'power2.out', immediateRender: false }, t); };
+  const panelOut = (t, id, d = .25) => tl.to('#' + id, { autoAlpha: 0, duration: d }, t);
+  const headIn = (t, id) => {
+    tl.to('#head .hd', { autoAlpha: 0, duration: .2 }, t - .2);
+    tl.fromTo(`#${id}`, { autoAlpha: 0 }, { autoAlpha: 1, duration: .01, immediateRender: false }, t);
+    tl.fromTo(`#${id} .w`, { autoAlpha: 0, y: 30 }, { autoAlpha: 1, y: 0, duration: .4, stagger: .08, ease: 'back.out(2)', immediateRender: false }, t);
+  };
+  const caret = (t0, t1, id) => { tl.set(id, { opacity: 1 }, t0); tl.set(id, { opacity: 0 }, t1); };
+
+  /* Initial states */
+  gsap.set('.pnl', { autoAlpha: 0 });
+  gsap.set('#head .hd', { autoAlpha: 0 });
+  gsap.set('#phone', { autoAlpha: 1, y: 0 });
+  gsap.set('#pHome', { autoAlpha: 1, scale: 1 });
+  gsap.set('#appMTop', { autoAlpha: 0, y: -20 });
+  gsap.set(['#sheetDim', '#sheet'], { autoAlpha: 0 });
+  gsap.set('#sheet', { y: 400 });
+  gsap.set(['#ctaLogo', '#ctaWord', '#ctaApp', '#ctaTag', '#ctaGp', '#ctaUrl', '#flow span'], { autoAlpha: 0 });
+  gsap.set('#ctaLogo', { scale: .4, rotation: -20 });
+  gsap.set(['#ctaWord', '#ctaApp', '#ctaTag', '#ctaUrl'], { y: 30 });
+  gsap.set('#ctaGp', { scale: .85 });
+
+  /* ================= S1 · HOOK + BUKA KLIPERS DI AWAL (0 – 7.9s) ================= */
+  headIn(0.2, 'hd0');
+  // Finger taps Klipers app icon on mobile home screen at 1.4s
+  const appIco = sp('#appIconKlipers');
+  tap(1.4, appIco.x, appIco.y);
+  sfx(1.5, 'whoosh', .4);
+  // Klipers app opens!
+  tl.to('#pHome', { autoAlpha: 0, scale: 1.15, duration: .45, ease: 'power2.in' }, 1.6);
+  tl.to('#appMTop', { autoAlpha: 1, y: 0, duration: .3 }, 1.8);
+  panelIn(1.8, 'pDash');
+  // Tap Highlight Bola on Feature Grid
+  const fg = sp('#fgSports');
+  tap(4.2, fg.x, fg.y);
+  sfx(4.3, 'click', .5);
+  tl.to('#fgSports', { scale: 0.95, yoyo: true, repeat: 1, duration: .15 }, 4.3);
+  // Smooth transition to /sports-highlight Form
+  panelOut(4.8, 'pDash');
+  panelIn(5.0, 'pForm');
+
+  /* ================= S2 · INPUT LINK DI COMPOSER (8.0 – 13.5s) ================= */
+  headIn(8.0, 'hdQ');
+  // Tap composer textarea
+  tap(8.6, 175, 120);
+  tl.to(P, { d: URL_MATCH.length, duration: 1.2, ease: 'none' }, 8.8);
+  caret(8.8, 10.4, '#dCaret');
+  sfx(10.2, 'success', .4);
+  // YouTube preview card expands
+  tl.to('#ytCard', { opacity: 1, y: 0, duration: .35, ease: 'back.out(1.2)' }, 10.3);
+
+  /* ================= S3 · PENGATURAN PINTAR (13.6 – 20.8s) ================= */
+  headIn(13.6, 'hdForm');
+  // Highlight Storytelling selection
+  tl.to('#pillStory', { scale: 1.08, yoyo: true, repeat: 1, duration: .2 }, 14.2);
+  sfx(14.2, 'click', .3);
+  // Highlight Voice
+  tl.to('#pillVoice', { scale: 1.08, yoyo: true, repeat: 1, duration: .2 }, 15.6);
+  // Papan Skor toggle
+  tl.to('#pillScore', { scale: 1.08, yoyo: true, repeat: 1, duration: .2 }, 17.0);
+  sfx(17.0, 'click', .3);
+  // Sensor logo
+  tl.to('#pillBlur', { scale: 1.08, yoyo: true, repeat: 1, duration: .2 }, 18.2);
+  // Klik Buat Highlight Bola
+  const bSub = sp('#bSubmit');
+  tap(19.4, bSub.x, bSub.y);
+  sfx(19.5, 'click', .5);
+  panelOut(20.4, 'pForm');
+  panelIn(20.6, 'pProg');
+
+  /* ================= S4 · PROGRESS DETEKSI & SMART VAR (20.9 – 28.0s) ================= */
+  headIn(20.9, 'hdProg');
+  sfx(21.2, 'processing', .4);
+  // Progress bar fills 0 to 100%
+  tl.to(P, { prog: 100, duration: 6.2, ease: 'power1.inOut' }, 21.2);
+  // Steps check
+  tl.fromTo('#st1', { scale: 0.95 }, { scale: 1, duration: .3 }, 21.6);
+  tl.fromTo('#st2', { scale: 0.95 }, { scale: 1, duration: .3 }, 23.2);
+  sfx(23.4, 'strike', .6);
+  tl.fromTo('#st3', { scale: 0.95 }, { scale: 1, duration: .3 }, 25.0);
+  sfx(25.2, 'success', .6);
+  tl.fromTo('#st4', { scale: 0.95 }, { scale: 1, duration: .3 }, 26.6);
+  panelOut(27.6, 'pProg');
+  panelIn(27.8, 'pRes');
+
+  /* ================= S5 · HASIL MASTER REEL & AUTO UPLOAD (28.2 – 35.5s) ================= */
+  headIn(28.2, 'hdRes');
+  sfx(28.4, 'success', .6);
+  // Play video reel preview
+  const rBox = sp('#reelBox');
+  tap(29.2, rBox.x, rBox.y);
+  tl.to('.reel-play-ic', { scale: 1.3, opacity: 0, duration: .3 }, 29.3);
+  tl.fromTo('.reel-karaoke', { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: .4 }, 29.5);
+  // Moments animation
+  tl.fromTo('#mc0', { x: -20, opacity: 0 }, { x: 0, opacity: 1, duration: .25 }, 30.6);
+  tl.fromTo('#mc1', { x: -20, opacity: 0 }, { x: 0, opacity: 1, duration: .25 }, 31.2);
+  tl.fromTo('#mc2', { x: -20, opacity: 0 }, { x: 0, opacity: 1, duration: .25 }, 31.8);
+  // Auto upload click & sheet popup
+  const bUp = sp('#bAutoUpload');
+  tap(33.0, bUp.x, bUp.y);
+  sfx(33.1, 'whoosh', .4);
+  tl.to('#sheetDim', { autoAlpha: 1, duration: .2 }, 33.2);
+  tl.fromTo('#sheet', { autoAlpha: 0, y: 300 }, { autoAlpha: 1, y: 0, duration: .4, ease: 'back.out(1.2)' }, 33.2);
+  tl.to('#phone', { scale: 0.72, y: 680, duration: .8, ease: 'power2.inOut' }, 35.5);
+
+  /* ================= S6 · CTA & PENUTUP (35.8 – 43.5s) ================= */
+  headIn(35.8, 'hdCta');
+  sfx(36.0, 'riser', .5);
+  tl.to('#ctaLogo', { autoAlpha: 1, scale: 1, rotation: 0, duration: .55, ease: 'back.out(1.6)' }, 36.2);
+  tl.to('#ctaWord', { autoAlpha: 1, y: 0, duration: .4, ease: 'power2.out' }, 36.6);
+  tl.to('#ctaApp', { autoAlpha: 1, y: 0, duration: .4, ease: 'power2.out' }, 36.8);
+  tl.to('#ctaTag', { autoAlpha: 1, y: 0, duration: .4, ease: 'power2.out' }, 37.0);
+  tl.to('#ctaGp', { autoAlpha: 1, scale: 1, duration: .5, ease: 'back.out(1.4)' }, 37.3);
+  tl.to('#ctaUrl', { autoAlpha: 1, y: 0, duration: .4 }, 37.7);
+  tl.to('#flow span', { autoAlpha: 1, stagger: .08, duration: .3, ease: 'back.out(1.5)' }, 38.0);
+}
+
+/* Controller Interactions */
+function setPlaying(p) {
+  playing = p;
+  $('#bPlay').textContent = playing ? '⏸' : '▶';
+  if (playing) {
+    if (tl.time() >= D - 0.05) tl.restart();
+    tl.play();
+  } else {
+    tl.pause();
+    stopAudio();
+  }
+}
+$('#bPlay').onclick = () => setPlaying(!playing);
+$('#bRestart').onclick = () => { tl.restart(); setPlaying(true); };
+$('#bMute').onclick = () => {
+  muted = !muted;
+  $('#bMute').textContent = muted ? '🔇' : '🔊';
+  if (muted) stopAudio();
+};
+$('#bTheme').onclick = () => document.body.classList.toggle('light');
+$('#bCC').onclick = () => document.body.classList.toggle('nocaps');
+$('#bRec').onclick = () => document.body.classList.toggle('rec');
+
+$('#scrub').oninput = e => {
+  scrubbing = true;
+  tl.seek(+e.target.value);
+  stopAudio();
+};
+$('#scrub').onchange = () => { scrubbing = false; };
+$('#startOverlay').onclick = () => {
+  $('#startOverlay').style.display = 'none';
+  setPlaying(true);
+};
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space') { e.preventDefault(); setPlaying(!playing); }
+  if (e.code === 'KeyM') { $('#bMute').click(); }
+  if (e.code === 'KeyC') { $('#bCC').click(); }
+  if (e.code === 'KeyR') { $('#bRestart').click(); }
+});
+
+window.__seek = t => { tl.seek(t); sync(); };
+window.__ready = true;
+
+window.addEventListener('load', () => {
+  build();
+  const st = parseFloat(Q.get('t') || '0');
+  if (st > 0) tl.seek(st);
+  if (Q.get('record') === '1') {
+    $('#startOverlay').style.display = 'none';
+  }
+});
+/*]]>*/
+</script>
+</body>
+</html>
