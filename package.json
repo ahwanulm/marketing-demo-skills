@@ -19,7 +19,7 @@
     "html-video",
     "puppeteer"
   ],
-  "author": "Klipers",
+  "author": "Ahwanulm",
   "license": "MIT",
   "devDependencies": {
     "playwright": "^1.42.0",
