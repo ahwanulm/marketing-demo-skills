@@ -31,6 +31,10 @@ const require = createRequire(import.meta.url);
 function loadPuppeteer() {
   try { return require('puppeteer'); } catch {}
   try {
+    const localPath = path.join(ROOT, 'node_modules', 'puppeteer');
+    if (fs.existsSync(localPath)) return require(localPath);
+  } catch {}
+  try {
     const backendPath = path.resolve('backend/node_modules/puppeteer');
     if (fs.existsSync(backendPath)) return require(backendPath);
   } catch {}
@@ -38,7 +42,7 @@ function loadPuppeteer() {
     const root = execFileSync('npm', ['root', '-g']).toString().trim();
     return require(path.join(root, 'puppeteer'));
   } catch {}
-  throw new Error('Puppeteer tidak ditemukan. Pasang lewat backend atau `npm i -g puppeteer`.');
+  throw new Error('Puppeteer tidak ditemukan. Pasang lewat `npm install puppeteer` atau `npm i -g puppeteer`.');
 }
 
 function resolveChromePath() {

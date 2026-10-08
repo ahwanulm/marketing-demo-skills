@@ -20,6 +20,12 @@ const { execFileSync } = require('child_process');
 
 function loadBrowser() {
   try { return { type: 'playwright', mod: require('playwright') }; } catch {}
+  try { return { type: 'puppeteer', mod: require('puppeteer') }; } catch {}
+  try {
+    const local = path.join(__dirname, '../node_modules');
+    if (fs.existsSync(path.join(local, 'playwright'))) return { type: 'playwright', mod: require(path.join(local, 'playwright')) };
+    if (fs.existsSync(path.join(local, 'puppeteer'))) return { type: 'puppeteer', mod: require(path.join(local, 'puppeteer')) };
+  } catch {}
   try {
     const root = execFileSync('npm', ['root', '-g']).toString().trim();
     return { type: 'playwright', mod: require(path.join(root, 'playwright')) };
@@ -27,7 +33,7 @@ function loadBrowser() {
   try {
     return { type: 'puppeteer', mod: require(path.resolve('backend/node_modules/puppeteer')) };
   } catch {}
-  throw new Error('Neither Playwright nor Puppeteer found.');
+  throw new Error('Neither Playwright nor Puppeteer found. Install with `npm install puppeteer` or `npm install playwright`.');
 }
 
 (async () => {
